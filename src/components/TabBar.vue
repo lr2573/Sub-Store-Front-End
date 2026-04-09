@@ -1,23 +1,25 @@
 <template>
   <div class="tab-bar-wrapper">
     <nut-tabbar
+      :aria-label="$t('tabBar.sub')"
       unactive-color=""
       v-model:visible="activeTab"
       :bottom="true"
       class="tabbar"
       size="22px"
     >
-      <nut-tabbar-item class="tabbar-item" to="/subs" icon="link" />
-      <nut-tabbar-item v-show="!appearanceSetting.istabBar2" class="tabbar-item" to="/files" icon="category" />
+      <nut-tabbar-item class="tabbar-item" to="/subs" icon="link" :title="$t('tabBar.sub')" />
+      <nut-tabbar-item v-show="!appearanceSetting.istabBar2" class="tabbar-item" to="/files" icon="category" :title="$t('tabBar.file')" />
 
       <nut-tabbar-item
         v-show="!appearanceSetting.istabBar"
         class="tabbar-item"
         to="/sync"
         icon="refresh2"
+        :title="$t('tabBar.sync')"
       />
 
-      <nut-tabbar-item class="tabbar-item" to="/my" icon="setting" :dot="env.hasNewVersion"/>
+      <nut-tabbar-item class="tabbar-item" to="/my" icon="setting" :dot="env.hasNewVersion" :title="$t('tabBar.my')"/>
     </nut-tabbar>
   </div>
 </template>

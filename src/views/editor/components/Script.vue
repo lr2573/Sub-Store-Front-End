@@ -5,6 +5,7 @@
       <a
         href="https://github.com/sub-store-org/Sub-Store/wiki/%E8%84%9A%E6%9C%AC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"
         target="_blank"
+        rel="noreferrer noopener"
       >
         {{ $t("subPage.panel.tips.ok") }}
       </a>
@@ -48,11 +49,15 @@
         <span>
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].paramsEdit`) }}
         </span>
-        <font-awesome-icon
-          class="icon"
-          icon="fa-solid fa-circle-question"
+        <button
+          type="button"
+          class="icon-button-reset icon"
+          :aria-label="paramsEditHelpLabel"
+          :title="paramsEditHelpLabel"
           @click.stop="showParamsEditTips"
-        />
+        >
+          <font-awesome-icon icon="fa-solid fa-circle-question" />
+        </button>
       </div>
       <!-- 无缓存开关 - 仅在link模式时显示 -->
       <div v-if="value.mode === 'link'" class="title-label">
@@ -60,28 +65,42 @@
         <span>
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].noCache`) }}
         </span>
-        <font-awesome-icon
-          class="icon"
-          icon="fa-solid fa-circle-question"
+        <button
+          type="button"
+          class="icon-button-reset icon"
+          :aria-label="noCacheHelpLabel"
+          :title="noCacheHelpLabel"
           @click.stop="showNoCacheTips"
-        />
+        >
+          <font-awesome-icon icon="fa-solid fa-circle-question" />
+        </button>
       </div>
       <div v-if="value.mode === 'link'" class="title-label">
         <nut-switch v-model="params.insecure" />
         <span>
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].insecure`) }}
         </span>
-        <font-awesome-icon
-          class="icon"
-          icon="fa-solid fa-circle-question"
+        <button
+          type="button"
+          class="icon-button-reset icon"
+          :aria-label="insecureHelpLabel"
+          :title="insecureHelpLabel"
           @click.stop="showInsecureTips"
-        />
+        >
+          <font-awesome-icon icon="fa-solid fa-circle-question" />
+        </button>
       </div>
       <!-- 添加参数按钮 -->
       <div v-if="showKeyValue" class="button">
-        <div @click="addParameter">
+        <button
+          type="button"
+          class="icon-button-reset add-parameter-button"
+          :aria-label="addParameterLabel"
+          :title="addParameterLabel"
+          @click="addParameter"
+        >
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].paramsAdd`) }}
-        </div>
+        </button>
       </div>
     </div>
     <ParamsEditor
@@ -94,7 +113,7 @@
 
 <script lang="ts" setup>
 import { Dialog } from "@nutui/nutui";
-import { inject, onMounted, reactive, ref, watch } from "vue";
+import { computed, inject, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 import ParamsEditor from "@/components/ParamsEditor.vue";
@@ -110,11 +129,23 @@ const { type, id, sourceType } = defineProps<{
 
 const cmStore = useCodeStore();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const form = inject<Sub | Collection>("form");
 
 const modeList = ["link", "script"];
+const addParameterLabel = computed(() =>
+  locale.value.startsWith("zh") ? "添加参数" : "Add parameter",
+);
+const paramsEditHelpLabel = computed(() =>
+  locale.value.startsWith("zh") ? "查看参数编辑帮助" : "Open parameter editing help",
+);
+const noCacheHelpLabel = computed(() =>
+  locale.value.startsWith("zh") ? "查看 noCache 帮助" : "Open noCache help",
+);
+const insecureHelpLabel = computed(() =>
+  locale.value.startsWith("zh") ? "查看 insecure 帮助" : "Open insecure help",
+);
 
 const showKeyValue = ref(false);
 
@@ -626,7 +657,7 @@ watch(
   }
   .button {
     margin-left: auto;
-    > div {
+    .add-parameter-button {
       cursor: pointer;
       color: var(--primary-color);
       font-size: 12px;

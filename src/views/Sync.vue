@@ -25,15 +25,18 @@
             }px`,
           }"
         >
-          <div
+          <button
             v-if="appearanceSetting.showFloatingAddButton"
             class="drag-btn"
+            type="button"
+            :aria-label="$t(`syncPage.emptySub.btn`)"
+            :title="$t(`syncPage.emptySub.btn`)"
             @touchmove="onTa"
             @touchend="enTa"
             @click="onclickAddArtifact"
           >
             <font-awesome-icon icon="fa-solid fa-plus" />
-          </div>
+          </button>
         </nut-drag>
       </div>
     </Teleport>
@@ -44,59 +47,57 @@
         ref="radioWrapperRef"
         class="radio-wrapper"
       >
-        <span
+        <button
           v-for="item in tags"
           :key="item.value"
           class="tag"
+          type="button"
           :class="{ current: item.value === tag }"
+          :aria-pressed="item.value === tag"
           @click="setTag(item.value)"
         >
           {{ item.label }}
-        </span>
+        </button>
       </div>
 
       <div class="subs-list-container" :style="{ paddingTop: `${radioWrapperHeight ? radioWrapperHeight : (radioWrapperHeight+10)}px` }">
         <div class="sticky-title-wrapper sync-title">
           <p class="list-title">{{ $t(`syncPage.title`) }}</p>
           <div class="actions-wrapper">
-            <nut-button
+            <button
               v-if="artifacts.length > 0"
-              class="upload-all-btn btn"
-              type="info"
-              plain
+              type="button"
+              class="upload-all-btn btn icon-action-button"
+              :aria-label="syncActionText.uploadAll"
+              :title="syncActionText.uploadAll"
               :disabled="uploadAllIsDisabled"
-              size="small"
-              :loading="uploadAllIsLoading"
+              :aria-busy="uploadAllIsLoading"
               @click="uploadAll"
             >
-              <font-awesome-icon
-                icon="fa-solid fa-cloud-arrow-up"
-                v-if="!uploadAllIsLoading"
-              />
-            </nut-button>
-            <nut-button
+              <span v-if="uploadAllIsLoading" class="button-spinner" aria-hidden="true"></span>
+              <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-up" />
+            </button>
+            <button
               v-if="syncPlatform !== 'gitlab'"
-              class="upload-all-btn btn"
-              type="info"
-              plain
-              size="small"
-              :loading="downloadAllIsLoading"
+              type="button"
+              class="upload-all-btn btn icon-action-button"
+              :aria-label="syncActionText.downloadAll"
+              :title="syncActionText.downloadAll"
+              :aria-busy="downloadAllIsLoading"
               @click="downloadAll"
             >
-              <font-awesome-icon
-                icon="fa-solid fa-cloud-arrow-down"
-                v-if="!downloadAllIsLoading"
-              />
-            </nut-button>
-            <nut-button
-              class="preview-btn btn"
-              type="info"
-              plain
-              size="small"
+              <span v-if="downloadAllIsLoading" class="button-spinner" aria-hidden="true"></span>
+              <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" />
+            </button>
+            <button
+              type="button"
+              class="preview-btn btn icon-action-button"
+              :aria-label="syncActionText.preview"
+              :title="syncActionText.preview"
               @click="preview"
             >
               <font-awesome-icon icon="fa-solid fa-eye" />
-            </nut-button>
+            </button>
           </div>
         </div>
 
@@ -144,20 +145,20 @@
       v-if="!isLoading && fetchResult && artifacts.length === 0"
       class="no-data-wrapper"
     >
-      <nut-empty image="empty">
+      <AccessibleEmpty image="empty">
         <template #description>
           <h3>{{ $t(`syncPage.emptySub.title`) }}</h3>
           <p>{{ $t(`syncPage.emptySub.desc`) }}</p>
         </template>
-      </nut-empty>
-      <nut-button @click="onclickAddArtifact" type="primary">
+      </AccessibleEmpty>
+      <button type="button" class="primary-action-button" @click="onclickAddArtifact">
         {{ $t(`syncPage.emptySub.btn`) }}
-      </nut-button>
+      </button>
     </div>
 
     <!--数据加载失败-->
     <div v-if="!isLoading && !fetchResult" class="no-data-wrapper">
-      <nut-empty image="error" style="padding: 32px 30px">
+      <AccessibleEmpty image="error" style="padding: 32px 30px">
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>
           <p>{{ $t(`subPage.loadFailed.desc`) }}</p>
@@ -172,13 +173,15 @@
             </a>
           </p>
         </template>
-      </nut-empty>
-      <nut-button icon="refresh" type="primary" @click="refresh">
+      </AccessibleEmpty>
+      <button type="button" class="primary-action-button" @click="refresh">
+        <font-awesome-icon icon="fa-solid fa-rotate-right" />
         {{ $t(`subPage.loadFailed.btn`) }}
-      </nut-button>
+      </button>
       <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
+        rel="noreferrer noopener"
       >
         <span>{{ $t(`subPage.loadFailed.doc`) }}</span>
         <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
@@ -189,6 +192,7 @@
 
 <script lang="ts" setup>
 import ArtifactsListItem from "@/components/ArtifactsListItem.vue";
+import AccessibleEmpty from "@/components/AccessibleEmpty.vue";
 import { useArtifactsStore } from "@/store/artifacts";
 import { storeToRefs } from "pinia";
 import { useGlobalStore } from "@/store/global";
@@ -204,6 +208,7 @@ import { useBackend } from "@/hooks/useBackend";
 import { useFilteredDraggableList } from "@/hooks/useFilteredDraggableList";
 import { useListViewMode } from "@/hooks/useListViewMode";
 import { useTagBarHeight } from "@/hooks/useTagBarHeight";
+import { useA11y } from "@/hooks/useA11y";
 import { Dialog } from "@nutui/nutui";
 import { isMobile } from "@/utils/isMobile";
 import { useRouter } from "vue-router";
@@ -242,7 +247,23 @@ const swipeDisabled = ref(false);
 const sortFailed = ref(false);
 const touchStartY = ref(null);
 const touchStartX = ref(null);
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const { getA11yText } = useA11y();
+const syncActionText = computed(() => {
+  if (locale.value.startsWith("zh")) {
+    return {
+      uploadAll: "上传全部同步项",
+      downloadAll: "下载全部同步项",
+      preview: "预览同步产物",
+    };
+  }
+
+  return {
+    uploadAll: "Upload all sync items",
+    downloadAll: "Download all sync items",
+    preview: getA11yText("preview"),
+  };
+});
 const getTag = () => {
   return localStorage.getItem("artifact-tag") || "all";
 };
@@ -489,6 +510,38 @@ const filteredArtifacts = useFilteredDraggableList(artifacts, shouldShowElement)
 </script>
 
 <style lang="scss" scoped>
+.drag-btn-wrapper {
+  position: relative;
+  z-index: 999;
+
+  button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .drag-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-image: linear-gradient(
+      to bottom right,
+      var(--primary-color),
+      var(--primary-color-end)
+    );
+    box-shadow: 0 4px 8px #0003;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    > svg {
+      width: 20px;
+      height: 20px;
+      color: #fffb;
+    }
+  }
+}
+
 .list-title {
   padding-left: 8px;
   font-weight: bold;
@@ -501,6 +554,7 @@ const filteredArtifacts = useFilteredDraggableList(artifacts, shouldShowElement)
 
   .actions-wrapper {
     margin-right: 16px;
+    display: flex;
 
     .btn:not(:last-child) {
       margin-right: 8px;
@@ -538,6 +592,8 @@ const filteredArtifacts = useFilteredDraggableList(artifacts, shouldShowElement)
       margin: 0 5px;
       padding: 7.5px 2.5px 4px;
       cursor: pointer;
+      border: none;
+      background: none;
       -webkit-user-select: none;
       user-select: none;
       border-bottom: 1px solid transparent;
@@ -556,16 +612,57 @@ const filteredArtifacts = useFilteredDraggableList(artifacts, shouldShowElement)
   border: none;
   background: none;
   width: 44px;
+}
 
-  :deep(view) {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+.icon-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 999px;
+}
 
-  svg {
-    width: 20px;
-    height: 20px;
+.icon-action-button:disabled {
+  opacity: 0.5;
+}
+
+.upload-all-btn svg,
+.preview-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgb(255 255 255 / 30%);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.primary-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 120px;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background-image: linear-gradient(
+    to right,
+    var(--primary-color),
+    var(--primary-color-end)
+  );
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

@@ -4,7 +4,7 @@
       <nut-cell-group :title="$t(`apiSettingPage.currentApi.title`)">
         <nut-cell class="cell" center>
           <template #icon>
-            <img :src="backendIcon" alt="" class="auto-reverse backend-icon">
+            <img :src="backendIcon" :alt="$t('apiSettingPage.currentApi.title')" class="auto-reverse backend-icon">
           </template>
           <template #title>
             <span class="backend-title">{{
@@ -56,15 +56,24 @@
             <p>{{ `${api.url.slice(0, 20)}******` }}</p>
           </div>
           <div class="api-item-right">
-            <font-awesome-icon
-              class="copy-icon"
-              icon="fa-solid fa-clone"
+            <button
+              type="button"
+              class="api-action-button icon-button-reset copy-icon"
+              :aria-label="getApiActionLabel('copy', api.name)"
+              :title="getApiActionLabel('copy', api.name)"
               @click.stop="copyApi(api)"
-            />
-            <font-awesome-icon
-              icon="fa-solid fa-xmark"
+            >
+              <font-awesome-icon icon="fa-solid fa-clone" />
+            </button>
+            <button
+              type="button"
+              class="api-action-button icon-button-reset"
+              :aria-label="getApiActionLabel('delete', api.name)"
+              :title="getApiActionLabel('delete', api.name)"
               @click.stop="deleteApi(api.name)"
-            />
+            >
+              <font-awesome-icon icon="fa-solid fa-xmark" />
+            </button>
           </div>
         </div>
       </nut-cell>
@@ -74,6 +83,7 @@
       <div class="add-api-wrapper">
         <div class="add-form-wrapper">
           <nut-input
+            ref="addApiNameInputRef"
             v-model="addForm.name"
             class="input"
             :placeholder="$t(`apiSettingPage.addApi.placeholder.name`)"
@@ -81,6 +91,7 @@
             input-align="left"
           />
           <nut-input
+            ref="addApiUrlInputRef"
             v-model="addForm.url"
             class="input"
             :placeholder="$t(`apiSettingPage.addApi.placeholder.url`)"
@@ -117,6 +128,8 @@
           type="primary"
           :disabled="!addForm.name || !addForm.url"
           :loading="checkingAPI"
+          :aria-label="addApiLabel"
+          :title="addApiLabel"
           @click="addApiHandler"
         >
           <font-awesome-icon
@@ -128,24 +141,34 @@
       </div>
     </nut-cell-group>
 
-    <p class="desc-text">
+    <div class="desc-text">
       <p>{{ $t(`apiSettingPage.apiSettingDesc0`) }}</p>
       <p>{{ $t(`apiSettingPage.apiSettingDesc1`) }}</p>
-      {{ $t(`apiSettingPage.apiSettingDesc2`) }}
-      <a
-        href="https://xream.notion.site/Sub-Store-abe6a96944724dc6a36833d5c9ab7c87"
-        target="_blank"
-      >
-        https://xream.notion.site/Sub-Store-abe6a96944724dc6a36833d5c9ab7c87</a>
-      <br/>
-      4. <a href="https://t.me/zhetengsha/1068" target="_blank">{{ $t('magicPath.troubleshooting') }}</a>
-    </p>
+      <p>
+        {{ $t(`apiSettingPage.apiSettingDesc2`) }}
+        <a
+          href="https://xream.notion.site/Sub-Store-abe6a96944724dc6a36833d5c9ab7c87"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          https://xream.notion.site/Sub-Store-abe6a96944724dc6a36833d5c9ab7c87
+        </a>
+      </p>
+      <p>
+        4.
+        <a
+          href="https://t.me/zhetengsha/1068"
+          target="_blank"
+          rel="noreferrer noopener"
+        >{{ $t('magicPath.troubleshooting') }}</a>
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Dialog, Toast } from "@nutui/nutui";
-import { computed, ref, onMounted, watchEffect } from 'vue';
+import { computed, nextTick, ref, onMounted, watch, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useBackend } from '@/hooks/useBackend';
 import { useHostAPI } from '@/hooks/useHostAPI';
@@ -157,11 +180,13 @@ import { storeToRefs } from 'pinia';
 import { useAppNotifyStore } from '@/store/appNotify';
 import { useSettingsStore } from '@/store/settings';
 import { createGithubProxyUrlRewriter } from '@/utils/githubProxy';
+import { syncInnerInputA11y, useA11y } from '@/hooks/useA11y';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { copy, isSupported } = useClipboard();
 const { toClipboard: copyFallback } = useV3Clipboard();
 const { showNotify } = useAppNotifyStore();
+const { getA11yText } = useA11y();
 
 const { icon, env, isEnvReady } = useBackend();
 const settingsStore = useSettingsStore();
@@ -176,11 +201,19 @@ const backendIcon = computed(() => {
     env.value?.meta?.node?.env?.SUB_STORE_BACKEND_CUSTOM_ICON || icon.value,
   ) || icon.value;
 });
+const addApiLabel = computed(() =>
+  locale.value.startsWith('zh') ? '添加 API' : 'Add API',
+);
+const getApiActionLabel = (action: 'copy' | 'delete', name: string) => {
+  return `${getA11yText(action)} API ${name}`;
+};
 
 const addForm = ref<HostAPI>({
   name: '',
   url: '',
 });
+const addApiNameInputRef = ref();
+const addApiUrlInputRef = ref();
 
 
 const error = ref('');
@@ -192,6 +225,19 @@ const parsedHost = ref('');
 const parsedPath = ref('');
 const previewUrl = ref('');
 const currentOrigin = ref(window.location.origin);
+const addApiNameLabel = computed(() => t('apiSettingPage.addApi.placeholder.name'));
+const addApiUrlLabel = computed(() => t('apiSettingPage.addApi.placeholder.url'));
+
+const updateAddApiInputA11y = async () => {
+  await nextTick();
+  syncInnerInputA11y(addApiNameInputRef.value, {
+    label: addApiNameLabel.value,
+  });
+  syncInnerInputA11y(addApiUrlInputRef.value, {
+    label: addApiUrlLabel.value,
+    invalid: !!error.value,
+  });
+};
 
 // 验证输入
 const validateInput = () => {
@@ -385,6 +431,7 @@ watchEffect(() => {
 });
 
 onMounted(() => {
+  updateAddApiInputA11y();
   if (apis.value.length) return;
   try {
     if (localStorage.getItem('api-desc-read')) return;
@@ -407,6 +454,14 @@ onMounted(() => {
     lockScroll: false,
   });
 });
+
+watch(
+  [locale, error],
+  () => {
+    updateAddApiInputA11y();
+  },
+  { immediate: true },
+);
 
 </script>
 
@@ -471,9 +526,15 @@ onMounted(() => {
       }
 
       .api-item-right {
+        display: flex;
+        align-items: center;
         font-size: 20px;
         color: var(--comment-text-color);
-        cursor: pointer;
+
+        .api-action-button {
+          color: inherit;
+        }
+
         .copy-icon {
           margin-right: 16px;
         }
@@ -588,7 +649,7 @@ onMounted(() => {
       font-size: 12px;
       color: var(--comment-text-color);
 
-      > a {
+      a {
         color: var(--primary-color);
       }
     }

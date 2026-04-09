@@ -22,14 +22,16 @@
         class="progress"
         :style="{ width: `${flow.progress * 100}%` }"
       ></div>
-      <!-- compareSub -->
-      <div
-        class="sub-img-wrappers"
+      <button
+        v-if="appearanceSetting.isShowIcon"
+        type="button"
+        class="sub-img-wrappers preview-trigger icon-button-reset"
         :style="{ 'margin-top': imageMarginTop }"
+        :aria-label="getItemActionLabel(getA11yText('preview'))"
+        :title="getItemActionLabel(getA11yText('preview'))"
         @click.stop="compareSub"
       >
-        <!-- icon visible -->
-        <div v-if="appearanceSetting.isShowIcon">
+        <div>
           <div v-if="isIconColor">
             <nut-avatar
               v-if="props[props.type].icon"
@@ -53,7 +55,7 @@
             />
           </div>
         </div>
-      </div>
+      </button>
       <div class="sub-item-content">
         <div class="sub-item-title-wrapper">
           <h3 v-if="!appearanceSetting.isSimpleMode" class="sub-item-title">
@@ -87,7 +89,10 @@
             <!-- 更多 -->
             <button
               v-if="appearanceSetting.isSubItemMenuFold"
+              type="button"
               class="compare-sub-link"
+              :aria-label="a11yText.openItemActions"
+              :title="a11yText.openItemActions"
               @click.stop="switchItemMenuVisible"
             >
               <font-awesome-icon
@@ -104,7 +109,10 @@
               <!-- 官网 -->
               <button
                 v-if="appOpenBtnVisible"
+                type="button"
                 class="compare-sub-link"
+                :aria-label="getItemActionLabel(getA11yText('open'))"
+                :title="getItemActionLabel(getA11yText('open'))"
                 @click.stop="openAppUrl"
               >
                 <font-awesome-icon icon="fa-solid fa-square-arrow-up-right" />
@@ -112,7 +120,10 @@
               <!-- 预览 -->
               <button
                 v-if="!appearanceSetting.isShowIcon"
+                type="button"
                 class="compare-sub-link"
+                :aria-label="getItemActionLabel(getA11yText('preview'))"
+                :title="getItemActionLabel(getA11yText('preview'))"
                 @click.stop="compareSub"
               >
                 <font-awesome-icon icon="fa-solid fa-eye" />
@@ -120,12 +131,21 @@
               <!-- 分享 -->
               <button
                 v-if="shareBtnVisible"
+                type="button"
                 class="share-sub-link"
+                :aria-label="getItemActionLabel(getA11yText('share'))"
+                :title="getItemActionLabel(getA11yText('share'))"
                 @click.stop="onClickShareLink"
               >
                 <font-awesome-icon icon="fa-solid fa-share-nodes" />
               </button>
-              <button class="copy-sub-link" @click.stop="onClickCopyLink">
+              <button
+                type="button"
+                class="copy-sub-link"
+                :aria-label="getItemActionLabel(getA11yText('copy'))"
+                :title="getItemActionLabel(getA11yText('copy'))"
+                @click.stop="onClickCopyLink"
+              >
                 <font-awesome-icon icon="fa-solid fa-clone" />
               </button>
             </template>
@@ -136,7 +156,10 @@
                 (!appearanceSetting.isSimpleMode ||
                   appearanceSetting.isSimpleReicon)
               "
+              type="button"
               class="refresh-sub-flow"
+              :aria-label="getItemActionLabel(getA11yText('refresh'))"
+              :title="getItemActionLabel(getA11yText('refresh'))"
               @click.stop="onClickRefresh"
             >
               <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
@@ -144,19 +167,32 @@
             <!-- 编辑 -->
             <button
               v-if="!appearanceSetting.isSimpleMode"
+              type="button"
               class="copy-sub-link"
+              :aria-label="getItemActionLabel(getA11yText('edit'))"
+              :title="getItemActionLabel(getA11yText('edit'))"
               @click.stop="onClickEdit"
             >
               <font-awesome-icon icon="fa-solid fa-pen-nib" />
             </button>
-            <button v-else class="refresh-sub-flow" @click.stop="onClickEdit">
+            <button
+              v-else
+              type="button"
+              class="refresh-sub-flow"
+              :aria-label="getItemActionLabel(getA11yText('edit'))"
+              :title="getItemActionLabel(getA11yText('edit'))"
+              @click.stop="onClickEdit"
+            >
               <font-awesome-icon icon="fa-solid fa-pen-nib" />
             </button>
             <!-- 打开侧边栏 -->
             <button
               v-if="!isMobile()"
               ref="moreAction"
+              type="button"
               class="copy-sub-link"
+              :aria-label="a11yText.openItemActions"
+              :title="a11yText.openItemActions"
               @click.stop="swipeController"
             >
               <font-awesome-icon icon="fa-solid fa-angles-right" />
@@ -236,20 +272,24 @@
           shape="square"
           type="primary"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('duplicate'))"
+          :title="getItemActionLabel(getA11yText('duplicate'))"
           @click="onClickCopyConfig"
         >
           <font-awesome-icon icon="fa-solid fa-paste" />
         </nut-button>
       </div>
       <div class="sub-item-swipe-btn-wrapper">
-        <a
-          :href="`${host}/api/${props.type}/${encodeURIComponent(name)}?raw=1`"
-          target="_blank"
+        <nut-button
+          shape="square"
+          type="success"
+          class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('export'))"
+          :title="getItemActionLabel(getA11yText('export'))"
+          @click="openRawConfig"
         >
-          <nut-button shape="square" type="success" class="sub-item-swipe-btn">
-            <font-awesome-icon icon="fa-solid fa-file-export" />
-          </nut-button>
-        </a>
+          <font-awesome-icon icon="fa-solid fa-file-export" />
+        </nut-button>
       </div>
       <!-- preview -->
       <!-- <div class="sub-item-swipe-btn-wrapper">
@@ -263,6 +303,8 @@
           shape="square"
           type="danger"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('delete'))"
+          :title="getItemActionLabel(getA11yText('delete'))"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
@@ -276,26 +318,32 @@
           shape="square"
           type="primary"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('duplicate'))"
+          :title="getItemActionLabel(getA11yText('duplicate'))"
           @click.stop="onClickCopyConfig"
         >
           <font-awesome-icon icon="fa-solid fa-paste" />
         </nut-button>
       </div>
       <div class="sub-item-swipe-btn-wrapper">
-        <a
-          :href="`${host}/api/${props.type}/${encodeURIComponent(name)}?raw=1`"
-          target="_blank"
+        <nut-button
+          shape="square"
+          type="success"
+          class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('export'))"
+          :title="getItemActionLabel(getA11yText('export'))"
+          @click.stop="openRawConfig"
         >
-          <nut-button shape="square" type="success" class="sub-item-swipe-btn">
-            <font-awesome-icon icon="fa-solid fa-file-export" />
-          </nut-button>
-        </a>
+          <font-awesome-icon icon="fa-solid fa-file-export" />
+        </nut-button>
       </div>
       <div class="sub-item-swipe-btn-wrapper">
         <nut-button
           shape="square"
           type="danger"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('delete'))"
+          :title="getItemActionLabel(getA11yText('delete'))"
           @click.stop="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
@@ -328,6 +376,7 @@ import { useSubsApi } from "@/api/subs";
 import logoIcon from "@/assets/icons/logo.png";
 import logoRedIcon from "@/assets/icons/logo-red.png";
 import PreviewPanel from "@/components/PreviewPanel.vue";
+import { useA11y } from "@/hooks/useA11y";
 import { useBackend } from "@/hooks/useBackend";
 import { useHostAPI } from "@/hooks/useHostAPI";
 import { usePopupRoute } from "@/hooks/usePopupRoute";
@@ -353,6 +402,7 @@ const { copy, isSupported } = useClipboard();
 const { toClipboard: copyFallback } = useV3Clipboard();
 
 const { t } = useI18n();
+const { a11yText, getA11yText } = useA11y();
 
 const { env } = useBackend();
 
@@ -877,6 +927,10 @@ const shareBtnVisible = computed(() => {
   return env.value?.feature?.share;
 });
 
+const getItemActionLabel = (action: string) => {
+  return `${action} ${displayName}`;
+};
+
 const closeExpandedMenu = () => {
   swipe.value.close();
   swipeIsOpen.value = false;
@@ -910,6 +964,15 @@ const onClickCopyConfig = async () => {
   showNotify({ title: t("subPage.copyConfigNotify.succeed") });
   closeExpandedMenu();
 };
+
+const openRawConfig = () => {
+  window.open(
+    `${host.value}/api/${props.type}/${encodeURIComponent(name)}?raw=1`,
+    "_blank",
+    "noopener,noreferrer",
+  );
+};
+
 // const onClickExport = async () => {
 //   swipeController()
 //   let data: Sub | Collection;
@@ -1265,5 +1328,11 @@ const onClickRefresh = async () => {
 .sub-img-wrappers {
   display: flex;
   align-items: center;
+}
+
+.preview-trigger {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 </style>

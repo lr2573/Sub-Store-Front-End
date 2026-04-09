@@ -2,19 +2,30 @@
   <div class="form-block-wrapper">
     <div v-if="sourceType !== 'file'" class="sticky-title-wrapper actions-title-wrapper">
       <p>{{ $t(`editorPage.subConfig.actions.label`) }}</p>
-      <font-awesome-icon
-        v-if="isCollapsed"
-        @click.stop="setCollapsed(false)"
-        class="toggle fa-toggle"
-        icon="fa-solid fa-toggle-on "
-      />
-      <font-awesome-icon
-        v-else
-        @click.stop="setCollapsed(true)"
-        class="toggle fa-toggle"
-        icon="fa-solid fa-toggle-off"
-      />
-      <button @click="popActionsHelp">
+      <button
+        type="button"
+        class="icon-button-reset toggle-button"
+        :aria-label="getGlobalCollapseLabel()"
+        :title="getGlobalCollapseLabel()"
+        @click.stop="setCollapsed(!isCollapsed)"
+      >
+        <font-awesome-icon
+          v-if="isCollapsed"
+          class="toggle fa-toggle"
+          icon="fa-solid fa-toggle-on "
+        />
+        <font-awesome-icon
+          v-else
+          class="toggle fa-toggle"
+          icon="fa-solid fa-toggle-off"
+        />
+      </button>
+      <button
+        type="button"
+        :aria-label="$t(`editorPage.subConfig.basic.nodeActionsHelp`)"
+        :title="$t(`editorPage.subConfig.basic.nodeActionsHelp`)"
+        @click="popActionsHelp"
+      >
         <font-awesome-icon icon="fa-solid fa-circle-question" />
         {{ $t(`editorPage.subConfig.basic.nodeActionsHelp`) }}
       </button>
@@ -46,13 +57,20 @@
       item-key="id"
     >
       <template #item="{ element, index }">
-        <nut-cell class="list-group-item" aria-hidden="true">
+        <nut-cell class="list-group-item">
           <div :class="{ 'list-group-item-title': true, 'collapsed': collapsedElements.includes(element.id) }">
             <div class="title-text left">
-              <span class="collapsed" @click="toggleElementCollapsed(element.id)">
+              <button
+                type="button"
+                class="icon-button-reset collapsed-toggle"
+                :aria-expanded="!collapsedElements.includes(element.id)"
+                :aria-label="getCollapseLabel(element)"
+                :title="getCollapseLabel(element)"
+                @click="toggleElementCollapsed(element.id)"
+              >
                 <nut-icon v-if="!collapsedElements.includes(element.id)" name="rect-down" size="12px"></nut-icon>
                 <nut-icon v-if="collapsedElements.includes(element.id)" name="rect-right" size="12px"></nut-icon>
-              </span>
+              </button>
               <div class="input-wrapper">
                 <nut-input
                   :id="`action-input-${element.id}`"
@@ -99,11 +117,35 @@
             <div class="right">
               <div class="list-group-item-icons icon-button__input">
                 <template v-if="!findEditItemById(element).isEditing">
-                  <font-awesome-icon icon="fa-solid fa-pen-to-square" @click.stop="toggleEditName(element)" />
+                  <button
+                    type="button"
+                    class="icon-button-reset"
+                    :aria-label="getEditLabel(element)"
+                    :title="getEditLabel(element)"
+                    @click.stop="toggleEditName(element)"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-pen-to-square" />
+                  </button>
                 </template>
                 <template v-else>
-                  <font-awesome-icon icon="fa-solid fa-floppy-disk" @click.stop="saveEditName(element)" />
-                  <font-awesome-icon icon="fa-solid fa-ban" @click.stop="exitEditName(element)" />
+                  <button
+                    type="button"
+                    class="icon-button-reset"
+                    :aria-label="getSaveLabel(element)"
+                    :title="getSaveLabel(element)"
+                    @click.stop="saveEditName(element)"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-floppy-disk" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-button-reset"
+                    :aria-label="getCancelEditLabel(element)"
+                    :title="getCancelEditLabel(element)"
+                    @click.stop="exitEditName(element)"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-ban" />
+                  </button>
                 </template>
               </div>
               <div class="action-switch">
@@ -111,25 +153,65 @@
                   v-model="element.enabled"
                   class="my-switch"
                 ></nut-checkbox>
-                <span @click="toggleActionSwitch(element.id)">{{ $t(`editorPage.subConfig.actions.enable`) }}</span>
+                <button
+                  type="button"
+                  class="icon-button-reset switch-label-button"
+                  :aria-pressed="element.enabled"
+                  :aria-label="getEnabledLabel(element)"
+                  :title="getEnabledLabel(element)"
+                  @click="toggleActionSwitch(element.id)"
+                >
+                  {{ $t(`editorPage.subConfig.actions.enable`) }}
+                </button>
               </div>
               <div class="preview-switch">
                 <nut-checkbox
                   v-model="getItem(element.id)[1]"
                   class="my-switch"
                 ></nut-checkbox>
-                <span @click="togglePreviewSwitch(element.id)">
+                <button
+                  type="button"
+                  class="icon-button-reset switch-label-button"
+                  :aria-pressed="getItem(element.id)[1]"
+                  :aria-label="getPreviewLabel(element)"
+                  :title="getPreviewLabel(element)"
+                  @click="togglePreviewSwitch(element.id)"
+                >
                   {{ $t(`editorPage.subConfig.basic.previewSwitch`) }}
-                </span>
+                </button>
               </div>
               <div class="icon-button">
-                <font-awesome-icon icon="fa-solid fa-circle-question" @click.stop="pop(element.type, element.tipsDes)" />
+                <button
+                  type="button"
+                  class="icon-button-reset"
+                  :aria-label="getHelpLabel(element)"
+                  :title="getHelpLabel(element)"
+                  @click.stop="pop(element.type, element.tipsDes)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-circle-question" />
+                </button>
               </div>
               <div class="icon-button">
-                <font-awesome-icon icon="fa-solid fa-clone" @click="copyItem(element)"></font-awesome-icon>
+                <button
+                  type="button"
+                  class="icon-button-reset"
+                  :aria-label="getCopyLabel(element)"
+                  :title="getCopyLabel(element)"
+                  @click="copyItem(element)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-clone"></font-awesome-icon>
+                </button>
               </div>
               <div class="delete">
-                <font-awesome-icon icon="fa-solid fa-trash-can" @click="deleteItem(element.id)" />
+                <button
+                  type="button"
+                  class="icon-button-reset delete-button"
+                  :aria-label="getDeleteLabel(element)"
+                  :title="getDeleteLabel(element)"
+                  @click="deleteItem(element.id)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-trash-can" />
+                </button>
               </div>
               <div class="drag-handler">
                 <font-awesome-icon icon="fa-solid fa-grip" class="fa-lg" />
@@ -158,19 +240,28 @@
       > -->
     <!-- </button> -->
 
-    <nut-cell class="list-group-itemsa" aria-hidden="true">
+    <nut-cell class="list-group-itemsa">
       <div class="list-group-item-titlesa">
         <!-- <div class="title-text left"> -->
         <span>{{
           $t(`editorPage.subConfig.actions.addAction.title`)
         }}</span>
-        <font-awesome-icon v-if="sourceType !== 'file'"  @click="popActionsHelp" icon="fa-solid fa-circle-question" />
+        <button
+          v-if="sourceType !== 'file'"
+          type="button"
+          class="icon-button-reset add-action-help-button"
+          :aria-label="$t(`editorPage.subConfig.basic.nodeActionsHelp`)"
+          :title="$t(`editorPage.subConfig.basic.nodeActionsHelp`)"
+          @click="popActionsHelp"
+        >
+          <font-awesome-icon icon="fa-solid fa-circle-question" />
+        </button>
       </div>
       <div class="horizontal-button-container">
-        <button v-for="(item, index) in columns" :key="index" @click="onButtonClick(item)" class="custom-button">
+        <button v-for="(item, index) in columns" :key="index" type="button" @click="onButtonClick(item)" class="custom-button">
           {{ item.text }}
         </button>
-        <button @click="paste" class="custom-button">
+        <button type="button" @click="paste" class="custom-button">
           {{ $t(`editorPage.subConfig.actions.pasteAction.label`) }}
         </button>
       </div>
@@ -185,10 +276,10 @@
           text-align="center"
         />
         <div class="horizontal-button-container">
-          <button @click="cancelPaste" class="custom-button">
+          <button type="button" @click="cancelPaste" class="custom-button">
             {{ $t(`editorPage.subConfig.actions.addAction.cancel`) }}
           </button>
-          <button @click="paste" class="custom-button">
+          <button type="button" @click="paste" class="custom-button">
             {{ $t(`editorPage.subConfig.actions.pasteAction.label`) }}
           </button>
         </div>
@@ -210,7 +301,7 @@ import useV3Clipboard from "vue-clipboard3";
 const { copy, isSupported } = useClipboard();
 const { toClipboard: copyFallback } = useV3Clipboard();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const pasteboard = ref("");
 const showPasteboard = ref(false);
 const drag = ref(true);
@@ -258,6 +349,42 @@ const setCollapsed = (v) => {
     collapsedElements.value = [];
   }
 };
+const getActionName = (element) => {
+  const editItem = findEditItemById(element);
+  return editItem?.customName || editItem?.defaultName || findNameByType(element.type);
+};
+const getActionControlLabel = (action: string, element?: ActionModuleProps) => {
+  const name = element ? getActionName(element) : t(`editorPage.subConfig.actions.label`);
+  const isZh = locale.value.startsWith('zh');
+  const labels = {
+    collapse: isZh ? `折叠 ${name}` : `Collapse ${name}`,
+    expand: isZh ? `展开 ${name}` : `Expand ${name}`,
+    enable: isZh ? `切换启用 ${name}` : `Toggle enable ${name}`,
+    preview: isZh ? `切换预览 ${name}` : `Toggle preview ${name}`,
+    help: isZh ? `查看 ${name} 帮助` : `Open help for ${name}`,
+    copy: isZh ? `复制 ${name}` : `Copy ${name}`,
+    delete: isZh ? `删除 ${name}` : `Delete ${name}`,
+    edit: isZh ? `编辑 ${name} 名称` : `Edit name for ${name}`,
+    save: isZh ? `保存 ${name} 名称` : `Save name for ${name}`,
+    cancel: isZh ? `取消编辑 ${name} 名称` : `Cancel editing name for ${name}`,
+    collapseAll: isZh ? '切换折叠全部操作' : 'Toggle collapse all actions',
+  };
+  return labels[action];
+};
+const getCollapseLabel = (element) => {
+  return collapsedElements.value.includes(element.id)
+    ? getActionControlLabel('expand', element)
+    : getActionControlLabel('collapse', element);
+};
+const getGlobalCollapseLabel = () => getActionControlLabel('collapseAll');
+const getEnabledLabel = (element) => getActionControlLabel('enable', element);
+const getPreviewLabel = (element) => getActionControlLabel('preview', element);
+const getHelpLabel = (element) => getActionControlLabel('help', element);
+const getCopyLabel = (element) => getActionControlLabel('copy', element);
+const getDeleteLabel = (element) => getActionControlLabel('delete', element);
+const getEditLabel = (element) => getActionControlLabel('edit', element);
+const getSaveLabel = (element) => getActionControlLabel('save', element);
+const getCancelEditLabel = (element) => getActionControlLabel('cancel', element);
 const toggleInput = (e) => {
   if (findEditItemById(e).isEditing) {
     return;
@@ -575,13 +702,18 @@ defineExpose({ exitAllEditName });
         color: var(--second-text-color);
         padding: 0;
         border: none;
-        outline: none;
+        outline: 2px solid transparent;
         text-overflow: ellipsis;
         :deep(.nut-input) {
           width: 100%;
           color: var(--second-text-color);
           text-overflow: ellipsis;
 
+        }
+        &:focus-within {
+          outline-color: var(--primary-color);
+          outline-offset: 2px;
+          border-radius: 4px;
         }
         &.nut-input-readonly,
         &.nut-input-disabled {
@@ -609,8 +741,8 @@ defineExpose({ exitAllEditName });
       display: flex;
       align-items: center;
       gap: 4px;
-      .svg-inline--fa {
-        cursor: pointer;
+      button {
+        color: inherit;
       }
     }
 
@@ -627,12 +759,9 @@ defineExpose({ exitAllEditName });
       align-items: center;
       flex: 1;
       padding-right: 5px;
-      .collapsed, .name {
-        cursor: pointer;
-      }
-
-      span {
+      .collapsed-toggle {
         margin-right: 6px;
+        color: inherit;
       }
 
       svg {
@@ -652,10 +781,11 @@ defineExpose({ exitAllEditName });
         .toggle {
           color: var(--unimportant-icon-color);
         }
-        span {
+        .switch-label-button {
           font-weight: normal;
           font-size: 12px;
           flex-shrink: 0;
+          color: inherit;
         }
         .my-switch {
           width: 18px;
@@ -667,17 +797,17 @@ defineExpose({ exitAllEditName });
       .preview-switch {
         -webkit-user-select: none;
         user-select: none;
-        cursor: pointer;
         display: flex;
         align-items: center;
         // margin-right: 12px;
         padding-right: 5px;
 
-        span {
+        .switch-label-button {
           // margin-right: 8px;
           flex-shrink: 0;
           font-weight: normal;
           font-size: 12px;
+          color: inherit;
         }
 
         .my-switch {
@@ -689,7 +819,6 @@ defineExpose({ exitAllEditName });
       }
       .icon-button {
         padding: 0 8px;
-        cursor: pointer;
         &__input {
           padding-right: 20px;
         }
@@ -697,7 +826,10 @@ defineExpose({ exitAllEditName });
       .delete {
         padding: 0 8px;
         color: var(--danger-color);
-        cursor: pointer;
+      }
+
+      .delete-button {
+        color: inherit;
       }
 
       .drag-handler {
@@ -728,6 +860,8 @@ defineExpose({ exitAllEditName });
     color: var(--comment-text-color);
     border-bottom: 1px solid var(--divider-color);
     padding: 1px 0 12px 12px;
+    display: flex;
+    align-items: center;
 
     span {
       margin-right: 6px;
@@ -745,9 +879,13 @@ defineExpose({ exitAllEditName });
   align-items: center;
 
   .toggle {
-    cursor: pointer;
+    margin: 0;
+  }
+
+  .toggle-button {
     margin-left: 18px;
     margin-right: auto;
+    color: inherit;
   }
 
   button {
@@ -790,6 +928,10 @@ defineExpose({ exitAllEditName });
 
 .list-group {
   min-height: 20px;
+}
+
+.add-action-help-button {
+  color: inherit;
 }
 
 // .list-group-item {

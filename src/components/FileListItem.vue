@@ -14,13 +14,16 @@
       :style="{ padding: itemPadding }"
       @click="handleContentClick"
     >
-      <div
-        @click.stop="previewFile"
-        class="sub-img-wrappers"
+      <button
+        v-if="appearanceSetting.isShowIcon"
+        type="button"
+        class="sub-img-wrappers preview-trigger icon-button-reset"
         :style="{ 'margin-top': imageMarginTop }"
+        :aria-label="getItemActionLabel(getA11yText('preview'))"
+        :title="getItemActionLabel(getA11yText('preview'))"
+        @click.stop="previewFile"
       >
-        <!-- icon visible -->
-        <div v-if="appearanceSetting.isShowIcon">
+        <div>
           <div v-if="isIconColor">
             <nut-avatar
               v-if="props[props.type].icon"
@@ -44,7 +47,7 @@
             />
           </div>
         </div>
-      </div>
+      </button>
       <div class="sub-item-content">
         <div class="sub-item-title-wrapper">
           <h3 v-if="!appearanceSetting.isSimpleMode" class="sub-item-title">
@@ -68,35 +71,60 @@
             <!-- 预览 -->
             <button
               v-if="!appearanceSetting.isShowIcon"
+              type="button"
               class="compare-sub-link"
+              :aria-label="getItemActionLabel(getA11yText('preview'))"
+              :title="getItemActionLabel(getA11yText('preview'))"
               @click.stop="previewFile"
             >
               <font-awesome-icon icon="fa-solid fa-eye" />
             </button>
             <button
               v-if="shareBtnVisible"
+              type="button"
               class="share-sub-link"
+              :aria-label="getItemActionLabel(getA11yText('share'))"
+              :title="getItemActionLabel(getA11yText('share'))"
               @click.stop="onClickShareLink"
             >
               <font-awesome-icon icon="fa-solid fa-share-nodes" />
             </button>
-            <button class="copy-sub-link" @click.stop="onClickCopyLink">
+            <button
+              type="button"
+              class="copy-sub-link"
+              :aria-label="getItemActionLabel(getA11yText('copy'))"
+              :title="getItemActionLabel(getA11yText('copy'))"
+              @click.stop="onClickCopyLink"
+            >
               <font-awesome-icon icon="fa-solid fa-clone" />
             </button>
             <!-- 编辑 -->
             <button
               v-if="!appearanceSetting.isSimpleMode"
+              type="button"
               class="copy-sub-link"
+              :aria-label="getItemActionLabel(getA11yText('edit'))"
+              :title="getItemActionLabel(getA11yText('edit'))"
               @click.stop="onClickEdit"
             >
               <font-awesome-icon icon="fa-solid fa-pen-nib" />
             </button>
-            <button class="refresh-sub-flow" @click.stop="onClickEdit" v-else>
+            <button
+              v-else
+              type="button"
+              class="refresh-sub-flow"
+              :aria-label="getItemActionLabel(getA11yText('edit'))"
+              :title="getItemActionLabel(getA11yText('edit'))"
+              @click.stop="onClickEdit"
+            >
               <font-awesome-icon icon="fa-solid fa-pen-nib" />
             </button>
 
             <button
               class="copy-sub-link"
+              type="button"
+              :aria-label="a11yText.openItemActions"
+              :title="a11yText.openItemActions"
               @click.stop="swipeController"
               v-if="!isMobile()"
               ref="moreAction"
@@ -147,6 +175,8 @@
           shape="square"
           type="primary"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('duplicate'))"
+          :title="getItemActionLabel(getA11yText('duplicate'))"
           @click="onClickCopyConfig"
         >
           <font-awesome-icon icon="fa-solid fa-paste" />
@@ -161,6 +191,8 @@
           shape="square"
           type="success"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('export'))"
+          :title="getItemActionLabel(getA11yText('export'))"
           @click="onClickExportFile(name)"
         >
           <font-awesome-icon icon="fa-solid fa-file-export" />
@@ -178,6 +210,8 @@
           shape="square"
           type="danger"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('delete'))"
+          :title="getItemActionLabel(getA11yText('delete'))"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
@@ -191,6 +225,8 @@
           shape="square"
           type="primary"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('duplicate'))"
+          :title="getItemActionLabel(getA11yText('duplicate'))"
           @click="onClickCopyConfig"
         >
           <font-awesome-icon icon="fa-solid fa-paste" />
@@ -201,6 +237,8 @@
           shape="square"
           type="success"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('export'))"
+          :title="getItemActionLabel(getA11yText('export'))"
           @click="onClickExportFile(name)"
         >
           <font-awesome-icon icon="fa-solid fa-file-export" />
@@ -216,6 +254,8 @@
           shape="square"
           type="danger"
           class="sub-item-swipe-btn"
+          :aria-label="getItemActionLabel(getA11yText('delete'))"
+          :title="getItemActionLabel(getA11yText('delete'))"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
@@ -239,6 +279,7 @@
   import { useFilesApi } from '@/api/files';
   import logoIcon from '@/assets/icons/logo.png';
   import logoRedIcon from '@/assets/icons/logo-red.png';
+  import { useA11y } from '@/hooks/useA11y';
   import { usePopupRoute } from '@/hooks/usePopupRoute';
   import { useAppNotifyStore } from '@/store/appNotify';
   import { useGlobalStore } from '@/store/global';
@@ -265,6 +306,7 @@
   const { toClipboard: copyFallback } = useV3Clipboard();
 
   const { t } = useI18n();
+  const { a11yText, getA11yText } = useA11y();
   const { env } = useBackend();
   const isArchiveEnabled = computed(() => {
     return env.value?.feature?.archive;
@@ -605,6 +647,10 @@
     return env.value?.feature?.share;
   });
 
+  const getItemActionLabel = (action: string) => {
+    return `${action} ${displayName}`;
+  };
+
   const onClickExportFile = (name) => {
     const url = `${host.value}/api/wholeFile/${encodeURIComponent(name)}?raw=1`;
     console.log('url', url);
@@ -874,8 +920,14 @@
     position: relative;
   }
 
-  .sub-img-wrappers {
-    display: flex;
-    align-items: center;
-  }
+.sub-img-wrappers {
+  display: flex;
+  align-items: center;
+}
+
+.preview-trigger {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
 </style>

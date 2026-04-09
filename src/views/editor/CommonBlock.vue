@@ -1,13 +1,13 @@
 <template>
   <div class="form-block-wrapper">
     <div class="sticky-title-wrapper">
-      <div class="title" @click="toggleFold">
+      <button type="button" class="title icon-button-reset" :aria-expanded="!isFold" @click="toggleFold">
         <p>
           {{ $t(`editorPage.subConfig.commonOptions.label`) }}
         </p>
         <nut-icon v-if="!isFold" name="rect-down" size="12px"></nut-icon>
         <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-      </div>
+      </button>
     </div>
     <nut-form v-if="!isFold" class="form">
       <nut-form-item>
@@ -15,14 +15,32 @@
           {{ $t(`editorPage.subConfig.commonOptions.useless.label`) }}
         </p>
         <div class="radio-wrapper options-radio">
-          <nut-radiogroup direction="horizontal" v-model="quick.args.useless">
-            <nut-radio :label="item[2]"
-              >{{ $t(`editorPage.subConfig.commonOptions.useless.disabled`) }}
-            </nut-radio>
-            <nut-radio :label="item[1]"
-              >{{ $t(`editorPage.subConfig.commonOptions.useless.enabled`) }}
-            </nut-radio>
-          </nut-radiogroup>
+          <div
+            class="native-radio-group two-column"
+            role="radiogroup"
+            :aria-label="$t(`editorPage.subConfig.commonOptions.useless.label`)"
+          >
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.useless === item[2] }"
+              role="radio"
+              :aria-checked="quick.args.useless === item[2]"
+              @click="quick.args.useless = item[2]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.useless.disabled`) }}
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.useless === item[1] }"
+              role="radio"
+              :aria-checked="quick.args.useless === item[1]"
+              @click="quick.args.useless = item[1]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.useless.enabled`) }}
+            </button>
+          </div>
         </div>
       </nut-form-item>
       <nut-form-item>
@@ -30,17 +48,42 @@
           {{ $t(`editorPage.subConfig.commonOptions.udp.label`) }}
         </p>
         <div class="radio-wrapper options-radio">
-          <nut-radiogroup direction="horizontal" v-model="quick.args.udp">
-            <nut-radio :label="item[0]"
-              >{{ $t(`editorPage.subConfig.commonOptions.udp.default`) }}
-            </nut-radio>
-            <nut-radio :label="item[1]"
-              >{{ $t(`editorPage.subConfig.commonOptions.udp.enabled`) }}
-            </nut-radio>
-            <nut-radio :label="item[2]"
-              >{{ $t(`editorPage.subConfig.commonOptions.udp.disabled`) }}
-            </nut-radio>
-          </nut-radiogroup>
+          <div
+            class="native-radio-group"
+            role="radiogroup"
+            :aria-label="$t(`editorPage.subConfig.commonOptions.udp.label`)"
+          >
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.udp === item[0] }"
+              role="radio"
+              :aria-checked="quick.args.udp === item[0]"
+              @click="quick.args.udp = item[0]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.udp.default`) }}
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.udp === item[1] }"
+              role="radio"
+              :aria-checked="quick.args.udp === item[1]"
+              @click="quick.args.udp = item[1]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.udp.enabled`) }}
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.udp === item[2] }"
+              role="radio"
+              :aria-checked="quick.args.udp === item[2]"
+              @click="quick.args.udp = item[2]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.udp.disabled`) }}
+            </button>
+          </div>
         </div>
       </nut-form-item>
       <nut-form-item>
@@ -48,17 +91,42 @@
           {{ $t(`editorPage.subConfig.commonOptions.scert.label`) }}
         </p>
         <div class="radio-wrapper options-radio">
-          <nut-radiogroup direction="horizontal" v-model="quick.args.scert">
-            <nut-radio :label="item[0]"
-              >{{ $t(`editorPage.subConfig.commonOptions.scert.default`) }}
-            </nut-radio>
-            <nut-radio :label="item[1]"
-              >{{ $t(`editorPage.subConfig.commonOptions.scert.enabled`) }}
-            </nut-radio>
-            <nut-radio :label="item[2]"
-              >{{ $t(`editorPage.subConfig.commonOptions.scert.disabled`) }}
-            </nut-radio>
-          </nut-radiogroup>
+          <div
+            class="native-radio-group"
+            role="radiogroup"
+            :aria-label="$t(`editorPage.subConfig.commonOptions.scert.label`)"
+          >
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.scert === item[0] }"
+              role="radio"
+              :aria-checked="quick.args.scert === item[0]"
+              @click="quick.args.scert = item[0]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.scert.default`) }}
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.scert === item[1] }"
+              role="radio"
+              :aria-checked="quick.args.scert === item[1]"
+              @click="quick.args.scert = item[1]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.scert.enabled`) }}
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.scert === item[2] }"
+              role="radio"
+              :aria-checked="quick.args.scert === item[2]"
+              @click="quick.args.scert = item[2]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.scert.disabled`) }}
+            </button>
+          </div>
         </div>
       </nut-form-item>
       <nut-form-item>
@@ -66,17 +134,42 @@
           {{ $t(`editorPage.subConfig.commonOptions.tfo.label`) }}
         </p>
         <div class="radio-wrapper options-radio">
-          <nut-radiogroup direction="horizontal" v-model="quick.args.tfo">
-            <nut-radio :label="item[0]"
-              >{{ $t(`editorPage.subConfig.commonOptions.tfo.default`) }}
-            </nut-radio>
-            <nut-radio :label="item[1]"
-              >{{ $t(`editorPage.subConfig.commonOptions.tfo.enabled`) }}
-            </nut-radio>
-            <nut-radio :label="item[2]"
-              >{{ $t(`editorPage.subConfig.commonOptions.tfo.disabled`) }}
-            </nut-radio>
-          </nut-radiogroup>
+          <div
+            class="native-radio-group"
+            role="radiogroup"
+            :aria-label="$t(`editorPage.subConfig.commonOptions.tfo.label`)"
+          >
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.tfo === item[0] }"
+              role="radio"
+              :aria-checked="quick.args.tfo === item[0]"
+              @click="quick.args.tfo = item[0]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.tfo.default`) }}
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.tfo === item[1] }"
+              role="radio"
+              :aria-checked="quick.args.tfo === item[1]"
+              @click="quick.args.tfo = item[1]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.tfo.enabled`) }}
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args.tfo === item[2] }"
+              role="radio"
+              :aria-checked="quick.args.tfo === item[2]"
+              @click="quick.args.tfo = item[2]"
+            >
+              {{ $t(`editorPage.subConfig.commonOptions.tfo.disabled`) }}
+            </button>
+          </div>
         </div>
       </nut-form-item>
       <nut-form-item>
@@ -84,26 +177,48 @@
           {{ $t(`editorPage.subConfig.commonOptions['vmess aead'].label`) }}
         </p>
         <div class="radio-wrapper options-radio">
-          <nut-radiogroup
-            direction="horizontal"
-            v-model="quick.args['vmess aead']"
+          <div
+            class="native-radio-group"
+            role="radiogroup"
+            :aria-label="$t(`editorPage.subConfig.commonOptions['vmess aead'].label`)"
           >
-            <nut-radio :label="item[0]"
-              >{{
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args['vmess aead'] === item[0] }"
+              role="radio"
+              :aria-checked="quick.args['vmess aead'] === item[0]"
+              @click="quick.args['vmess aead'] = item[0]"
+            >
+              {{
                 $t(`editorPage.subConfig.commonOptions['vmess aead'].default`)
               }}
-            </nut-radio>
-            <nut-radio :label="item[1]"
-              >{{
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args['vmess aead'] === item[1] }"
+              role="radio"
+              :aria-checked="quick.args['vmess aead'] === item[1]"
+              @click="quick.args['vmess aead'] = item[1]"
+            >
+              {{
                 $t(`editorPage.subConfig.commonOptions['vmess aead'].enabled`)
               }}
-            </nut-radio>
-            <nut-radio :label="item[2]"
-              >{{
+            </button>
+            <button
+              type="button"
+              class="native-radio-button"
+              :class="{ current: quick.args['vmess aead'] === item[2] }"
+              role="radio"
+              :aria-checked="quick.args['vmess aead'] === item[2]"
+              @click="quick.args['vmess aead'] = item[2]"
+            >
+              {{
                 $t(`editorPage.subConfig.commonOptions['vmess aead'].disabled`)
               }}
-            </nut-radio>
-          </nut-radiogroup>
+            </button>
+          </div>
         </div>
       </nut-form-item>
     </nut-form>
@@ -244,15 +359,35 @@
   .radio-wrapper.options-radio {
     justify-content: start;
 
-    .nut-radiogroup {
+    .native-radio-group {
       width: 100%;
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .native-radio-group.two-column {
+      grid-template-columns: 1fr 1fr;
     }
   }
 
   .radio-wrapper {
     display: flex;
     justify-content: flex-end;
+  }
+
+  .native-radio-button {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: var(--divider-color);
+    color: var(--second-text-color);
+    text-align: center;
+  }
+
+  .native-radio-button.current {
+    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
   }
 </style>

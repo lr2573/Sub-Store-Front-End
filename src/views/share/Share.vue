@@ -41,13 +41,16 @@
           }"
         >
           <!-- 刷新 -->
-          <div
+          <button
             v-if="appearanceSetting.showFloatingRefreshButton"
+            type="button"
             class="drag-btn refresh"
+            :aria-label="getA11yText('refresh')"
+            :title="getA11yText('refresh')"
             @click="refresh"
           >
             <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
-          </div>
+          </button>
 
           <!-- 加号 -->
           <!-- <div
@@ -77,7 +80,11 @@
           :key="item.value"
           class="tag"
           :class="{ current: item.value === tag }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="item.value === tag"
           @click="setTag(item.value)"
+          @keydown="onKeyboardActivate($event, () => setTag(item.value))"
         >
           {{ item.label }}
         </span>
@@ -93,7 +100,14 @@
         <!-- 单条订阅 -->
         <div v-if="subShareDataCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div class="list-title" @click="toggleFold('sub')">
+            <div
+              class="list-title"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!isFold('sub')"
+              @click="toggleFold('sub')"
+              @keydown="onKeyboardActivate($event, () => toggleFold('sub'))"
+            >
               <div class="list-title-main">
                 <p>
                   {{ `${$t(`specificWord.singleSub`)}(${subShareDataCount})` }}
@@ -148,7 +162,11 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isShareSelected(element), 'is-dual-column': isDualColumnMode }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="isShareSelected(element)"
                   @click.stop="toggleShareSelection(element)"
+                  @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
                   <nut-checkbox
                     :model-value="isShareSelected(element)"
@@ -178,7 +196,14 @@
         <!-- 组合订阅 -->
         <div v-if="collectionShareDataCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div class="list-title" @click="toggleFold('col')">
+            <div
+              class="list-title"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!isFold('col')"
+              @click="toggleFold('col')"
+              @keydown="onKeyboardActivate($event, () => toggleFold('col'))"
+            >
               <div class="list-title-main">
                 <p>
                   {{
@@ -237,7 +262,11 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isShareSelected(element), 'is-dual-column': isDualColumnMode }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="isShareSelected(element)"
                   @click.stop="toggleShareSelection(element)"
+                  @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
                   <nut-checkbox
                     :model-value="isShareSelected(element)"
@@ -267,7 +296,14 @@
         <!-- 文件 -->
         <div v-if="fileShareDataCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div class="list-title" @click="toggleFold('file')">
+            <div
+              class="list-title"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!isFold('file')"
+              @click="toggleFold('file')"
+              @keydown="onKeyboardActivate($event, () => toggleFold('file'))"
+            >
               <div class="list-title-main">
                 <p>
                   {{ `${$t(`specificWord.file`)}(${fileShareDataCount})` }}
@@ -322,7 +358,11 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isShareSelected(element), 'is-dual-column': isDualColumnMode }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="isShareSelected(element)"
                   @click.stop="toggleShareSelection(element)"
+                  @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
                   <nut-checkbox
                     :model-value="isShareSelected(element)"
@@ -353,12 +393,12 @@
     </div>
     <!-- 没有数据 -->
     <div v-if="!isLoading && fetchResult && !hasShares" class="no-data-wrapper">
-      <nut-empty image="empty">
+      <AccessibleEmpty image="empty">
         <template #description>
           <h3>{{ $t(`sharePage.emptyShare.title`) }}</h3>
           <p>{{ $t(`sharePage.emptyShare.desc`) }}</p>
         </template>
-      </nut-empty>
+      </AccessibleEmpty>
       <router-link to="/subs" class="router-link">
         <nut-button type="primary">
           {{ $t(`sharePage.emptyShare.btn`) }}
@@ -368,7 +408,7 @@
 
     <!-- 数据加载失败 -->
     <div v-if="!isLoading && !fetchResult" class="no-data-wrapper">
-      <nut-empty image="error" style="padding: 32px 30px">
+      <AccessibleEmpty image="error" style="padding: 32px 30px">
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>
           <p>{{ $t(`subPage.loadFailed.desc`) }}</p>
@@ -383,13 +423,14 @@
             </a>
           </p>
         </template>
-      </nut-empty>
+      </AccessibleEmpty>
       <nut-button icon="refresh" type="primary" @click="refresh">
         {{ $t(`subPage.loadFailed.btn`) }}
       </nut-button>
       <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
+        rel="noreferrer noopener"
       >
         <span>{{ $t(`subPage.loadFailed.doc`) }}</span>
         <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
@@ -446,6 +487,7 @@ import { useRouter } from "vue-router";
 import draggable from "vuedraggable";
 import ShareListItem from "@/components/ShareListItem.vue";
 import { useShareApi } from "@/api/share";
+import { onKeyboardActivate, useA11y } from "@/hooks/useA11y";
 import { useBackend } from "@/hooks/useBackend";
 import { useFilteredDraggableList } from "@/hooks/useFilteredDraggableList";
 import { useHostAPI } from "@/hooks/useHostAPI";
@@ -469,6 +511,7 @@ import {
 import { initStores } from "@/utils/initApp";
 import { isMobile } from "@/utils/isMobile";
 import { openManagedDeleteDialog } from "@/utils/archive";
+import AccessibleEmpty from "@/components/AccessibleEmpty.vue";
 
 import SharePopup from "./SharePopup.vue";
 import { Dialog } from "@nutui/nutui";
@@ -489,6 +532,7 @@ const isArchiveEnabled = computed(() => {
   return env.value?.feature?.archive;
 });
 const { t } = useI18n();
+const { getA11yText } = useA11y();
 const shareApi = useShareApi();
 const { showNotify } = useAppNotifyStore();
 const subsStore = useSubsStore();
@@ -945,6 +989,12 @@ const handleShareDetail = (detail: Share) => {
   position: relative;
   z-index: 999;
 
+  button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
   .drag-btn {
     width: 48px;
     height: 48px;
@@ -1229,8 +1279,9 @@ const handleShareDetail = (detail: Share) => {
   height: 17px;
 }
 
-.share-top-selection-toggle:focus {
-  outline: none;
+.share-top-selection-toggle:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
 }
 
 .share-select-item {

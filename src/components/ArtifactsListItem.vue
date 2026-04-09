@@ -11,9 +11,28 @@
       class="sub-item-wrapper"
       :class="{ 'is-dual-column': props.isDualColumn }"
       :style="{ padding: itemPadding }"
+      role="button"
+      tabindex="0"
+      :aria-label="getItemActionLabel(getA11yText('preview'))"
       @click="handleContentClick"
+      @keydown="onKeyboardActivate($event, handleContentClick)"
     >
-      <div v-if="appearanceSetting.isShowIcon" class="sub-img-wrappers" @click.stop="openUrl">
+      <button
+        v-if="appearanceSetting.isShowIcon && artifact.url"
+        type="button"
+        class="sub-img-wrappers icon-button-reset"
+        :aria-label="getItemActionLabel(getA11yText('open'))"
+        :title="getItemActionLabel(getA11yText('open'))"
+        @click.stop="openUrl"
+      >
+        <nut-avatar
+          :class="{ 'sub-item-customer-icon': !isIconColor }"
+          :size="avatarSize"
+          :url="displayIcon"
+          bg-color=""
+        ></nut-avatar>
+      </button>
+      <div v-else-if="appearanceSetting.isShowIcon" class="sub-img-wrappers">
         <nut-avatar
           :class="{ 'sub-item-customer-icon': !isIconColor }"
           :size="avatarSize"
@@ -32,7 +51,10 @@
           <div class="title-right-wrapper" v-if="!appearanceSetting.isSimpleMode">
             <button
               v-if="!appearanceSetting.isShowIcon && artifact.url"
+              type="button"
               class="copy-sub-link"
+              :aria-label="getItemActionLabel(getA11yText('open'))"
+              :title="getItemActionLabel(getA11yText('open'))"
               @click.stop="openUrl"
             >
               <font-awesome-icon icon="fa-solid fa-eye" />
@@ -41,18 +63,27 @@
               class="copy-sub-link"
               style="padding: 0 12px"
               v-if="artifact.url"
+              type="button"
+              :aria-label="getItemActionLabel(getA11yText('copy'))"
+              :title="getItemActionLabel(getA11yText('copy'))"
               @click.stop="onClickCopyLink"
             >
               <font-awesome-icon icon="fa-solid fa-clone"></font-awesome-icon>
             </button>
             <button
               class="copy-sub-link"
+              type="button"
+              :aria-label="getItemActionLabel(getA11yText('edit'))"
+              :title="getItemActionLabel(getA11yText('edit'))"
               @click.stop="onClickEdit"
             >
               <font-awesome-icon icon="fa-solid fa-pen-nib" />
             </button>
             <button
               class="copy-sub-link"
+              type="button"
+              :aria-label="a11yText.openItemActions"
+              :title="a11yText.openItemActions"
               @click.stop="swipeController"
               v-if="!isMobile()"
               ref="moreAction"
@@ -79,7 +110,10 @@
                 <div class="simple-actions">
                 <button
                   v-if="!appearanceSetting.isShowIcon && artifact.url"
+                  type="button"
                   class="copy-sub-link"
+                  :aria-label="getItemActionLabel(getA11yText('open'))"
+                  :title="getItemActionLabel(getA11yText('open'))"
                   @click.stop="openUrl"
                 >
                   <font-awesome-icon icon="fa-solid fa-eye" />
@@ -88,6 +122,9 @@
                   v-if="artifact.url"
                   class="copy-sub-link"
                   style="padding: 0 12px"
+                  type="button"
+                  :aria-label="getItemActionLabel(getA11yText('copy'))"
+                  :title="getItemActionLabel(getA11yText('copy'))"
                   @click.stop="onClickCopyLink"
                 >
                   <font-awesome-icon
@@ -96,12 +133,18 @@
                 </button>
                 <button
                   class="copy-sub-link"
+                  type="button"
+                  :aria-label="getItemActionLabel(getA11yText('edit'))"
+                  :title="getItemActionLabel(getA11yText('edit'))"
                   @click.stop="onClickEdit"
                 >
                   <font-awesome-icon icon="fa-solid fa-pen-nib" />
                 </button>
-                <button
+                  <button
                     class="copy-sub-link"
+                    type="button"
+                    :aria-label="a11yText.openItemActions"
+                    :title="a11yText.openItemActions"
                     @click.stop="swipeController"
                     v-if="!isMobile()"
                     ref="moreAction"
@@ -113,13 +156,12 @@
               <span class="switch-label" v-if="!appearanceSetting.isSimpleMode">
                 {{ $t(`syncPage.syncSwitcher`) }}
               </span>
-              <span @click.stop>
-                <nut-switch
-                  class="my-switch"
-                  v-model="isSyncOpen"
-                  :loading="isSwitcherLoading"
-                />
-              </span>
+              <nut-switch
+                class="my-switch"
+                v-model="isSyncOpen"
+                :loading="isSwitcherLoading"
+                @click.stop
+              />
             </div>
           </div>
         </div>
@@ -209,6 +251,7 @@ import { useAppNotifyStore } from "@/store/appNotify";
 import { useArtifactsStore } from "@/store/artifacts";
 import { useSettingsStore } from "@/store/settings";
 import { useSubsStore } from "@/store/subs";
+import { onKeyboardActivate, useA11y } from "@/hooks/useA11y";
 import { butifyDate } from "@/utils/butifyDate";
 import { resolveArtifactIcon } from "@/utils/artifactIcon";
 import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
@@ -228,6 +271,7 @@ const { copy, isSupported } = useClipboard();
 const { toClipboard: copyFallback } = useV3Clipboard();
 
 const { t } = useI18n();
+const { a11yText, getA11yText } = useA11y();
 const { currentUrl: host } = useHostAPI();
 const { env } = useBackend();
 const isArchiveEnabled = computed(() => {
@@ -258,6 +302,9 @@ const displayName = computed(() => {
     artifact.value.name
   );
 });
+const getItemActionLabel = (action: string) => {
+  return `${action} ${displayName.value}`;
+};
 const tag = computed(() => artifact.value?.tag || []);
 const remark = computed(() => artifact.value?.remark || "");
 const remarkText = computed(() => {

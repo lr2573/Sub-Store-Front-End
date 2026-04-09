@@ -2,7 +2,15 @@
   <div class="my-page-wrapper">
     <div class="profile-block">
       <div class="radio-wrapper" >
-        <span v-for="i in [{value: 'gist'}, {value:'manual'}]" :class="{ 'tag': true, 'current': i.value === storageType }" @click="setTag(i.value)">{{$t(`myPage.storage.${i.value}.label`) }}</span>
+        <button
+          v-for="i in [{value: 'gist'}, {value:'manual'}]"
+          :key="i.value"
+          type="button"
+          class="storage-tag icon-button-reset"
+          :class="{ 'tag': true, 'current': i.value === storageType }"
+          :aria-pressed="i.value === storageType"
+          @click="setTag(i.value)"
+        >{{$t(`myPage.storage.${i.value}.label`) }}</button>
         <p class="storage-info">{{ $t(`myPage.storage.${storageType}.info`) }}</p>
       </div>
       <!-- <div class="radio-wrapper" >
@@ -15,14 +23,17 @@
       <div class="info">
         <div v-if="storageType === 'manual'" class="avatar-wrapper">
           <nut-avatar
+            v-if="remoteAvatarUrl"
             :key="avatarDisplayKey"
-            :class="{ 'avatar-fallback': isAvatarFallback }"
             size="72"
             bg-color="var(--card-color)"
             :url="remoteAvatarUrl"
-            :icon="displayAvatarIcon"
+            alt=""
             @on-error="handleAvatarError"
           />
+          <div v-else class="avatar-fallback-shell" aria-hidden="true">
+            <img :src="avatar" alt="" class="avatar-fallback-image">
+          </div>
           <div class="name">
             <p class="title">
               {{ $t(`myPage.storage.manual.label`) }}
@@ -37,14 +48,17 @@
         </div>
         <div v-else class="avatar-wrapper">
           <nut-avatar
+            v-if="remoteAvatarUrl"
             :key="avatarDisplayKey"
-            :class="{ 'avatar-fallback': isAvatarFallback }"
             size="72"
             bg-color="var(--card-color)"
             :url="remoteAvatarUrl"
-            :icon="displayAvatarIcon"
+            alt=""
             @on-error="handleAvatarError"
           />
+          <div v-else class="avatar-fallback-shell" aria-hidden="true">
+            <img :src="avatar" alt="" class="avatar-fallback-image">
+          </div>
           <div class="name">
             <p class="title">
               {{ githubUser || $t(`myPage.placeholder.name`) }}
@@ -76,7 +90,7 @@
             />
             {{ $t(`myPage.storage.manual.restore`) }}
           </nut-button>
-          <a :href="host + '/api/storage'" target="_blank">
+          <a :href="host + '/api/storage'" target="_blank" rel="noreferrer noopener">
             <nut-button
               class="download-btn"
               type="primary"
@@ -122,7 +136,15 @@
         </div>
       </div>
       <div class="config-card" v-if="storageType !== 'manual'" >
-        <div class="title-wrapper" @click="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')">
+        <div
+          class="title-wrapper"
+          role="button"
+          tabindex="0"
+          :aria-expanded="isGitHubConfigEditing"
+          @click="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')"
+          @keydown.enter.prevent="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')"
+          @keydown.space.prevent="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')"
+        >
           <h1>{{ $t(`myPage.githubConfig`) }}</h1>
           <div class="config-btn-wrapper">
             <nut-button
@@ -207,7 +229,15 @@
         </div>
       </div>
       <div class="config-card">
-        <div class="title-wrapper"  @click="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')">
+        <div
+          class="title-wrapper"
+          role="button"
+          tabindex="0"
+          :aria-expanded="isRequestConfigEditing"
+          @click="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')"
+          @keydown.enter.prevent="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')"
+          @keydown.space.prevent="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')"
+        >
           <h1>{{ $t(`myPage.requestConfig`) }}</h1>
           <div class="config-btn-wrapper">
             <nut-button
@@ -280,7 +310,15 @@
         </div>
       </div>
       <div class="config-card">
-        <div class="title-wrapper" @click="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')">
+        <div
+          class="title-wrapper"
+          role="button"
+          tabindex="0"
+          :aria-expanded="isCacheConfigEditing"
+          @click="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')"
+          @keydown.enter.prevent="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')"
+          @keydown.space.prevent="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')"
+        >
           <h1>{{ $t(`myPage.cacheConfig`) }}</h1>
           <div class="config-btn-wrapper">
             <nut-button
@@ -365,7 +403,15 @@
         </div>
       </div>
       <div class="config-card">
-        <div class="title-wrapper" @click="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')">
+        <div
+          class="title-wrapper"
+          role="button"
+          tabindex="0"
+          :aria-expanded="isFrontEndConfigEditing"
+          @click="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')"
+          @keydown.enter.prevent="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')"
+          @keydown.space.prevent="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')"
+        >
           <h1>{{ $t(`myPage.frontEndConfig`) }}</h1>
           <div class="config-btn-wrapper">
             <nut-button
@@ -476,10 +522,11 @@
     </div>
 
     <div class="env-block">
-      <img v-if="icon" :src="displayBackendIcon" alt="" class="auto-reverse" />
+      <img v-if="icon" :src="displayBackendIcon" :alt="`${env.backend} backend`" class="auto-reverse" />
       <a
         v-if="env.hasNewVersion"
         target="_blank"
+        rel="noreferrer noopener"
         :href="
           env.backend === 'Node'
             ? 'https://github.com/sub-store-org/Sub-Store/releases'
@@ -567,14 +614,6 @@ const remoteAvatarUrl = computed(() => {
   }
 
   return applyGithubAvatarProxy(avatarUrl.value || fallbackGithubAvatarUrl.value);
-});
-
-const displayAvatarIcon = computed(() => {
-  return remoteAvatarUrl.value ? "" : avatar;
-});
-
-const isAvatarFallback = computed(() => {
-  return !remoteAvatarUrl.value;
 });
 
 const avatarDisplayKey = computed(() => {
@@ -1164,6 +1203,11 @@ const setTag = (current) => {
         user-select: none;
         flex-shrink: 0;
       }
+      .storage-tag {
+        border: none;
+        background: none;
+        color: inherit;
+      }
       .current {
         border-bottom: 1px solid var(--primary-color);
         color: var(--primary-color);
@@ -1190,6 +1234,12 @@ const setTag = (current) => {
         justify-content: space-between;
         align-items: center;
         padding: 0 0 0 10px;
+        border-radius: 10px;
+      }
+
+      .title-wrapper:focus-visible {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
       }
 
       h1 {
@@ -1258,13 +1308,21 @@ const setTag = (current) => {
           background: var(--card-color);
         }
 
-        .avatar-fallback {
-          :deep(img),
-          :deep(.nut-icon__img) {
-            width: 72%;
-            height: 72%;
-            object-fit: contain;
-          }
+        .avatar-fallback-shell {
+          width: 72px;
+          height: 72px;
+          flex-shrink: 0;
+          border-radius: 50%;
+          background: var(--card-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .avatar-fallback-image {
+          width: 72%;
+          height: 72%;
+          object-fit: contain;
         }
 
         .name {

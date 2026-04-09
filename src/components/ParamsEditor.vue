@@ -49,7 +49,14 @@
               <!-- @blur="trimValue(item, 'value')" -->
             </div>
             <div class="item key-value-operation">
-              <div @click="deleteItem(index)">{{ deleteParamsText }}</div>
+              <button
+                type="button"
+                class="delete-param-button"
+                :aria-label="deleteParamsText"
+                @click="deleteItem(index)"
+              >
+                {{ deleteParamsText }}
+              </button>
             </div>
           </div>
           <div v-if="!paramsArgumentsLocal.length" class="empty-tips">
@@ -228,10 +235,20 @@ const handleKeyBlur = (item, index) => {
             display: flex;
             align-items: center;
             justify-content: center;
-            div {
+            .delete-param-button {
               cursor: pointer;
               color: var(--primary-color);
               margin: 0 8px;
+              border: none;
+              background: none;
+              padding: 0;
+              font: inherit;
+            }
+
+            .delete-param-button:focus-visible {
+              outline: 2px solid var(--primary-color);
+              outline-offset: 2px;
+              border-radius: 4px;
             }
           }
         }

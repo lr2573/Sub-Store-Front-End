@@ -2,7 +2,7 @@
   <!-- isPWA 时候顶部边距 -->
   <div v-if="isPWA" class="pwa_top_padding" />
   <div class="nav-bar-wrapper">
-    <nav>
+    <nav :aria-label="a11yText.mainNavigation">
       <!-- &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {{ navBarHeight }} {{ wh }}    {{ topHeight }}-->
 
       <nut-navbar
@@ -12,54 +12,96 @@
         @on-click-icon="onClickNavbarIcon"
       >
         <template #left>
-          <div :class="isNeedBack ? 'icon-back' : 'icon-home'"></div>
+          <button
+            v-if="isNeedBack"
+            type="button"
+            class="icon-button-reset nav-icon-button nav-leading-button"
+            :aria-label="a11yText.back"
+            :title="a11yText.back"
+            @click.stop="back"
+          >
+            <span class="icon-back" aria-hidden="true"></span>
+          </button>
+          <span v-else class="icon-null nav-leading-button" aria-hidden="true"></span>
           <div class="icon-group">
-            <font-awesome-icon
+            <button
               v-if="!isNeedBack && !appearanceSetting.showFloatingRefreshButton"
+              type="button"
+              class="icon-button-reset nav-icon-button icon fa-arrow-rotate-right"
+              :aria-label="a11yText.refresh"
+              :title="a11yText.refresh"
               @click.stop="refresh"
-              class="icon fa-arrow-rotate-right"
-              icon="fa-solid fa-arrow-rotate-right"
-            />
-            <font-awesome-icon
+            >
+              <font-awesome-icon
+                aria-hidden="true"
+                icon="fa-solid fa-arrow-rotate-right"
+              />
+            </button>
+            <button
               v-if="
                 ['/subs', '/sync', '/files'].includes(route.path) &&
                 !appearanceSetting.showFloatingAddButton
               "
+              type="button"
+              class="icon-button-reset nav-icon-button icon fa-plus"
+              :aria-label="a11yText.add"
+              :title="a11yText.add"
               @click.stop="add(route)"
-              class="icon fa-plus"
-              icon="fa-solid fa-plus"
-            />
+            >
+              <font-awesome-icon aria-hidden="true" icon="fa-solid fa-plus" />
+            </button>
           </div>
         </template>
 
         <template #right>
-          <font-awesome-icon
+          <button
             v-if="appearanceSetting.isSimpleMode"
+            type="button"
+            class="icon-button-reset nav-icon-button navBar-right-icon fa-toggle"
+            :aria-label="a11yText.disableSimpleMode"
+            :title="a11yText.disableSimpleMode"
+            aria-pressed="true"
             @click.stop="setSimpleMode(false)"
-            class="navBar-right-icon fa-toggle"
-            icon="fa-solid fa-toggle-on "
-          />
-          <font-awesome-icon
+          >
+            <font-awesome-icon aria-hidden="true" icon="fa-solid fa-toggle-on " />
+          </button>
+          <button
             v-else
+            type="button"
+            class="icon-button-reset nav-icon-button navBar-right-icon fa-toggle"
+            :aria-label="a11yText.enableSimpleMode"
+            :title="a11yText.enableSimpleMode"
+            aria-pressed="false"
             @click.stop="setSimpleMode(true)"
-            class="navBar-right-icon fa-toggle"
-            icon="fa-solid fa-toggle-off"
-          />
-          <font-awesome-icon
+          >
+            <font-awesome-icon aria-hidden="true" icon="fa-solid fa-toggle-off" />
+          </button>
+          <button
             v-if="showListViewToggle"
-            @click.stop="handleListViewModeToggle"
-            class="navBar-right-icon fa-list-view"
+            type="button"
+            class="icon-button-reset nav-icon-button navBar-right-icon fa-list-view"
             :class="{ 'is-disabled': isListViewModeLocked }"
-            :icon="effectiveListViewMode === 'dual-column' ? 'fa-solid fa-table-columns' : 'fa-solid fa-list'"
-            :title="listViewModeToggleTitle"
+            :title="effectiveListViewMode === 'dual-column' ? a11yText.switchToSingleColumn : a11yText.switchToDualColumn"
+            :aria-label="effectiveListViewMode === 'dual-column' ? a11yText.switchToSingleColumn : a11yText.switchToDualColumn"
             :aria-disabled="isListViewModeLocked ? 'true' : 'false'"
-          />
-          <font-awesome-icon
-            class="navBar-right-icon fa-lg"
-            icon="fa-solid fa-language"
-            @click.stop="showLangSwitchPopup = true"
+            :disabled="isListViewModeLocked"
+            @click.stop="handleListViewModeToggle"
+          >
+            <font-awesome-icon
+              aria-hidden="true"
+              :icon="effectiveListViewMode === 'dual-column' ? 'fa-solid fa-table-columns' : 'fa-solid fa-list'"
+            />
+          </button>
+          <button
+            type="button"
+            class="icon-button-reset nav-icon-button navBar-right-icon fa-lg"
+            :aria-label="a11yText.language"
             :title="t('navBar.langSwitcher.cellTitle')"
-          />
+            :aria-expanded="showLangSwitchPopup ? 'true' : 'false'"
+            @click.stop="showLangSwitchPopup = true"
+          >
+            <font-awesome-icon aria-hidden="true" icon="fa-solid fa-language" />
+          </button>
         </template>
       </nut-navbar>
     </nav>
@@ -70,7 +112,8 @@
     position="top"
     v-model:visible="showLangSwitchPopup"
     z-index="1000"
-     :style="{ paddingTop: 'env(safe-area-inset-top)' }"
+    :style="{ paddingTop: 'env(safe-area-inset-top)' }"
+    :aria-label="t('navBar.langSwitcher.cellTitle')"
   >
     <nut-cell-group>
       <div
@@ -114,11 +157,13 @@ import { Toast, Dialog } from "@nutui/nutui";
 import { initStores } from "@/utils/initApp";
 import { useMethodStore } from '@/store/methodStore';
 import { useAppNotifyStore } from "@/store/appNotify";
+import { useA11y } from "@/hooks/useA11y";
 import i18n from "@/locales";
 
 const { t:i18n_global } = i18n.global;
 const { showNotify } = useAppNotifyStore();
 const { t, locale } = useI18n();
+const { a11yText } = useA11y();
 const router = useRouter();
 const route = useRoute();
 const methodStore = useMethodStore()
@@ -267,6 +312,13 @@ const refresh = async () => {
   height: v-bind(navBarHeight);
   z-index: 20;
   @include centered-fixed-container;
+
+  .nav-icon-button {
+    cursor: pointer;
+    min-width: 28px;
+    min-height: 28px;
+  }
+
   nav {
     .nut-navbar {
       padding-top: v-bind(navBartop);
@@ -313,6 +365,11 @@ const refresh = async () => {
         padding-bottom: 15px;
         padding-left: 10px;
         color: var(--icon-nav-bar-right);
+      }
+      .nav-leading-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
       .icon-group {
         .icon {
@@ -363,6 +420,10 @@ const refresh = async () => {
           opacity: 0.35;
           cursor: not-allowed;
         }
+      }
+
+      button:disabled {
+        cursor: not-allowed;
       }
     }
   }

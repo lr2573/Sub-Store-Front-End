@@ -31,6 +31,7 @@ import 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
 import aboutUs from '@/views/settings/AboutUs.vue';
 import APISetting from '@/views/settings/APISetting.vue';
+import i18n from '@/locales';
 
 // import { SwipeBack } from 'vue-swipe-back'
 
@@ -273,7 +274,13 @@ router.afterEach(async (to, from) => {
   }
 });
 router.beforeEach((to, from) => {
-  document.title = 'Sub Store';
+  const metaTitle = to.meta?.title;
+  const translatedTitle = metaTitle
+    ? i18n.global.t(`navBar.pagesTitle.${metaTitle}`)
+    : 'Sub Store';
+  document.title = translatedTitle === 'Sub Store'
+    ? 'Sub Store'
+    : `${translatedTitle} | Sub Store`;
   // console.log(`beforeEach ${from.path} => ${to.path}`)
   if (!globalStore) {
     globalStore = useGlobalStore();

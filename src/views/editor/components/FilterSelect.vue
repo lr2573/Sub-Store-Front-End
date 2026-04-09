@@ -21,7 +21,7 @@
         :label="item"
         >
       <span class="item" v-if="type === 'Region Filter' && item === 'TW'">
-        <img :src="tw" alt="">&nbsp;{{ item }}
+        <img :src="tw" alt="TW flag">&nbsp;{{ item }}
       </span>
       <span v-else>{{ $t(`editorPage.subConfig.nodeActions['${type}'].options[${index}]`) }}</span>
       </nut-checkbox>

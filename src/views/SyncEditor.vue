@@ -2,13 +2,20 @@
   <div class="page-wrapper">
     <div class="form-block-wrapper">
       <div v-if="appearanceSetting.isShowIcon" class="sticky-title-icon-container">
-        <nut-image
-          :class="{ 'sub-item-customer-icon': !form.isIconColor }"
-          :src="syncIcon"
-          fit="cover"
-          show-loading
+        <button
+          type="button"
+          class="icon-button-reset icon-picker-trigger"
+          :aria-label="$t(`editorPage.subConfig.basic.icon.label`)"
+          :title="$t(`editorPage.subConfig.basic.icon.label`)"
           @click="showIconPopup"
-        />
+        >
+          <nut-image
+            :class="{ 'sub-item-customer-icon': !form.isIconColor }"
+            :src="syncIcon"
+            fit="cover"
+            show-loading
+          />
+        </button>
       </div>
       <nut-form class="form" :model-value="form" ref="ruleForm">
         <nut-form-item
@@ -111,7 +118,18 @@
           class="ignore-failed-wrapper"
         >
           <div class="switch-wrapper">
-            <nut-switch v-model="form.isIconColor" />
+            <button
+              type="button"
+              class="native-switch"
+              role="switch"
+              :aria-checked="form.isIconColor"
+              :aria-label="$t(`editorPage.subConfig.basic.isIconColor.label`)"
+              @click="form.isIconColor = !form.isIconColor"
+            >
+              <span class="native-switch__track" :class="{ active: form.isIconColor }">
+                <span class="native-switch__thumb"></span>
+              </span>
+            </button>
           </div>
         </nut-form-item>
 
@@ -148,21 +166,68 @@
         >
           <nut-form-item class="include-unsupported-proxy-wrapper">
             <template #label>
-              <div class="label" @click="includeUnsupportedProxyTips">
+              <button type="button" class="label icon-button-reset" @click="includeUnsupportedProxyTips">
                 <p>{{ $t(`syncPage.addArtForm.includeUnsupportedProxy.label`) }}</p>
                 <nut-icon name="tips"></nut-icon>
-              </div>
+              </button>
             </template>
             <div class="switch-wrapper">
-              <nut-switch v-model="form.includeUnsupportedProxy" />
+              <button
+                type="button"
+                class="native-switch"
+                role="switch"
+                :aria-checked="form.includeUnsupportedProxy"
+                :aria-label="$t(`syncPage.addArtForm.includeUnsupportedProxy.label`)"
+                @click="form.includeUnsupportedProxy = !form.includeUnsupportedProxy"
+              >
+                <span class="native-switch__track" :class="{ active: form.includeUnsupportedProxy }">
+                  <span class="native-switch__thumb"></span>
+                </span>
+              </button>
             </div>
           </nut-form-item>
 
           <nut-form-item :label="$t(`syncPage.addArtForm.platform.label`)">
-            <nut-radiogroup
-              direction="horizontal"
-              v-model="form.platform"
-              class="artifact-radio-group"
+            <div
+              class="artifact-radio-group native-radio-group"
+              role="radiogroup"
+              :aria-label="$t(`syncPage.addArtForm.platform.label`)"
+            >
+              <div
+                v-for="option in platformOptions"
+                :key="option.value"
+                class="platform-option"
+              >
+                <button
+                  type="button"
+                  class="native-radio-button"
+                  :class="{ current: form.platform === option.value }"
+                  role="radio"
+                  :aria-checked="form.platform === option.value"
+                  @click="form.platform = option.value"
+                >
+                  <span>{{ option.label }}</span>
+                </button>
+                <a
+                  v-if="option.link"
+                  :href="option.link"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  @click.stop
+                >ⓘ</a>
+                <button
+                  v-if="option.showQxTips"
+                  type="button"
+                  class="qx-tips-button icon-button-reset"
+                  @click.stop="qxTips"
+                >&nbsp;ⓘ</button>
+              </div>
+            </div>
+            <div
+              v-if="false"
+              class="artifact-radio-group native-radio-group"
+              role="radiogroup"
+              :aria-label="$t(`syncPage.addArtForm.platform.label`)"
             >
               <nut-radio label="Stash">Stash</nut-radio>
               <nut-radio label="Egern">Egern</nut-radio>
@@ -174,6 +239,7 @@
                 <a
                   href="https://github.com/sub-store-org/Sub-Store/wiki/%E9%93%BE%E6%8E%A5%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"
                   target="_blank"
+                  rel="noreferrer noopener"
                 >
                   ⓘ
                 </a>
@@ -182,29 +248,28 @@
               <nut-radio label="ShadowRocket">Shadowrocket</nut-radio>
               <nut-radio label="QX">
                 Quantumult X
-                <span name="tips" @click="qxTips">&nbsp;ⓘ</span>
+                <button
+                  type="button"
+                  class="qx-tips-button icon-button-reset"
+                  @click.stop="qxTips"
+                >&nbsp;ⓘ</button>
               </nut-radio>
               <nut-radio label="sing-box">sing-box</nut-radio>
               <nut-radio label="V2Ray">V2Ray</nut-radio>
               <nut-radio label="URI">URI</nut-radio>
               <nut-radio label="JSON">JSON</nut-radio>
               <nut-radio label="Clash">Clash(Deprecated)</nut-radio>
-            </nut-radiogroup>
+            </div>
           </nut-form-item>
         </template>
       </nut-form>
     </div>
 
     <div class="bottom-btn-wrapper">
-      <nut-button
-        @click="submit"
-        class="submit-btn btn"
-        type="primary"
-        shape="square"
-      >
+      <button type="button" @click="submit" class="submit-btn btn">
         <font-awesome-icon icon="fa-solid fa-floppy-disk" />
         {{ $t("editorPage.subConfig.btn.save") }}
-      </nut-button>
+      </button>
     </div>
 
     <Teleport to="#ztop">
@@ -292,6 +357,27 @@ const form = reactive<any>({
   sync: false,
   includeUnsupportedProxy: false,
 });
+const platformOptions: Array<{
+  value: string;
+  label: string;
+  link?: string;
+  showQxTips?: boolean;
+}> = [
+  { value: "Stash", label: "Stash" },
+  { value: "Egern", label: "Egern" },
+  { value: "ClashMeta", label: "Mihomo" },
+  { value: "Surfboard", label: "Surfboard" },
+  { value: "Surge", label: "Surge" },
+  { value: "SurgeMac", label: "Surge(macOS)" },
+  { value: "Loon", label: "Loon" },
+  { value: "ShadowRocket", label: "Shadowrocket" },
+  { value: "QX", label: "Quantumult X" },
+  { value: "sing-box", label: "sing-box" },
+  { value: "V2Ray", label: "V2Ray" },
+  { value: "URI", label: "URI" },
+  { value: "JSON", label: "JSON" },
+  { value: "Clash", label: "Clash(Deprecated)" },
+];
 
 const syncIcon = computed(() => {
   const icon = resolveArtifactIcon({
@@ -573,6 +659,10 @@ const submit = () => {
   .sticky-title-icon-container {
     display: flex;
     justify-content: center;
+    .icon-picker-trigger {
+      padding: 0;
+      color: inherit;
+    }
 
     .nut-image {
       cursor: pointer;
@@ -634,6 +724,8 @@ const submit = () => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 0;
+      text-align: left;
 
       p {
         margin: 0;
@@ -648,6 +740,11 @@ const submit = () => {
     }
   }
 
+  .qx-tips-button {
+    color: inherit;
+    padding: 0;
+  }
+
   :deep(.artifact-radio-group) {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -656,11 +753,78 @@ const submit = () => {
       margin: 20px 0 0 0;
     }
   }
+
+  .native-radio-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 8px;
+  }
+
+  .native-radio-button {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 8px 10px;
+    background: var(--divider-color);
+    color: var(--second-text-color);
+    text-align: center;
+  }
+
+  .native-radio-button.current {
+    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+  }
+
+  .platform-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
 }
 
 .switch-wrapper {
   display: flex;
   justify-content: flex-end;
+
+  .native-switch {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .native-switch__track {
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--divider-color);
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  .native-switch__track.active {
+    background: linear-gradient(
+      to right,
+      var(--primary-color),
+      var(--primary-color-end)
+    );
+  }
+
+  .native-switch__thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+    transform: translateX(0);
+    transition: transform 0.2s ease;
+  }
+
+  .native-switch__track.active .native-switch__thumb {
+    transform: translateX(20px);
+  }
 }
 
 .bottom-btn-wrapper {
@@ -678,6 +842,7 @@ const submit = () => {
   @include centered-fixed-container;
 
   .btn {
+    border: 1px solid transparent;
     border-radius: 8px;
     padding: 4px 12px;
     font-size: 14px;
@@ -691,6 +856,12 @@ const submit = () => {
   }
 
   .submit-btn {
+    background-image: linear-gradient(
+      to right,
+      var(--primary-color),
+      var(--primary-color-end)
+    );
+    color: #fff;
     width: 100%;
   }
 }

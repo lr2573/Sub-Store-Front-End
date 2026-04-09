@@ -32,6 +32,7 @@
 
       <div class="input-container">
         <nut-input
+          ref="magicPathInputRef"
           v-model="magicPath"
           :placeholder="$t('magicPath.placeholder')"
           class="magic-path-input"
@@ -83,21 +84,22 @@
       <div class="info">
         <p>{{ $t('magicPath.info') }}</p>
         <p>{{ $t('magicPath.customInfo') }}</p>
-        <p><a href="https://t.me/zhetengsha/1068" target="_blank">{{ $t('magicPath.troubleshooting') }}</a></p>
+        <p><a href="https://t.me/zhetengsha/1068" target="_blank" rel="noreferrer noopener">{{ $t('magicPath.troubleshooting') }}</a></p>
       </div>
     </div>
   </nut-popup>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, watchEffect } from 'vue';
+import { ref, computed, nextTick, watch, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { syncInnerInputA11y } from '@/hooks/useA11y';
 import { useHostAPI } from '@/hooks/useHostAPI';
 import { useAppNotifyStore } from '@/store/appNotify';
 import { isMobile } from '@/utils/isMobile';
 import axios from 'axios';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { showNotify } = useAppNotifyStore();
 const { addApi, setCurrent } = useHostAPI();
 
@@ -120,6 +122,7 @@ const visible = computed({
 const magicPath = ref('');
 const error = ref('');
 const loading = ref(false);
+const magicPathInputRef = ref();
 
 // 输入类型：'path'(仅路径), 'host'(主机+路径), 'full'(完整URL)
 const inputType = ref('path');
@@ -127,6 +130,18 @@ const parsedHost = ref('');
 const parsedPath = ref('');
 const previewUrl = ref('');
 const currentOrigin = ref(window.location.origin);
+
+const updateMagicPathInputA11y = async () => {
+  if (!visible.value) {
+    return;
+  }
+
+  await nextTick();
+  syncInnerInputA11y(magicPathInputRef.value, {
+    label: t('magicPath.placeholder'),
+    invalid: !!error.value,
+  });
+};
 
 // 处理提交
 const handleSubmit = async () => {
@@ -312,6 +327,14 @@ watch(() => props.urlApiValue, (newValue) => {
 });
 
 // 实时解析输入
+watch(
+  [visible, error, locale],
+  () => {
+    updateMagicPathInputA11y();
+  },
+  { immediate: true },
+);
+
 watchEffect(() => {
   const input = magicPath.value.trim();
 

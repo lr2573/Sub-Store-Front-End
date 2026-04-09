@@ -40,7 +40,15 @@
             />
             {{ $t(`subPage.import.label`) }}
           </nut-button>
-          <nut-icon name="tips" @click="importTips"></nut-icon>
+          <button
+            type="button"
+            class="import-tips-button icon-button-reset"
+            :aria-label="importTipsLabel"
+            :title="importTipsLabel"
+            @click="importTips"
+          >
+            <nut-icon name="tips"></nut-icon>
+          </button>
         </div>
         <ul class="add-sub-panel-list">
           <li>
@@ -51,7 +59,7 @@
           </li>
           <li>
             <router-link to="/edit/files/UNTITLED-mihomoProfile" class="router-link">
-              <img src="@/assets/icons/clashmeta_color.png" alt="">
+              <img src="@/assets/icons/clashmeta_color.png" :alt="$t(`filePage.type.mihomoProfile`)" />
               <span>{{ $t(`filePage.type.mihomoProfile`) }}</span>
               <small>{{ $t(`filePage.type.mihomoProfileTips`) }}</small>
             </router-link>
@@ -81,26 +89,32 @@
           }"
         >
           <!-- 刷新 -->
-          <div
+          <button
             v-if="appearanceSetting.showFloatingRefreshButton"
+            type="button"
             class="drag-btn refresh"
+            :aria-label="getA11yText('refresh')"
+            :title="getA11yText('refresh')"
             @click="refresh"
           >
             <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
-          </div>
+          </button>
 
           <!-- 加号 -->
-          <div
+          <button
             v-if="appearanceSetting.showFloatingAddButton"
+            type="button"
             @touchmove="onTa"
             @touchend="enTa"
             @click="editFile"
             class="router-link"
+            :aria-label="getA11yText('add')"
+            :title="getA11yText('add')"
           >
             <div class="drag-btn">
               <font-awesome-icon icon="fa-solid fa-plus" />
             </div>
-          </div>
+          </button>
         </nut-drag>
       </div>
     </Teleport>
@@ -111,7 +125,17 @@
       <div v-if="tags && tags.length > 0" ref="radioWrapperRef" class="radio-wrapper" >
         <!-- <nut-radiogroup v-model="tag" direction="horizontal"> -->
           <!-- <nut-radio v-for="i in tags" shape="button" :label="String(i.value)">{{ i.label }}</nut-radio> -->
-          <span v-for="i in tags" class="tag" :class="{ 'current': i.value === tag }" @click="setTag(i.value)">{{ i.label }}</span>
+          <button
+            v-for="i in tags"
+            :key="i.value"
+            type="button"
+            class="tag"
+            :class="{ 'current': i.value === tag }"
+            :aria-pressed="i.value === tag"
+            @click="setTag(i.value)"
+          >
+            {{ i.label }}
+          </button>
         <!-- </nut-radiogroup> -->
       </div>
       <div class="subs-list-container" :style="{ paddingTop: `${radioWrapperHeight}px` }">
@@ -153,12 +177,12 @@
     </div>
     <!-- 没有数据 -->
     <div v-if="!isLoading && fetchResult && !hasFiles" class="no-data-wrapper">
-      <nut-empty image="empty">
+      <AccessibleEmpty image="empty">
         <template #description>
           <h3>{{ $t(`filePage.emptySub.title`) }}</h3>
           <p>{{ $t(`filePage.emptySub.desc`) }}</p>
         </template>
-      </nut-empty>
+      </AccessibleEmpty>
       <!-- <router-link to="/edit/files/UNTITLED" class="router-link"> -->
         <nut-button type="primary" @click="addSubBtnIsVisible = true">
           {{ $t(`filePage.emptySub.btn`) }}
@@ -168,7 +192,7 @@
 
     <!-- 数据加载失败 -->
     <div v-if="!isLoading && !fetchResult" class="no-data-wrapper">
-      <nut-empty image="error" style="padding: 32px 30px">
+      <AccessibleEmpty image="error" style="padding: 32px 30px">
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>
           <p>{{ $t(`subPage.loadFailed.desc`) }}</p>
@@ -183,13 +207,14 @@
             </a>
           </p>
         </template>
-      </nut-empty>
+      </AccessibleEmpty>
       <nut-button icon="refresh" type="primary" @click="refresh">
         {{ $t(`subPage.loadFailed.btn`) }}
       </nut-button>
       <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
+        rel="noreferrer noopener"
       >
         <span>{{ $t(`subPage.loadFailed.doc`) }}</span>
         <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
@@ -214,7 +239,9 @@ import { Dialog, Toast } from '@nutui/nutui';
 
 import { useSubsApi } from "@/api/subs";
 import { useFilesApi } from '@/api/files';
+import AccessibleEmpty from "@/components/AccessibleEmpty.vue";
 import FileListItem from "@/components/FileListItem.vue";
+import { useA11y } from "@/hooks/useA11y";
 import { useGlobalStore } from "@/store/global";
 import { useSubsStore } from "@/store/subs";
 import { useSettingsStore } from '@/store/settings';
@@ -231,6 +258,7 @@ import { isMobile } from "@/utils/isMobile";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const methodStore = useMethodStore();
+const { getA11yText } = useA11y();
 
 const as = ref(false);
 
@@ -253,7 +281,10 @@ const { env } = useBackend();
 const { showNotify } = useAppNotifyStore();
 const subApi = useSubsApi();
 const filesApi = useFilesApi();
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const importTipsLabel = computed(() =>
+  locale.value.startsWith("zh") ? "导入说明" : "Import instructions",
+);
 const fileInput = ref(null);
 const uploadIsLoading = ref(false);
 const restoreIsLoading = ref(false);
@@ -498,14 +529,19 @@ const filteredFiles = useFilteredDraggableList(files, shouldShowElement);
     .nut-icon {
       color: var(--comment-text-color);
     }
-    :deep(.nut-icon-tips:before) {
-      cursor: pointer;
+    .import-tips-button {
       margin-left: 4px;
     }
   }
 .drag-btn-wrapper {
   position: relative;
   z-index: 999;
+
+  button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
 
   .drag-btn {
     width: 48px;
@@ -723,6 +759,10 @@ const filteredFiles = useFilteredDraggableList(files, shouldShowElement);
       -webkit-user-select: none;
       user-select: none;
       border-bottom: 1px solid transparent;
+      border-left: 0;
+      border-right: 0;
+      border-top: 0;
+      background: transparent;
     }
     .current {
       border-bottom: 1px solid var(--primary-color);

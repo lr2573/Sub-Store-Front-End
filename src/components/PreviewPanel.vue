@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="desc" @click="tips">
+    <button type="button" class="desc" @click="tips">
       <span>{{ desc }}</span>
-      <nut-icon name="tips"></nut-icon>
-    </div>
+      <nut-icon name="tips" aria-hidden="true"></nut-icon>
+    </button>
     <div class="includeUnsupportedProxy">
       <input type="checkbox" id="includeUnsupportedProxy" name="includeUnsupportedProxy" value="includeUnsupportedProxy" v-model="includeUnsupportedProxy">
       <label for="includeUnsupportedProxy">包含不支持的协议(详见文档)</label>
@@ -12,17 +12,38 @@
       <li v-for="platform in platformList" :key="platform.name">
         <div class="infos">
           <div>
-            <img :src="platform.icon" class="auto-reverse" />
+            <img :src="platform.icon" :alt="platform.name" class="auto-reverse" />
           </div>
           <p>{{ platform.name }}</p>
-          <nut-icon name="tips" v-if="platform.path === 'SurgeMac'" @click="tips"></nut-icon>
-          <nut-icon name="tips" v-if="platform.path === 'QX'" @click="qxTips"></nut-icon>
+          <button
+            v-if="platform.path === 'SurgeMac'"
+            type="button"
+            class="tips-trigger"
+            :aria-label="`${platform.name} tips`"
+            :title="`${platform.name} tips`"
+            @click="tips"
+          >
+            <nut-icon name="tips" aria-hidden="true"></nut-icon>
+          </button>
+          <button
+            v-if="platform.path === 'QX'"
+            type="button"
+            class="tips-trigger"
+            :aria-label="`${platform.name} tips`"
+            :title="`${platform.name} tips`"
+            @click="qxTips"
+          >
+            <nut-icon name="tips" aria-hidden="true"></nut-icon>
+          </button>
         </div>
 
         <div class="actions">
           <a
             :href="getUrl(platform.path, appearanceSetting.displayPreviewInWebPage)"
             target="_blank"
+            rel="noreferrer noopener"
+            :aria-label="`${getA11yText('open')} ${platform.name}`"
+            :title="`${getA11yText('open')} ${platform.name}`"
           >
             <svg-icon
               name="view"
@@ -30,7 +51,13 @@
               color="var(--comment-text-color)"
             />
           </a>
-          <button class="copy-sub-link" @click.stop="targetCopy(platform.path)">
+          <button
+            type="button"
+            class="copy-sub-link"
+            :aria-label="`${getA11yText('copy')} ${platform.name}`"
+            :title="`${getA11yText('copy')} ${platform.name}`"
+            @click.stop="targetCopy(platform.path)"
+          >
             <svg-icon
               name="copy"
               class="action-icon"
@@ -65,6 +92,7 @@
   import useV3Clipboard from 'vue-clipboard3';
   import { useAppNotifyStore } from '@/store/appNotify';
   import SvgIcon from '@/components/SvgIcon.vue';
+  import { useA11y } from '@/hooks/useA11y';
   import { useHostAPI } from '@/hooks/useHostAPI';
   import { storeToRefs } from "pinia";
   import { useSettingsStore } from '@/store/settings';
@@ -74,6 +102,7 @@
   const { appearanceSetting } = storeToRefs(settingsStore);
 
   const includeUnsupportedProxy = ref(false);
+  const { getA11yText } = useA11y();
   const { copy, isSupported } = useClipboard();
   const { toClipboard: copyFallback } = useV3Clipboard();
   const { showNotify } = useAppNotifyStore();
@@ -259,6 +288,17 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    border: 0;
+    background: transparent;
+    width: 100%;
+  }
+
+  .tips-trigger {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
   }
   .preview-list {
     flex: 1;

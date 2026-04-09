@@ -28,14 +28,26 @@
             <p>{{ form.iconCollectionDesc }}</p>
           </div>
           <div class="icon-collection-action">
-            <div class="action-btn" @click="handleMoreIconCollection">
+            <button
+              type="button"
+              class="action-btn icon-button-reset"
+              :aria-label="$t(`iconCollectionPage.more`)"
+              :title="$t(`iconCollectionPage.more`)"
+              @click="handleMoreIconCollection"
+            >
               <span>{{ $t(`iconCollectionPage.more`) }}</span>
               <nut-icon name="rect-right" size="12px"></nut-icon>
-            </div>
-            <div class="action-btn" @click="handleResetDefault">
+            </button>
+            <button
+              type="button"
+              class="action-btn icon-button-reset"
+              :aria-label="$t(`iconCollectionPage.resetDefaultIconCollection`)"
+              :title="$t(`iconCollectionPage.resetDefaultIconCollection`)"
+              @click="handleResetDefault"
+            >
               <span>{{ $t(`iconCollectionPage.resetDefaultIconCollection`) }}</span>
               <!-- <nut-icon name="rect-right" size="12px"></nut-icon> -->
-            </div>
+            </button>
           </div>
         </div>
         <div class="switch-wrapper">
@@ -91,12 +103,12 @@
         </div>
         <div v-else-if="fetchStatus === 'error'" class="icon-state-wrapper">
           <div class="icon-state">
-            <nut-empty image="error" class="icon-empty">
+            <AccessibleEmpty image="error" class="icon-empty">
               <template #description>
                 <h3>{{ $t(`iconCollectionPage.loadFailedTitle`) }}</h3>
                 <p>{{ $t(`iconCollectionPage.loadFailedDesc`) }}</p>
               </template>
-            </nut-empty>
+            </AccessibleEmpty>
             <nut-button
               icon="refresh"
               type="primary"
@@ -108,28 +120,32 @@
           </div>
         </div>
         <div v-else-if="iconData.length" class="icon-list">
-          <div
+          <button
             v-for="(icon, index) in iconData"
             :key="index"
             class="icon-item"
+            type="button"
+            :aria-label="getIconItemLabel(icon)"
+            :title="getIconItemLabel(icon)"
             @click="handleIcon(icon)"
           >
             <nut-image
               :src="rewriteGithubUrl(icon.url)"
+              :alt="icon.name"
               fit="cover"
               lazy-load
               show-loading
             />
             <p>{{ icon.name }}</p>
-          </div>
+          </button>
         </div>
         <div v-else class="icon-state-wrapper">
-          <nut-empty image="empty">
+          <AccessibleEmpty image="empty">
             <template #description>
               <h3>{{ $t(`iconCollectionPage.emptyCollectionTitle`) }}</h3>
               <p>{{ $t(`iconCollectionPage.emptyCollectionDesc`) }}</p>
             </template>
-          </nut-empty>
+          </AccessibleEmpty>
         </div>
       </div>
     </div>
@@ -154,6 +170,7 @@ import { storeToRefs } from "pinia";
 import { computed, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
+import AccessibleEmpty from "@/components/AccessibleEmpty.vue";
 import { useGlobalStore } from "@/store/global";
 import { useSettingsStore } from "@/store/settings";
 import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
@@ -165,7 +182,7 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["update:visible", "setIcon"]);
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const globalStore = useGlobalStore();
 const settingsStore = useSettingsStore();
 const { customIconCollections, defaultIconCollections, defaultIconCollection } =
@@ -313,6 +330,11 @@ const handleIcon = (icon) => {
   console.log("icon", icon);
   hide();
   emit("setIcon", icon);
+};
+const getIconItemLabel = (icon) => {
+  return locale.value.startsWith("zh")
+    ? `选择图标 ${icon.name}`
+    : `Select icon ${icon.name}`;
 };
 
 const handleMoreIconCollection = () => {
@@ -463,6 +485,7 @@ defineExpose({ show, hide, close });
         align-items: center;
         justify-content: flex-end;
         padding-bottom: 10px;
+        color: inherit;
         span {
           font-size: 14px;
           color: var(--comment-text-color);
@@ -561,6 +584,8 @@ defineExpose({ show, hide, close });
       display: flex;
       flex-direction: column;
       align-items: center;
+      background: none;
+      border: none;
       margin-bottom: 20px;
       &:not(:nth-child(4n)) {
         margin-right: calc(4% / 3);

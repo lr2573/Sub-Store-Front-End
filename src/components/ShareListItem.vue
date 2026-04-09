@@ -6,12 +6,40 @@
     data-testid="share-card"
     @click="onClickPreviews"
   >
+    <button
+      v-if="appearanceSetting.isShowIcon && type !== 'file'"
+      type="button"
+      class="sub-img-wrappers preview-trigger icon-button-reset"
+      :style="{ 'margin-top': imageMarginTop }"
+      :disabled="props.disabled"
+      :aria-label="getItemActionLabel(getA11yText('preview'))"
+      :title="getItemActionLabel(getA11yText('preview'))"
+      @click.stop="onClickPreviews"
+    >
+      <div>
+        <div v-if="isIconColor">
+          <nut-avatar
+            :size="avatarSize"
+            :url="shareIcon"
+            bg-color=""
+          />
+        </div>
+        <div v-else>
+          <nut-avatar
+            class="sub-item-customer-icon"
+            :size="avatarSize"
+            :url="shareIcon"
+            bg-color=""
+          />
+        </div>
+      </div>
+    </button>
     <div
+      v-else-if="appearanceSetting.isShowIcon"
       class="sub-img-wrappers"
       :style="{ 'margin-top': imageMarginTop }"
-      @click.stop="onClickEdit"
     >
-      <div v-if="appearanceSetting.isShowIcon">
+      <div>
         <div v-if="isIconColor">
           <nut-avatar
             :size="avatarSize"
@@ -53,31 +81,41 @@
           :style="{ top: appearanceSetting.isSimpleMode ? '8px' : '0' }"
         >
           <button
+            type="button"
             class="copy-sub-link"
             :disabled="props.disabled"
+            :aria-label="getItemActionLabel(getA11yText('open'))"
+            :title="getItemActionLabel(getA11yText('open'))"
             @click.stop="onClickShareLink"
           >
             <font-awesome-icon icon="fa-solid fa-link" />
           </button>
           <button
+            type="button"
             class="copy-sub-link"
             :disabled="props.disabled"
+            :aria-label="getItemActionLabel(getA11yText('copy'))"
+            :title="getItemActionLabel(getA11yText('copy'))"
             @click.stop="onClickCopyLink"
           >
             <font-awesome-icon icon="fa-solid fa-clone" />
           </button>
           <button
+            type="button"
             class="refresh-sub-flow"
             :disabled="props.disabled"
+            :aria-label="getItemActionLabel(getA11yText('edit'))"
+            :title="getItemActionLabel(getA11yText('edit'))"
             @click.stop="onClickEdit"
           >
             <font-awesome-icon icon="fa-solid fa-pen-nib" />
           </button>
           <button
+            type="button"
             class="share-sub-link"
             data-testid="share-delete-button"
-            :aria-label="t('sharePage.selectMode.delete')"
-            :title="t('sharePage.selectMode.delete')"
+            :aria-label="getItemActionLabel(getA11yText('delete'))"
+            :title="getItemActionLabel(getA11yText('delete'))"
             :disabled="props.disabled"
             @click.stop="onClickDelete"
           >
@@ -118,6 +156,7 @@ import { useRouter } from "vue-router";
 import logoIcon from "@/assets/icons/logo.png";
 import logoRedIcon from "@/assets/icons/logo-red.png";
 import PreviewPanel from "@/components/PreviewPanel.vue";
+import { useA11y } from "@/hooks/useA11y";
 import { useBackend } from "@/hooks/useBackend";
 import { useHostAPI } from "@/hooks/useHostAPI";
 import { useAppNotifyStore } from "@/store/appNotify";
@@ -138,6 +177,7 @@ const emit = defineEmits(["detail", "delete"]);
 const { copy, isSupported } = useClipboard();
 const { toClipboard: copyFallback } = useV3Clipboard();
 const { t } = useI18n();
+const { getA11yText } = useA11y();
 const { env } = useBackend();
 const isArchiveEnabled = computed(() => {
   return env.value?.feature?.archive;
@@ -262,6 +302,10 @@ const isIconColor = computed(() => {
       return true;
   }
 });
+
+const getItemActionLabel = (action: string) => {
+  return `${action} ${displayName.value || name.value}`;
+};
 
 const onDeleteConfirm = async (mode: DeleteMode = "permanent") => {
   await subsStore.deleteShare(token.value, type.value, name.value, mode);
@@ -606,5 +650,11 @@ const onClickPreviews = () => {
 .sub-img-wrappers {
   display: flex;
   align-items: center;
+}
+
+.preview-trigger {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 </style>

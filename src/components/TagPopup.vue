@@ -49,7 +49,12 @@
             <nut-tag
               :key="element.label"
               :class="{ 'active': element.isActive }"
+              role="button"
+              tabindex="0"
+              :aria-pressed="element.isActive"
               @click="handleTagItem(element)"
+              @keydown.enter.prevent="handleTagItem(element)"
+              @keydown.space.prevent="handleTagItem(element)"
             >{{ element.label }}</nut-tag>
           </template>
         </draggable>
@@ -68,7 +73,15 @@
           @blur="saveTag"
           closeable
         />
-        <nut-tag v-else class="add-tag" @click="addTag">{{ t('subPage.tag.addTagBtn') }}</nut-tag>
+        <nut-tag
+          v-else
+          class="add-tag"
+          role="button"
+          tabindex="0"
+          @click="addTag"
+          @keydown.enter.prevent="addTag"
+          @keydown.space.prevent="addTag"
+        >{{ t('subPage.tag.addTagBtn') }}</nut-tag>
         </div>
       </div>
     </div>
@@ -324,8 +337,13 @@ defineExpose({ show, close });
         padding: 4px 10px;
         text-align: center;
         font-size: 14px;
-
+        cursor: pointer;
         color: var(--primary-text-color);
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
 
         &.active {
           color: var(--primary-color);

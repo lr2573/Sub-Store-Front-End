@@ -4,13 +4,20 @@
     <!-- 基础表单 -->
     <div class="form-block-wrapper">
       <div v-if="appearanceSetting.isShowIcon" class="sticky-title-icon-container">
-        <nut-image
-          :class="{ 'sub-item-customer-icon': !form.isIconColor }"
-          :src="subIcon"
-          fit="cover"
-          show-loading
+        <button
+          type="button"
+          class="icon-button-reset icon-picker-trigger"
+          :aria-label="$t(`editorPage.subConfig.basic.icon.label`)"
+          :title="$t(`editorPage.subConfig.basic.icon.label`)"
           @click="showIconPopup"
-        />
+        >
+          <nut-image
+            :class="{ 'sub-item-customer-icon': !form.isIconColor }"
+            :src="subIcon"
+            fit="cover"
+            show-loading
+          />
+        </button>
       </div>
       <!-- <div class="sticky-title-wrapper">
         <p>{{ $t(`editorPage.subConfig.basic.label`) }}</p>
@@ -115,7 +122,18 @@
           class="ignore-failed-wrapper"
         >
           <div class="switch-wrapper">
-            <nut-switch v-model="form.isIconColor" />
+            <button
+              type="button"
+              class="native-switch"
+              role="switch"
+              :aria-checked="form.isIconColor"
+              :aria-label="$t(`editorPage.subConfig.basic.isIconColor.label`)"
+              @click="form.isIconColor = !form.isIconColor"
+            >
+              <span class="native-switch__track" :class="{ active: form.isIconColor }">
+                <span class="native-switch__thumb"></span>
+              </span>
+            </button>
           </div>
         </nut-form-item>
         <template v-if="editType === 'subs'">
@@ -126,14 +144,32 @@
             prop="source"
           >
             <div class="radio-wrapper">
-              <nut-radiogroup direction="horizontal" v-model="form.source">
-                <nut-radio shape="button" label="remote">
+              <div
+                class="native-radio-group"
+                role="radiogroup"
+                :aria-label="$t(`editorPage.subConfig.basic.source.label`)"
+              >
+                <button
+                  type="button"
+                  class="native-radio-button"
+                  :class="{ current: form.source === 'remote' }"
+                  role="radio"
+                  :aria-checked="form.source === 'remote'"
+                  @click="form.source = 'remote'"
+                >
                   {{ $t(`editorPage.subConfig.basic.source.remote`) }}
-                </nut-radio>
-                <nut-radio shape="button" label="local">
+                </button>
+                <button
+                  type="button"
+                  class="native-radio-button"
+                  :class="{ current: form.source === 'local' }"
+                  role="radio"
+                  :aria-checked="form.source === 'local'"
+                  @click="form.source = 'local'"
+                >
                   {{ $t(`editorPage.subConfig.basic.source.local`) }}
-                </nut-radio>
-              </nut-radiogroup>
+                </button>
+              </div>
             </div>
           </nut-form-item>
           <!-- url / content -->
@@ -155,13 +191,13 @@
             ]"
           >
             <template v-slot:label>
-              <span class="label-tips" @click="urlTips">
+              <button type="button" class="label-tips icon-button-reset" @click="urlTips">
                 <p>{{$t(`editorPage.subConfig.basic.url.label`)}}</p>
                 <span class="tips">
                   <span>{{$t(`editorPage.subConfig.basic.url.tips.label`)}}</span>
                   <!-- <nut-icon name="tips"></nut-icon> -->
                 </span>
-              </span>
+              </button>
             </template>
             <nut-textarea
               class="textarea-wrapper"
@@ -188,22 +224,22 @@
               "
               type="text"
             /> -->
-            <button class="cimg-button" @click="isDis = false">
+            <button type="button" class="cimg-button" @click="isDis = false">
               <font-awesome-icon icon="fa-solid fa-maximize" />
               {{ $t(`editorPage.subConfig.basic.url.tips.fullScreenEdit`) }}
               <!-- 测试 后续再改效果 -->
             </button>
             <input type="file" ref="fileInput" @change="fileChange" style="display: none">
-            <button class="cimg-button" @click="upload">
+            <button type="button" class="cimg-button" @click="upload">
               <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
               {{ $t(`editorPage.subConfig.basic.url.tips.importFromFile`) }}
             </button>
-            <span class="button-tips" @click="contentTips">
+            <button type="button" class="button-tips icon-button-reset" @click="contentTips">
                 <span class="tips">
                   <span>{{$t(`editorPage.subConfig.basic.url.tips.label`)}}</span>
                   <!-- <nut-icon name="tips"></nut-icon> -->
                 </span>
-              </span>
+              </button>
             <div style="margin-left: -15px; margin-right: -15px;max-height: 60vh;overflow: auto;">
               <cmView :isReadOnly="false" id="SubEditer"/>
             </div>
@@ -216,7 +252,18 @@
             v-if="form.source === 'remote'"
           >
             <div class="switch-wrapper">
-              <nut-switch v-model="form.passThroughUA" @change="handlePassThroughUAChange"/>
+              <button
+                type="button"
+                class="native-switch"
+                role="switch"
+                :aria-checked="form.passThroughUA"
+                :aria-label="$t(`editorPage.subConfig.basic.passThroughUA.label`)"
+                @click="handlePassThroughUAChange(!form.passThroughUA)"
+              >
+                <span class="native-switch__track" :class="{ active: form.passThroughUA }">
+                  <span class="native-switch__thumb"></span>
+                </span>
+              </button>
             </div>
           </nut-form-item>
           <nut-form-item
@@ -276,20 +323,42 @@
             prop="mergeSources"
           >
             <div class="radio-wrapper">
-              <nut-radiogroup
-                direction="horizontal"
-                v-model="form.mergeSources"
+              <div
+                class="native-radio-group"
+                role="radiogroup"
+                :aria-label="$t(`editorPage.subConfig.basic.source.mergeSources`)"
               >
-                <nut-radio shape="button" label="">
+                <button
+                  type="button"
+                  class="native-radio-button"
+                  :class="{ current: form.mergeSources === '' }"
+                  role="radio"
+                  :aria-checked="form.mergeSources === ''"
+                  @click="form.mergeSources = ''"
+                >
                   {{ $t(`editorPage.subConfig.basic.source.noMerge`) }}
-                </nut-radio>
-                <nut-radio shape="button" label="localFirst">
+                </button>
+                <button
+                  type="button"
+                  class="native-radio-button"
+                  :class="{ current: form.mergeSources === 'localFirst' }"
+                  role="radio"
+                  :aria-checked="form.mergeSources === 'localFirst'"
+                  @click="form.mergeSources = 'localFirst'"
+                >
                   {{ $t(`editorPage.subConfig.basic.source.localFirst`) }}
-                </nut-radio>
-                <nut-radio shape="button" label="remoteFirst">
+                </button>
+                <button
+                  type="button"
+                  class="native-radio-button"
+                  :class="{ current: form.mergeSources === 'remoteFirst' }"
+                  role="radio"
+                  :aria-checked="form.mergeSources === 'remoteFirst'"
+                  @click="form.mergeSources = 'remoteFirst'"
+                >
                   {{ $t(`editorPage.subConfig.basic.source.remoteFirst`) }}
-                </nut-radio>
-              </nut-radiogroup>
+                </button>
+              </div>
             </div>
           </nut-form-item>
         </template>
@@ -320,13 +389,17 @@
           >
             <div v-if="tags && tags.length > 0" class="tag-check">
               <div class="radio-wrapper">
-                <span
+                <button
                   v-for="i in tags"
+                  :key="i.value"
+                  type="button"
                   :class="{ tag: true, current: i.value === tag }"
+                  class="tag-filter-button"
+                  :aria-pressed="i.value === tag"
                   @click="setTag(i.value)"
                 >
                   {{ i.label }}
-                </span>
+                </button>
               </div>
               <nut-checkbox v-model="subCheckbox" :indeterminate="subCheckboxIndeterminate" @click="subCheckboxClick"></nut-checkbox>
             </div>
@@ -419,18 +492,42 @@
             <nut-switch v-model="form.ignoreFailedRemoteSub" />
           </div> -->
           <div class="radio-wrapper">
-            <nut-radiogroup direction="horizontal" v-model="form.ignoreFailedRemoteSub">
-              <nut-radio shape="button" label="disabled">
+            <div
+              class="native-radio-group"
+              role="radiogroup"
+              :aria-label="$t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.label`)"
+            >
+              <button
+                type="button"
+                class="native-radio-button"
+                :class="{ current: form.ignoreFailedRemoteSub === 'disabled' }"
+                role="radio"
+                :aria-checked="form.ignoreFailedRemoteSub === 'disabled'"
+                @click="form.ignoreFailedRemoteSub = 'disabled'"
+              >
                 {{ $t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.disabled`) }}
-              </nut-radio>
-              <nut-radio shape="button" label="quiet">
+              </button>
+              <button
+                type="button"
+                class="native-radio-button"
+                :class="{ current: form.ignoreFailedRemoteSub === 'quiet' }"
+                role="radio"
+                :aria-checked="form.ignoreFailedRemoteSub === 'quiet'"
+                @click="form.ignoreFailedRemoteSub = 'quiet'"
+              >
                 {{ $t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.quiet`) }}
-              </nut-radio>
-              <nut-radio shape="button" label="enabled">
+              </button>
+              <button
+                type="button"
+                class="native-radio-button"
+                :class="{ current: form.ignoreFailedRemoteSub === 'enabled' }"
+                role="radio"
+                :aria-checked="form.ignoreFailedRemoteSub === 'enabled'"
+                @click="form.ignoreFailedRemoteSub = 'enabled'"
+              >
                 {{ $t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.enabled`) }}
-              </nut-radio>
-            
-            </nut-radiogroup>
+              </button>
+            </div>
           </div>
         </nut-form-item>
       </nut-form>
@@ -452,23 +549,22 @@
   </div>
 
   <div class="bottom-btn-wrapper">
-    <nut-button @click="compare" class="compare-btn btn" plain shape="square">
+    <button type="button" @click="compare" class="compare-btn btn">
       <font-awesome-icon icon="fa-solid fa-eye" />
       {{ $t("editorPage.subConfig.btn.compare") }}
-    </nut-button>
-    <nut-button
+    </button>
+    <button
+      type="button"
       @click="submit"
       class="submit-btn btn"
-      type="primary"
-      shape="square"
     >
       <font-awesome-icon icon="fa-solid fa-floppy-disk" />
       {{ $t("editorPage.subConfig.btn.save") }}
-    </nut-button>
+    </button>
   </div>
 </div>
 <div v-else style="width: 100%;max-height: 95vh;">
-    <button class="cimg-button" @click="isDis = true">
+    <button type="button" class="cimg-button" @click="isDis = true">
       <font-awesome-icon icon="fa-solid fa-minimize" />
       {{ $t(`editorPage.subConfig.basic.url.tips.fullScreenEditCancel`) }}
     </button>
@@ -955,6 +1051,7 @@ const userAgentPlaceholder = computed(() => {
 });
 
 const handlePassThroughUAChange = (val) => {
+  form.passThroughUA = val;
   if (val) {
     form._savedUA = form.ua;
     form.ua = "";
@@ -1363,7 +1460,6 @@ const handleEditGlobalClick = () => {
 }
 .radio-wrapper {
   display: flex;
-  // justify-content: start;
   flex-wrap: wrap;
   justify-content: flex-end;
 
@@ -1375,6 +1471,27 @@ const handleEditGlobalClick = () => {
   :deep(.nut-radio__button) {
     padding: 5px 10px;
   }
+
+  .native-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .native-radio-button {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 5px 10px;
+    background: var(--divider-color);
+    color: var(--second-text-color);
+  }
+
+  .native-radio-button.current {
+    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+  }
 }
 
 .form-block-wrapper {
@@ -1382,6 +1499,10 @@ const handleEditGlobalClick = () => {
   .sticky-title-icon-container {
     display: flex;
     justify-content: center;
+    .icon-picker-trigger {
+      padding: 0;
+      color: inherit;
+    }
     .nut-image {
       cursor: pointer;
       width: 70px;
@@ -1411,11 +1532,14 @@ const handleEditGlobalClick = () => {
     font-size: 12px;
     text-decoration: underline;
     margin-left: 6px;
+    padding: 0;
   }
   .label-tips {
     display: inline-flex;
     flex-direction: column;
     cursor: pointer;
+    padding: 0;
+    text-align: left;
     .tips {
       display: inline-flex;
       align-items: center;
@@ -1426,6 +1550,12 @@ const handleEditGlobalClick = () => {
         // color: #fa2c19;
       }
     }
+  }
+  .tag-filter-button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
   }
   :deep(.nut-input-text){
     .nut-input-inner {
@@ -1451,6 +1581,7 @@ const handleEditGlobalClick = () => {
   @include centered-fixed-container;
 
   .btn {
+    border: 1px solid transparent;
     border-radius: 8px;
     padding: 4px 12px;
     font-size: 14px;
@@ -1464,10 +1595,17 @@ const handleEditGlobalClick = () => {
 
   .compare-btn {
     background: transparent;
+    border-color: var(--divider-color);
     width: 36%;
   }
 
   .submit-btn {
+    background-image: linear-gradient(
+      to right,
+      var(--primary-color),
+      var(--primary-color-end)
+    );
+    color: #fff;
     width: 62%;
   }
 }
@@ -1481,6 +1619,45 @@ const handleEditGlobalClick = () => {
   .switch-wrapper {
     display: flex;
     justify-content: flex-end
+  }
+
+  .native-switch {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .native-switch__track {
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--divider-color);
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  .native-switch__track.active {
+    background: linear-gradient(
+      to right,
+      var(--primary-color),
+      var(--primary-color-end)
+    );
+  }
+
+  .native-switch__thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+    transform: translateX(0);
+    transition: transform 0.2s ease;
+  }
+
+  .native-switch__track.active .native-switch__thumb {
+    transform: translateX(20px);
   }
 }
 

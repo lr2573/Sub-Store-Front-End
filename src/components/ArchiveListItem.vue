@@ -14,7 +14,7 @@
       >
         <img
           :src="displayItemIcon"
-          alt=""
+          :alt="displayName"
           :style="{
             opacity: isIconColor ? 1 : 0.8,
             filter: isIconColor ? 'none' : 'brightness(var(--img-brightness))',
@@ -56,17 +56,21 @@
           :style="{ top: appearanceSetting.isSimpleMode ? '8px' : '0' }"
         >
           <button
+            type="button"
             class="refresh-sub-flow"
             :disabled="props.disabled"
-            :title="$t('archivePage.entry.restore')"
+            :aria-label="getItemActionLabel(getA11yText('restore'))"
+            :title="getItemActionLabel(getA11yText('restore'))"
             @click.stop="emit('restore', props.data)"
           >
             <font-awesome-icon icon="fa-solid fa-reply" />
           </button>
           <button
+            type="button"
             class="share-sub-link archives-danger-action"
             :disabled="props.disabled"
-            :title="$t('archivePage.entry.delete')"
+            :aria-label="getItemActionLabel(getA11yText('delete'))"
+            :title="getItemActionLabel(getA11yText('delete'))"
             @click.stop="emit('delete', props.data)"
           >
             <font-awesome-icon icon="fa-solid fa-trash-can" />
@@ -113,6 +117,7 @@ import { useI18n } from 'vue-i18n';
 
 import logoIcon from '@/assets/icons/logo.png';
 import logoRedIcon from '@/assets/icons/logo-red.png';
+import { useA11y } from '@/hooks/useA11y';
 import { useSettingsStore } from '@/store/settings';
 import { useSubsStore } from '@/store/subs';
 import { resolveArtifactIcon } from '@/utils/artifactIcon';
@@ -132,6 +137,7 @@ const props = defineProps<{
 const emit = defineEmits(['restore', 'delete']);
 
 const { t } = useI18n();
+const { getA11yText } = useA11y();
 const settingsStore = useSettingsStore();
 const subsStore = useSubsStore();
 const { appearanceSetting, githubProxy, githubProxyRegex } = storeToRefs(settingsStore);
@@ -141,6 +147,9 @@ const itemPadding = computed(() => {
 });
 
 const displayName = computed(() => getArchiveEntryDisplayName(props.data));
+const getItemActionLabel = (action: string) => {
+  return `${action} ${displayName.value}`;
+};
 const remark = computed(() => props.data?.remark || '');
 const shouldInlineRemarkInSecondLine = computed(() => {
   return Boolean(

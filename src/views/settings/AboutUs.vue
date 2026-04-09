@@ -14,9 +14,9 @@
               </span>
             </template>
             <template v-slot:link>
-              <a target="_blank" href="https://github.com/sub-store-org/Sub-Store-Front-End">{{ $t(`aboutUsPage.projectInfo.link`)  }}</a>
+              <a target="_blank" rel="noreferrer noopener" href="https://github.com/sub-store-org/Sub-Store-Front-End">{{ $t(`aboutUsPage.projectInfo.link`)  }}</a>
               &nbsp;&nbsp;
-              <a target="_blank" href="https://github.com/sub-store-org/Sub-Store-Front-End/releases">{{ $t(`aboutUsPage.changelogs.title`)  }}</a>
+              <a target="_blank" rel="noreferrer noopener" href="https://github.com/sub-store-org/Sub-Store-Front-End/releases">{{ $t(`aboutUsPage.changelogs.title`)  }}</a>
             </template>
           </nut-cell>
 
@@ -26,14 +26,14 @@
             <template v-slot:title>
               <span
                 >{{ env.backend === 'Node' ? $t(`aboutUsPage.projectInfo.be`) : $t(`aboutUsPage.projectInfo.module`) }}
-                <b v-if="env.hasNewVersion" class="bclass"><a target="_blank" :href="env.backend === 'Node' ? 'https://github.com/sub-store-org/Sub-Store/releases' : 'https://github.com/sub-store-org/Sub-Store/tree/master/config'"><nut-badge value="NEW">v{{env.version}}</nut-badge></a></b>
+                <b v-if="env.hasNewVersion" class="bclass"><a target="_blank" rel="noreferrer noopener" :href="env.backend === 'Node' ? 'https://github.com/sub-store-org/Sub-Store/releases' : 'https://github.com/sub-store-org/Sub-Store/tree/master/config'"><nut-badge value="NEW">v{{env.version}}</nut-badge></a></b>
                 <b v-else class="bclass">v{{ env.version }}</b>
               </span>
             </template>
             <template v-slot:link>
-              <a target="_blank" :href="env.backend === 'Node' ? 'https://github.com/sub-store-org/Sub-Store/releases' : 'https://github.com/sub-store-org/Sub-Store/tree/master/config'">{{ $t(`aboutUsPage.projectInfo.link`)  }}</a>
+              <a target="_blank" rel="noreferrer noopener" :href="env.backend === 'Node' ? 'https://github.com/sub-store-org/Sub-Store/releases' : 'https://github.com/sub-store-org/Sub-Store/tree/master/config'">{{ $t(`aboutUsPage.projectInfo.link`)  }}</a>
               &nbsp;&nbsp;
-              <a target="_blank" href="https://github.com/sub-store-org/Sub-Store/releases">{{ $t(`aboutUsPage.changelogs.title`)  }}</a>
+              <a target="_blank" rel="noreferrer noopener" href="https://github.com/sub-store-org/Sub-Store/releases">{{ $t(`aboutUsPage.changelogs.title`)  }}</a>
             </template>
           </nut-cell>
 
@@ -44,9 +44,9 @@
               <span>{{ $t(`aboutUsPage.projectInfo.team`) }}</span>
             </template>
             <template v-slot:link>
-              <a target="_blank" href="https://github.com/sub-store-org">{{ $t(`aboutUsPage.projectInfo.link`)  }}</a>
+              <a target="_blank" rel="noreferrer noopener" href="https://github.com/sub-store-org">{{ $t(`aboutUsPage.projectInfo.link`)  }}</a>
               &nbsp;&nbsp;
-              <a target="_blank" href="https://t.me/cool_scripts">Telegram</a>
+              <a target="_blank" rel="noreferrer noopener" href="https://t.me/cool_scripts">Telegram</a>
             </template>
           </nut-cell>
           <nut-cell
@@ -56,9 +56,9 @@
               <span>{{ $t(`aboutUsPage.projectInfo.scriptTutorial`) }}</span>
             </template>
             <template v-slot:link>
-              <a target="_blank" href="https://github.com/sub-store-org/Sub-Store/wiki">{{ $t(`aboutUsPage.projectInfo.link`)  }}</a>
+              <a target="_blank" rel="noreferrer noopener" href="https://github.com/sub-store-org/Sub-Store/wiki">{{ $t(`aboutUsPage.projectInfo.link`)  }}</a>
               &nbsp;&nbsp;
-              <a target="_blank" href="https://t.me/zhetengsha/214">Telegram</a>
+              <a target="_blank" rel="noreferrer noopener" href="https://t.me/zhetengsha/214">Telegram</a>
             </template>
           </nut-cell>
         </nut-cell-group>

@@ -15,7 +15,10 @@
         >
         <template #item="{ element, index }">
             <nut-tag
-              @click="onClickTag"
+              role="button"
+              tabindex="0"
+              @click="onClickTag(index)"
+              @keydown="onKeyboardActivate($event, () => onClickTag(index))"
               class="tag-item"
               closeable
               @close="deleteItem(index)"
@@ -37,7 +40,15 @@
         "
         v-model="input"
       />
-      <font-awesome-icon @click="addItem" icon="fa-solid fa-location-arrow" />
+      <button
+        type="button"
+        class="icon-button-reset add-item-button"
+        :aria-label="addButtonLabel"
+        :title="addButtonLabel"
+        @click="addItem"
+      >
+        <font-awesome-icon icon="fa-solid fa-location-arrow" />
+      </button>
     </div>
     <p class="des-label">
       {{ $t(`editorPage.subConfig.nodeActions['${type}'].action.des`) }}
@@ -102,7 +113,8 @@
   import { Dialog } from '@nutui/nutui';
   import { inject, onMounted, watch, reactive, toRaw, ref, computed } from 'vue';
   import draggable from "vuedraggable";
-  const { t } = useI18n();
+  import { onKeyboardActivate } from '@/hooks/useA11y';
+  const { t, locale } = useI18n();
   const input = ref('');
   const { type, id } = defineProps<{
     type: string;
@@ -134,10 +146,10 @@
       })
     }
   })
-const onClickTag = el => {
-    const index = [...el.currentTarget.parentElement.children].indexOf(
-      el.currentTarget
-    );
+  const addButtonLabel = computed(() =>
+    locale.value.startsWith('zh') ? '添加字段' : 'Add field',
+  );
+const onClickTag = index => {
     if (input.value ) {
       Dialog({
         title: t('editorPage.subConfig.pop.clickTag.title'),
@@ -271,7 +283,7 @@ const onClickTag = el => {
       margin-right: 16px;
     }
 
-    > svg {
+    .add-item-button {
       width: 20px;
       height: 20px;
       color: var(--primary-color);

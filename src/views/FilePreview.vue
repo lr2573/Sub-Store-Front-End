@@ -8,9 +8,18 @@
       <header class="compare-page-header">
         <template v-if="url">
           <h1>
-            <span class="title" @click="copyUrl"><font-awesome-icon class="copy" icon="fa-solid fa-clone" @click="copyUrl" /><span class="titleText">点击复制, 在外部资源中使用:</span></span>
+            <button
+              type="button"
+              class="title copy-link-button"
+              :aria-label="copyUrlLabel"
+              :title="copyUrlLabel"
+              @click="copyUrl"
+            >
+              <font-awesome-icon class="copy" icon="fa-solid fa-clone" />
+              <span class="titleText">Click to copy for external use:</span>
+            </button>
             <span class="displayName">
-              <a class="url" :href="url" target="_blank">{{ url }}</a>
+              <a class="url" :href="url" target="_blank" rel="noreferrer noopener">{{ url }}</a>
             </span>
           </h1>
         </template>
@@ -23,136 +32,137 @@
               <span class="displayNameText">{{ displayName }}</span>
             </span>
           </h1>
-          <!-- <button class="copy" @click.stop="copyContent">
-            <svg-icon
-              name="copy"
-              class="action-icon"
-              color="var(--comment-text-color)"
-            />
-          </button> -->
           <div class="btn-groups">
-            <button v-if="showRefresh" class="btn refresh" @click="emit('refresh')">
+            <button
+              v-if="showRefresh"
+              type="button"
+              class="btn refresh"
+              :aria-label="refreshLabel"
+              :title="refreshLabel"
+              @click="emit('refresh')"
+            >
               <font-awesome-icon icon="fa-solid fa-arrows-rotate" />
             </button>
-            <button class="btn close" @click="clickClose">
+            <button
+              type="button"
+              class="btn close"
+              :aria-label="closeLabel"
+              :title="closeLabel"
+              @click="clickClose"
+            >
               <font-awesome-icon icon="fa-solid fa-circle-xmark" />
             </button>
           </div>
         </template>
       </header>
       <cmView :isReadOnly="false" id="filePreview" />
-      <!-- <div class="compare-page-body">
-        <div class="block-wrapper">
-          <div class="input-wrapper">
-            <nut-textarea
-              v-model="processedData"
-              :rows="23"
-              autosize
-              placeholder=" "
-              readonly
-            /> 
-          </div>
-        </div>
-      </div> -->
     </div>
   </Teleport>
 </template>
 
 <script lang="ts" setup>
-import axios from 'axios';
-import { useSubsApi } from "@/api/subs";
-import { useSubsStore } from "@/store/subs";
-import { Toast } from "@nutui/nutui";
-import { computed, ref, toRaw, watch, watchEffect } from "vue";
-import { useI18n } from "vue-i18n";
+import axios from "axios";
+import { computed, ref, watch, watchEffect } from "vue";
 import { useClipboard } from "@vueuse/core";
 import useV3Clipboard from "vue-clipboard3";
+import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
+
 import { useAppNotifyStore } from "@/store/appNotify";
-import cmView from "@/views/editCode/cmView.vue";
 import { useCodeStore } from "@/store/codeStore";
-import { useRoute } from 'vue-router';
+import { useSubsStore } from "@/store/subs";
+import cmView from "@/views/editCode/cmView.vue";
 
 const cmStore = useCodeStore();
+const subsStore = useSubsStore();
+const route = useRoute();
 const { copy, isSupported } = useClipboard();
 const { toClipboard: copyFallback } = useV3Clipboard();
 const { showNotify } = useAppNotifyStore();
-
-const { t } = useI18n();
-const subsStore = useSubsStore();
-
-const route = useRoute();
-const { url } = route.query as { url: string };
-
-const processedData = ref('')
-
-watchEffect(async () => {
-  if (url) {
-    try {
-      cmStore.setEditCode('filePreview', 'Loading...')
-      const response = await axios.get(url as string, {
-        responseType: 'text',
-        transformResponse: [(data) => data],
-      })
-      console.log(typeof response.data)
-      processedData.value = response.data
-      cmStore.setEditCode('filePreview', processedData.value || '')
-    } catch (error) {
-      let data = error.response?.data
-      if (data) {
-        try {
-          data = JSON.stringify(JSON.parse(error.response?.data), null, 2)
-        } catch (e) {
-          
-        }
-      }
-      console.error('Error fetching URL:', error, data)
-      cmStore.setEditCode('filePreview', `Error: ${
-      error.response ? `${error.response.status} ${error.response.statusText}\n\n${data}` : error.message
-      }`)
-      showNotify({ title: `加载失败: ${error.message}` })
-    }
-  }
-  if (route.query.name) {
-    document.title = `${route.query.name} - Sub Store`
-  }
-})
+const { locale } = useI18n();
 
 const props = defineProps<{
   previewData: any;
   name: string;
   showRefresh?: boolean;
-}>(); 
-
-const showRefresh = computed(() => props.showRefresh !== false);
+}>();
 
 const emit = defineEmits(["closePreview", "refresh"]);
 
-const isOriginalVisible = ref(true);
-const isProcessedVisible = ref(true);
+const url = computed(() => route.query.url as string | undefined);
+const processedData = ref("");
+const showRefresh = computed(() => props.showRefresh !== false);
+const copyUrlLabel = computed(() =>
+  locale.value.startsWith("zh") ? "复制预览链接" : "Copy preview URL",
+);
+const refreshLabel = computed(() =>
+  locale.value.startsWith("zh") ? "刷新预览内容" : "Refresh preview content",
+);
+const closeLabel = computed(() =>
+  locale.value.startsWith("zh") ? "关闭预览" : "Close preview",
+);
 
 const displayName = computed(() => {
-  if(route.query.name) return route.query.name
-  const sub = subsStore.getOneFile(props.name);
-  return sub?.displayName || sub?.["display-name"] || props.name;
+  if (route.query.name) return route.query.name as string;
+  const file = subsStore.getOneFile(props.name);
+  return file?.displayName || file?.["display-name"] || props.name;
 });
 
-watch(() => props.previewData?.processed, (val) => {
-  if (!url && val != null) {
-    cmStore.setEditCode('filePreview', val)
+watchEffect(async () => {
+  if (url.value) {
+    try {
+      cmStore.setEditCode("filePreview", "Loading...");
+      const response = await axios.get(url.value, {
+        responseType: "text",
+        transformResponse: [(data) => data],
+      });
+      processedData.value = response.data;
+      cmStore.setEditCode("filePreview", processedData.value || "");
+    } catch (error: any) {
+      let data = error.response?.data;
+      if (data) {
+        try {
+          data = JSON.stringify(JSON.parse(error.response?.data), null, 2);
+        } catch {}
+      }
+      cmStore.setEditCode(
+        "filePreview",
+        `Error: ${
+          error.response
+            ? `${error.response.status} ${error.response.statusText}\n\n${data}`
+            : error.message
+        }`,
+      );
+      showNotify({ title: `Load failed: ${error.message}` });
+    }
   }
-}, { immediate: true });
+  if (route.query.name) {
+    document.title = `${route.query.name} - Sub Store`;
+  }
+});
 
- 
+watch(
+  () => props.previewData?.processed,
+  (val) => {
+    if (!url.value && val != null) {
+      cmStore.setEditCode("filePreview", val);
+    }
+  },
+  { immediate: true },
+);
+
 const clickClose = () => {
   emit("closePreview");
 };
+
 const copyUrl = async () => {
+  if (!url.value) return;
   if (isSupported) {
-    await copy(url);
+    await copy(url.value);
   } else {
-    await copyFallback(url);
+    await copyFallback(url.value);
   }
-  showNotify({ title: `已复制链接: ${url}` });
+  showNotify({ title: `Copied: ${url.value}` });
 };
 </script>
 
@@ -307,12 +317,12 @@ const copyUrl = async () => {
   background: var(--background-color);
   border-color: var(--divider-color);
   width: 100%;
+
   .title {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     white-space: nowrap;
-    cursor: pointer;
     min-width: 0;
 
     .titleText {
@@ -321,6 +331,16 @@ const copyUrl = async () => {
       white-space: nowrap;
     }
   }
+
+  .copy-link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
   .displayName {
     display: inline-flex;
     align-items: center;
@@ -328,28 +348,34 @@ const copyUrl = async () => {
     min-width: 0;
     overflow: hidden;
     flex: 1;
+
     .displayNameText,
     .url {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .displayNameText,
     .url {
       display: block;
     }
+
     > svg {
       flex-shrink: 0;
     }
+
     .copy {
       cursor: pointer;
       font-size: 16px;
       flex-shrink: 0;
     }
+
     .url {
       text-decoration: underline;
     }
   }
+
   h1 {
     display: flex;
     align-items: center;
@@ -388,10 +414,12 @@ const copyUrl = async () => {
     justify-content: center;
     align-items: center;
     margin: 0;
+
     &.refresh {
       font-size: 18px;
     }
   }
+
   .btn-groups {
     display: flex;
     align-items: center;
@@ -403,9 +431,6 @@ const copyUrl = async () => {
 .compare-page-wrapper {
   --compare-header-height: 56px;
   --compare-header-offset: calc(var(--compare-header-height) + env(safe-area-inset-top));
-  // top: 0;
-  // left: 0;
-  // position: absolute;
   width: 100%;
   height: 100vh;
   z-index: 1000;
@@ -416,9 +441,11 @@ const copyUrl = async () => {
   flex-direction: column;
   align-items: center;
   background: var(--background-color);
+
   .cmviewRef {
     width: 100%;
   }
+
   @media screen and (min-width: 768px) {
     .compare-page-header,
     .compare-page-body,
@@ -427,7 +454,7 @@ const copyUrl = async () => {
       max-width: 800px;
     }
   }
-  
+
   @media screen and (min-width: 900px) {
     .compare-page-header,
     .compare-page-body,
@@ -436,7 +463,7 @@ const copyUrl = async () => {
       max-width: 900px;
     }
   }
-  
+
   @media screen and (min-width: 1200px) {
     .compare-page-header,
     .compare-page-body,
@@ -459,6 +486,7 @@ const copyUrl = async () => {
   color: var(--lowest-text-color);
   border-color: var(--lowest-text-color);
 }
+
 .input-wrapper {
   display: flex;
   align-items: center;
@@ -466,7 +494,6 @@ const copyUrl = async () => {
   > view.nut-textarea {
     background: transparent;
     padding: 8px 12px;
-    // border-bottom: 1px solid;
     color: var(--second-text-color);
     border-color: var(--lowest-text-color);
 

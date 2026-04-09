@@ -1,8 +1,15 @@
 <template>
   <!-- <GlobalNotify /> -->
+  <a class="skip-link" href="#main-content">{{ a11yText.skipToContent }}</a>
   <NavBar />
   <SideBar v-show="!route.path.startsWith('/preview')" />
-  <main class="page-body">
+  <RouteAnnouncer />
+  <main
+    id="main-content"
+    class="page-body"
+    tabindex="-1"
+    :aria-busy="globalStore.isLoading || isBackendCheckInProgress ? 'true' : 'false'"
+  >
     <router-view />
   </main>
   <MagicPathDialog
@@ -18,6 +25,8 @@
 import SideBar from "@/components/SideBar.vue";
 import NavBar from "@/components/NavBar.vue";
 import MagicPathDialog from "@/components/MagicPathDialog.vue";
+import RouteAnnouncer from "@/components/RouteAnnouncer.vue";
+import { useA11y } from "@/hooks/useA11y";
 import { useThemes } from "@/hooks/useThemes";
 import { useGlobalStore } from "@/store/global";
 import { useSubsStore } from "@/store/subs";
@@ -27,11 +36,14 @@ import { storeToRefs } from "pinia";
 import { ref, watchEffect, onMounted } from "vue";
 import { useHostAPI } from "@/hooks/useHostAPI"; //onMounted
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const subsStore = useSubsStore();
 const globalStore = useGlobalStore();
 const route = useRoute();
 const router = useRouter();
+const { locale } = useI18n();
+const { a11yText } = useA11y();
 
 const { subs, flows } = storeToRefs(subsStore);
 
@@ -224,6 +236,10 @@ processUrlApiConfig();
 
 // 初始化颜色主题
 useThemes();
+
+watchEffect(() => {
+  document.documentElement.lang = locale.value;
+});
 
 // 初始化应用数据（顶部通知）
 //   initStores(true, true, false);

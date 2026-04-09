@@ -28,7 +28,11 @@
           :key="item.value"
           class="tag"
           :class="{ current: item.value === tag }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="item.value === tag"
           @click="setTag(item.value)"
+          @keydown="onKeyboardActivate($event, () => setTag(item.value))"
         >
           {{ item.label }}
         </span>
@@ -43,7 +47,14 @@
       >
         <div v-if="subEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div class="list-title" @click="toggleFold('sub')">
+            <div
+              class="list-title"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!isFold('sub')"
+              @click="toggleFold('sub')"
+              @keydown="onKeyboardActivate($event, () => toggleFold('sub'))"
+            >
               <div class="list-title-main">
                 <p>{{ `${$t('specificWord.singleSub')}(${subEntryCount})` }}</p>
                 <nut-icon
@@ -93,7 +104,11 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
+                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <nut-checkbox
                     :model-value="isEntrySelected(element)"
@@ -119,7 +134,14 @@
 
         <div v-if="colEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div class="list-title" @click="toggleFold('col')">
+            <div
+              class="list-title"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!isFold('col')"
+              @click="toggleFold('col')"
+              @keydown="onKeyboardActivate($event, () => toggleFold('col'))"
+            >
               <div class="list-title-main">
                 <p>{{ `${$t('specificWord.collectionSub')}(${colEntryCount})` }}</p>
                 <nut-icon
@@ -169,7 +191,11 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
+                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <nut-checkbox
                     :model-value="isEntrySelected(element)"
@@ -195,7 +221,14 @@
 
         <div v-if="fileEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div class="list-title" @click="toggleFold('file')">
+            <div
+              class="list-title"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!isFold('file')"
+              @click="toggleFold('file')"
+              @keydown="onKeyboardActivate($event, () => toggleFold('file'))"
+            >
               <div class="list-title-main">
                 <p>{{ `${$t('specificWord.file')}(${fileEntryCount})` }}</p>
                 <nut-icon
@@ -245,7 +278,11 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
+                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <nut-checkbox
                     :model-value="isEntrySelected(element)"
@@ -271,7 +308,14 @@
 
         <div v-if="artifactEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div class="list-title" @click="toggleFold('artifact')">
+            <div
+              class="list-title"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!isFold('artifact')"
+              @click="toggleFold('artifact')"
+              @keydown="onKeyboardActivate($event, () => toggleFold('artifact'))"
+            >
               <div class="list-title-main">
                 <p>{{ `${$t('specificWord.syncConfig')}(${artifactEntryCount})` }}</p>
                 <nut-icon
@@ -321,7 +365,11 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
+                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <nut-checkbox
                     :model-value="isEntrySelected(element)"
@@ -347,7 +395,14 @@
 
         <div v-if="shareEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div class="list-title" @click="toggleFold('share')">
+            <div
+              class="list-title"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!isFold('share')"
+              @click="toggleFold('share')"
+              @keydown="onKeyboardActivate($event, () => toggleFold('share'))"
+            >
               <div class="list-title-main">
                 <p>{{ `${$t('specificWord.share')}(${shareEntryCount})` }}</p>
                 <nut-icon
@@ -397,7 +452,11 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
+                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <nut-checkbox
                     :model-value="isEntrySelected(element)"
@@ -424,12 +483,12 @@
     </div>
 
     <div v-if="!pageLoading && pageFetchResult && !hasEntries" class="no-data-wrapper">
-      <nut-empty image="empty">
+      <AccessibleEmpty image="empty">
         <template #description>
           <h3>{{ $t('archivePage.empty.title') }}</h3>
           <p>{{ $t('archivePage.empty.desc') }}</p>
         </template>
-      </nut-empty>
+      </AccessibleEmpty>
       <router-link to="/" class="router-link">
         <nut-button type="primary">
           {{ $t('archivePage.empty.btn') }}
@@ -438,12 +497,12 @@
     </div>
 
     <div v-if="!pageLoading && !pageFetchResult" class="no-data-wrapper">
-      <nut-empty image="error" style="padding: 32px 30px">
+      <AccessibleEmpty image="error" style="padding: 32px 30px">
         <template #description>
           <h3>{{ $t('subPage.loadFailed.title') }}</h3>
           <p>{{ $t('subPage.loadFailed.desc') }}</p>
         </template>
-      </nut-empty>
+      </AccessibleEmpty>
       <nut-button icon="refresh" type="primary" @click="init">
         {{ $t('subPage.loadFailed.btn') }}
       </nut-button>
@@ -490,6 +549,8 @@ import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 
 import ArchiveListItem from '@/components/ArchiveListItem.vue';
+import AccessibleEmpty from '@/components/AccessibleEmpty.vue';
+import { onKeyboardActivate } from '@/hooks/useA11y';
 import { useFilteredDraggableList } from '@/hooks/useFilteredDraggableList';
 import { useListViewMode } from '@/hooks/useListViewMode';
 import { useListViewModeSelectionLock } from '@/hooks/useListViewModeSelectionLock';
@@ -1171,8 +1232,9 @@ onMounted(() => {
   height: 17px;
 }
 
-.share-top-selection-toggle:focus {
-  outline: none;
+.share-top-selection-toggle:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
 }
 
 .share-select-item {

@@ -1,59 +1,83 @@
 <template>
-  <div class="side-bar-wrapper" :class="{ 'is-expanded': isExpanded }">
+  <aside class="side-bar-wrapper" :class="{ 'is-expanded': isExpanded }">
     <div class="sidebar-content">
-      <div class="menu-items">
-        <div 
+      <nav class="menu-items" :aria-label="a11yText.mainNavigation">
+        <button
+          type="button"
           class="menu-item" 
           :class="{ active: activeTab === 0 }" 
+          :aria-current="activeTab === 0 ? 'page' : undefined"
+          :aria-label="$t('tabBar.sub')"
+          :title="$t('tabBar.sub')"
           @click="router.push('/subs')"
         >
           <nut-icon name="link" size="22px" />
           <span class="label" v-show="isExpanded">{{ $t('tabBar.sub') }}</span>
-        </div>
+        </button>
 
-        <div 
+        <button 
           v-show="!appearanceSetting.istabBar2"
+          type="button"
           class="menu-item" 
           :class="{ active: activeTab === 1 }" 
+          :aria-current="activeTab === 1 ? 'page' : undefined"
+          :aria-label="$t('tabBar.file')"
+          :title="$t('tabBar.file')"
           @click="router.push('/files')"
         >
           <nut-icon name="category" size="22px" />
           <span class="label" v-show="isExpanded">{{ $t('tabBar.file') }}</span>
-        </div>
+        </button>
 
-        <div 
+        <button 
           v-show="!appearanceSetting.istabBar"
+          type="button"
           class="menu-item" 
           :class="{ active: activeTab === 2 }" 
+          :aria-current="activeTab === 2 ? 'page' : undefined"
+          :aria-label="$t('tabBar.sync')"
+          :title="$t('tabBar.sync')"
           @click="router.push('/sync')"
         >
           <nut-icon name="refresh2" size="22px" />
           <span class="label" v-show="isExpanded">{{ $t('tabBar.sync') }}</span>
-        </div>
+        </button>
 
-        <div 
+        <button 
           v-show="env?.feature?.share"
+          type="button"
           class="menu-item" 
           :class="{ active: activeTab === 3 }" 
+          :aria-current="activeTab === 3 ? 'page' : undefined"
+          :aria-label="$t('tabBar.share')"
+          :title="$t('tabBar.share')"
           @click="router.push('/shares')"
         >
-          <font-awesome-icon icon="fa-solid fa-share-nodes" style="font-size: 20px; width: 22px; height: 22px;" />
+          <font-awesome-icon aria-hidden="true" icon="fa-solid fa-share-nodes" style="font-size: 20px; width: 22px; height: 22px;" />
           <span class="label" v-show="isExpanded">{{ $t('tabBar.share') }}</span>
-        </div>
+        </button>
 
-        <div 
+        <button 
           v-show="env?.feature?.archive"
+          type="button"
           class="menu-item" 
           :class="{ active: activeTab === 4 }" 
+          :aria-current="activeTab === 4 ? 'page' : undefined"
+          :aria-label="$t('tabBar.archive')"
+          :title="$t('tabBar.archive')"
           @click="router.push('/archives')"
         >
-          <font-awesome-icon icon="fa-solid fa-box-archive" style="font-size: 20px; width: 22px; height: 22px;" />
+          <font-awesome-icon aria-hidden="true" icon="fa-solid fa-box-archive" style="font-size: 20px; width: 22px; height: 22px;" />
           <span class="label" v-show="isExpanded">{{ $t('tabBar.archive') }}</span>
-        </div>
+        </button>
 
-        <div 
+        <button 
+          type="button"
           class="menu-item" 
           :class="{ active: activeTab === 5 }" 
+          :aria-current="activeTab === 5 ? 'page' : undefined"
+          :aria-label="$t('tabBar.my')"
+          :title="$t('tabBar.my')"
           @click="router.push('/my')"
         >
           <div class="icon-container">
@@ -61,10 +85,10 @@
             <div v-if="env.hasNewVersion" class="nut-badge__content sup is-dot"></div>
           </div>
           <span class="label" v-show="isExpanded">{{ $t('tabBar.my') }}</span>
-        </div>
-      </div>
+        </button>
+      </nav>
     </div>
-  </div>
+  </aside>
 </template>
 
 <script lang="ts" setup>
@@ -72,6 +96,7 @@ import { useGlobalStore } from '@/store/global';
 import { useSettingsStore } from '@/store/settings';
 import { useSystemStore } from "@/store/system";
 import { SIDEBAR_EXPANDED_BREAKPOINT } from "@/store/system";
+import { useA11y } from "@/hooks/useA11y";
 import { storeToRefs } from 'pinia';
 import { ref, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -79,6 +104,7 @@ import { useWindowSize } from '@vueuse/core';
 
 const route = useRoute();
 const router = useRouter();
+const { a11yText } = useA11y();
 const routeList = ['/subs', '/files', '/sync', '/shares', '/archives', '/my'];
 const activeTab = ref(routeList.indexOf(route.path));
 
@@ -181,6 +207,9 @@ const { navBarHeight } = storeToRefs(systemStore);
     width: 100%;
     padding: 14px 24px;
     transition: color 0.2s, background 0.2s;
+    border: 0;
+    background: transparent;
+    text-align: left;
 
     &.active {
       color: var(--primary-color);

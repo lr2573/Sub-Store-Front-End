@@ -33,11 +33,11 @@
         </ul>
         <div v-else-if="props.ipApiStatus === 'error'" class="ip-api-state">
           <strong class="node-name">{{ props.nodeInfo.name }}</strong>
-          <nut-empty image="error" class="ip-api-empty">
+          <AccessibleEmpty image="error" class="ip-api-empty">
             <template #description>
               <h3>{{ $t('comparePage.nodeInfo.ipApi.loadFailed') }}</h3>
             </template>
-          </nut-empty>
+          </AccessibleEmpty>
           <nut-button
             icon="refresh"
             type="primary"
@@ -69,6 +69,7 @@
 </template>
 
 <script lang="ts" setup>
+  import AccessibleEmpty from "@/components/AccessibleEmpty.vue";
   import { useQRCode } from '@vueuse/integrations/useQRCode';
   import { computed, ref } from 'vue';
 

@@ -11,10 +11,23 @@
           </span>
         </h1>
         <div class="btn-groups">
-          <button v-if="showRefresh" class="btn refresh" @click="emit('refresh')">
+          <button
+            v-if="showRefresh"
+            type="button"
+            class="btn refresh"
+            :aria-label="$t(`globalNotify.refresh.loading`)"
+            :title="$t(`globalNotify.refresh.loading`)"
+            @click="emit('refresh')"
+          >
             <font-awesome-icon  icon="fa-solid fa-arrows-rotate" />
           </button>
-          <button class="btn close" @click="clickClose">
+          <button
+            type="button"
+            class="btn close"
+            aria-label="Close"
+            title="Close"
+            @click="clickClose"
+          >
             <font-awesome-icon icon="fa-solid fa-circle-xmark" />
           </button>          
         </div>
@@ -24,7 +37,18 @@
         <div class="block-wrapper">
           <!--块标题-->
           <div class="sticky-title-wrapperse compare-title">
-            <p>{{ $t(`comparePage.remain.title`) }}({{ remainDesc }}) <small v-if="filteredOriginalData.length > 0" @click="goToFilterRef">{{ $t(`comparePage.filter.title`) }}({{ filterDesc }})</small></p>
+            <p>
+              {{ $t(`comparePage.remain.title`) }}({{ remainDesc }})
+              <small
+                v-if="filteredOriginalData.length > 0"
+                role="button"
+                tabindex="0"
+                @click="goToFilterRef"
+                @keydown="onKeyboardActivate($event, goToFilterRef)"
+              >
+                {{ $t(`comparePage.filter.title`) }}({{ filterDesc }})
+              </small>
+            </p>
           </div>
 
           <!--指示器说明-->
@@ -32,11 +56,19 @@
             <span
               @click="toggleProcessedVisible"
               class="processed-item indicator"
+              role="button"
+              tabindex="0"
+              :aria-pressed="isProcessedVisible"
+              @keydown="onKeyboardActivate($event, toggleProcessedVisible)"
               >{{ $t(`comparePage.remain.afterIndicator`) }}</span
             >
             <span
               @click="toggleOriginalVisible"
               class="original-item indicator"
+              role="button"
+              tabindex="0"
+              :aria-pressed="isOriginalVisible"
+              @keydown="onKeyboardActivate($event, toggleOriginalVisible)"
               >{{ $t(`comparePage.remain.beforeIndicator`) }}</span
             >
           </div>
@@ -54,7 +86,11 @@
               <tr
                 v-if="isProcessedVisible"
                 class="compare-table-row processed-tr"
+                role="button"
+                tabindex="0"
+                :aria-label="processed.name"
                 @click="openNodeInfoPanel(processed)"
+                @keydown="onKeyboardActivate($event, () => openNodeInfoPanel(processed))"
               >
                 <td class="processed-item">
                   <div class="name-wrapper">
@@ -102,7 +138,11 @@
               <tr
                 v-if="isOriginalVisible"
                 class="compare-table-row original-tr"
+                role="button"
+                tabindex="0"
+                :aria-label="original.name"
                 @click="openNodeInfoPanel(original)"
+                @keydown="onKeyboardActivate($event, () => openNodeInfoPanel(original))"
               >
                 <td class="original-item">
                   <div class="name-wrapper">
@@ -179,7 +219,11 @@
             <template v-for="node in filteredOriginalData" :key="node.id">
               <tr
                 class="compare-table-row original-tr"
+                role="button"
+                tabindex="0"
+                :aria-label="node.name"
                 @click="openNodeInfoPanel(node)"
+                @keydown="onKeyboardActivate($event, () => openNodeInfoPanel(node))"
               >
                 <td class="original-item">
                   <div class="name-wrapper">
@@ -245,6 +289,7 @@
 <script lang="ts" setup>
   import { useSubsApi } from '@/api/subs';
   import NodeInfoPanel from '@/components/NodeInfoPanel.vue';
+  import { onKeyboardActivate } from '@/hooks/useA11y';
   import { useSubsStore } from '@/store/subs';
   import { computed, ref, toRaw } from 'vue';
 

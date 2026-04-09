@@ -5,14 +5,19 @@
       :class="{ 'nodark-imgbutton': !isDarkModeEnabled }"
     >
       <div v-if="openPanel">
-        <button @click="hiCode"><img :src="jsimg" /></button>
-        <button @click="undoCode"><img :src="undoimg" /></button>
-        <button @click="redoCode"><img :src="redoimg" /></button>
-        <button v-if="isJS" @click="formatCode"><img :src="format" /></button>
-        <button @click="searchs"><img :src="searchimg" /></button>
-        <button @click="copyText"><img :src="copyimg" /></button>
-        <button @click="delAllCode"><img :src="del" /></button>
-        <button @click="pasteNav"><img :src="paste" /></button>
+        <button
+          type="button"
+          aria-label="Toggle syntax highlighting"
+          title="Toggle syntax highlighting"
+          @click="hiCode"
+        ><img :src="jsimg" alt="" /></button>
+        <button type="button" aria-label="Undo" title="Undo" @click="undoCode"><img :src="undoimg" alt="" /></button>
+        <button type="button" aria-label="Redo" title="Redo" @click="redoCode"><img :src="redoimg" alt="" /></button>
+        <button v-if="isJS" type="button" aria-label="Format code" title="Format code" @click="formatCode"><img :src="format" alt="" /></button>
+        <button type="button" aria-label="Find in editor" title="Find in editor" @click="searchs"><img :src="searchimg" alt="" /></button>
+        <button type="button" aria-label="Copy code" title="Copy code" @click="copyText"><img :src="copyimg" alt="" /></button>
+        <button type="button" aria-label="Clear code" title="Clear code" @click="delAllCode"><img :src="del" alt="" /></button>
+        <button type="button" aria-label="Paste from clipboard" title="Paste from clipboard" @click="pasteNav"><img :src="paste" alt="" /></button>
       </div>
       <span
         v-else
@@ -27,7 +32,12 @@
       >
         {{ Length }} &nbsp;
       </span>
-      <button @click="setPanel"><img :src="more" /></button>
+      <button
+        type="button"
+        :aria-label="openPanel ? 'Hide editor toolbar' : 'Show editor toolbar'"
+        :title="openPanel ? 'Hide editor toolbar' : 'Show editor toolbar'"
+        @click="setPanel"
+      ><img :src="more" alt="" /></button>
     </div>
 
     <div ref="viewRef" style="width: 100%; font-size: 12px" />
@@ -430,6 +440,12 @@ const pasteNav = async () => {
   filter: invert(0.5);
 }
 
+.cm-img-button button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 .cm-button {
   background-image: none !important;
   background-color: #88828217 !important;
@@ -447,7 +463,12 @@ const pasteNav = async () => {
   width: 40%;
   padding: 0.2em 0.5em;
   border-color: none !important;
-  outline: none;
+  outline: 2px solid transparent;
+}
+
+.cm-textfield:focus-visible {
+  outline-color: var(--primary-color);
+  outline-offset: 2px;
 }
 
 .cm-panel.cm-search input[type="checkbox"] {
@@ -483,7 +504,8 @@ input[type="checkbox"]:checked {
   filter: invert(1);
 }
 .ͼ1.cm-focused {
-  outline: none;
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .ͼ1u .cm-panels.cm-panels-bottom {
