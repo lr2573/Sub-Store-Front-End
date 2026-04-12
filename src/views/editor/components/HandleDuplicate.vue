@@ -53,31 +53,44 @@
     <p class="des-label">
       {{ $t(`editorPage.subConfig.nodeActions['${type}'].action.des`) }}
     </p>
-    <nut-radiogroup direction="horizontal" v-model="value.action">
-      <nut-radio v-for="(key, index) in actionList" :label="key" :key="index"
-        >{{
+    <div class="native-radio-group two-column" role="radiogroup" :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].action.des`)">
+      <button
+        v-for="(key, index) in actionList"
+        :key="index"
+        type="button"
+        class="native-radio-button"
+        :class="{ current: value.action === key }"
+        role="radio"
+        :aria-checked="value.action === key"
+        @click="value.action = key"
+      >{{
           $t(
             `editorPage.subConfig.nodeActions['${type}'].action.options[${index}]`
           )
         }}
-      </nut-radio>
-    </nut-radiogroup>
+      </button>
+    </div>
     <template v-if="value.action === 'rename'">
       <p class="des-label">
         {{ $t(`editorPage.subConfig.nodeActions['${type}'].position.des`) }}
       </p>
-      <nut-radiogroup direction="horizontal" v-model="value.position">
-        <nut-radio
+      <div class="native-radio-group two-column" role="radiogroup" :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].position.des`)">
+        <button
           v-for="(key, index) in positionList"
-          :label="key"
           :key="index"
+          type="button"
+          class="native-radio-button"
+          :class="{ current: value.position === key }"
+          role="radio"
+          :aria-checked="value.position === key"
+          @click="value.position = key"
           >{{
             $t(
               `editorPage.subConfig.nodeActions['${type}'].position.options[${index}]`
             )
           }}
-        </nut-radio>
-      </nut-radiogroup>
+        </button>
+      </div>
       <p class="des-label">
         {{ $t(`editorPage.subConfig.nodeActions['${type}'].template.des`) }}
       </p>
@@ -215,10 +228,29 @@ const onClickTag = index => {
     }
   }
 
-  .nut-radiogroup {
+  .native-radio-group {
     width: 100%;
     display: grid;
+    gap: 8px;
+  }
+
+  .native-radio-group.two-column {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .native-radio-button {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: var(--divider-color);
+    color: var(--second-text-color);
+    text-align: center;
+  }
+
+  .native-radio-button.current {
+    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
   }
 
   .input-wrapper {

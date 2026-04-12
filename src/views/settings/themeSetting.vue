@@ -3,12 +3,18 @@
   <div class="page-wrapper">
     <nut-cell :title="$t(`themeSettingPage.auto`)" class="cell-item">
       <template v-slot:link>
-        <nut-switch
-          class="my-switch"
-          v-model="autoSwitch"
-          size="mini"
-          @change="autoSwitchIsChange"
-        />
+        <button
+          type="button"
+          class="native-switch-button"
+          role="switch"
+          :aria-checked="autoSwitch"
+          :aria-label="$t(`themeSettingPage.auto`)"
+          @click="autoSwitchIsChange(!autoSwitch)"
+        >
+          <span class="native-switch-track" :class="{ active: autoSwitch }">
+            <span class="native-switch-thumb"></span>
+          </span>
+        </button>
       </template>
     </nut-cell>
  
@@ -204,5 +210,49 @@
 
   .nut-icon {
     color: var(--comment-text-color);
+  }
+
+  .native-switch-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 3px;
+      border-radius: 999px;
+    }
+  }
+
+  .native-switch-track {
+    position: relative;
+    width: 34px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--divider-color);
+    transition: background-color 0.2s ease;
+
+    &.active {
+      background: var(--primary-color);
+    }
+  }
+
+  .native-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s ease;
+
+    .native-switch-track.active & {
+      transform: translateX(14px);
+    }
   }
 </style>

@@ -7,29 +7,84 @@
     <nut-cell-group>
       <nut-cell :title="$t(`moreSettingPage.simple`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="SimpleSwitch" size="mini" @change="setSimpleMode" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="SimpleSwitch"
+            :aria-label="$t(`moreSettingPage.simple`)"
+            @click="setSimpleMode(!SimpleSwitch)"
+          >
+            <span class="native-switch-track" :class="{ active: SimpleSwitch }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
       <nut-cell :title="$t(`moreSettingPage.isSimpleReicon`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awSimpleReicon" size="mini" @change="setSimpleReicon" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awSimpleReicon"
+            :aria-label="$t(`moreSettingPage.isSimpleReicon`)"
+            @click="setSimpleReicon(!awSimpleReicon)"
+          >
+            <span class="native-switch-track" :class="{ active: awSimpleReicon }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
       <nut-cell :title="$t(`moreSettingPage.isSimpleShowRemarks`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awSimpleShowRemark" size="mini" @change="setSimpleShowRemark" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awSimpleShowRemark"
+            :aria-label="$t(`moreSettingPage.isSimpleShowRemarks`)"
+            @click="setSimpleShowRemark(!awSimpleShowRemark)"
+          >
+            <span class="native-switch-track" :class="{ active: awSimpleShowRemark }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
     </nut-cell-group>
     <nut-cell-group>
       <nut-cell :title="$t(`moreSettingPage.isDefaultIcon`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awIsDefaultIcon" size="mini" @change="setIsDefaultIcon" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awIsDefaultIcon"
+            :aria-label="$t(`moreSettingPage.isDefaultIcon`)"
+            @click="setIsDefaultIcon(!awIsDefaultIcon)"
+          >
+            <span class="native-switch-track" :class="{ active: awIsDefaultIcon }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
       <nut-cell :title="$t(`moreSettingPage.isShowIcon`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awIsShowIcon" size="mini" @change="setIsShowIcon" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awIsShowIcon"
+            :aria-label="$t(`moreSettingPage.isShowIcon`)"
+            @click="setIsShowIcon(!awIsShowIcon)"
+          >
+            <span class="native-switch-track" :class="{ active: awIsShowIcon }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
     </nut-cell-group>
@@ -37,14 +92,36 @@
 
       <nut-cell :title="$t(`moreSettingPage.islr`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="LeftRight" size="mini" @change="setLeftRight" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="LeftRight"
+            :aria-label="$t(`moreSettingPage.islr`)"
+            @click="setLeftRight(!LeftRight)"
+          >
+            <span class="native-switch-track" :class="{ active: LeftRight }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
 
 
       <nut-cell :title="$t(`moreSettingPage.isSubItemMenuFold`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awIsSubItemMenuFold" size="mini" @change="setIsSubItemMenuFold" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awIsSubItemMenuFold"
+            :aria-label="$t(`moreSettingPage.isSubItemMenuFold`)"
+            @click="setIsSubItemMenuFold(!awIsSubItemMenuFold)"
+          >
+            <span class="native-switch-track" :class="{ active: awIsSubItemMenuFold }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
 
@@ -62,13 +139,34 @@
 
       <nut-cell :title="$t(`moreSettingPage.displayPreviewInWebPage`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awDisplayPreviewInWebPage" size="mini"
-            @change="setDisplayPreviewInWebPage" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awDisplayPreviewInWebPage"
+            :aria-label="$t(`moreSettingPage.displayPreviewInWebPage`)"
+            @click="setDisplayPreviewInWebPage(!awDisplayPreviewInWebPage)"
+          >
+            <span class="native-switch-track" :class="{ active: awDisplayPreviewInWebPage }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
       <nut-cell :title="$t(`moreSettingPage.isEditorCommon`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awEditorCommon" size="mini" @change="setEditorCommon" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awEditorCommon"
+            :aria-label="$t(`moreSettingPage.isEditorCommon`)"
+            @click="setEditorCommon(!awEditorCommon)"
+          >
+            <span class="native-switch-track" :class="{ active: awEditorCommon }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
     </nut-cell-group>
@@ -76,8 +174,18 @@
     <nut-cell-group v-if="shareBtnVisible">
       <nut-cell :title="$t(`moreSettingPage.invalidShareFakeNode`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="invalidShareFakeNode" size="mini"
-            @change="setInvalidShareFakeNode" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="invalidShareFakeNode"
+            :aria-label="$t(`moreSettingPage.invalidShareFakeNode`)"
+            @click="setInvalidShareFakeNode(!invalidShareFakeNode)"
+          >
+            <span class="native-switch-track" :class="{ active: invalidShareFakeNode }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
     </nut-cell-group>
@@ -93,24 +201,66 @@
       </nut-picker>
       <nut-cell :title="$t(`moreSettingPage.showFloatingAddButton`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awShowFloatingAddButton" size="mini"
-            @change="setShowFloatingAddButton" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awShowFloatingAddButton"
+            :aria-label="$t(`moreSettingPage.showFloatingAddButton`)"
+            @click="setShowFloatingAddButton(!awShowFloatingAddButton)"
+          >
+            <span class="native-switch-track" :class="{ active: awShowFloatingAddButton }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
       <nut-cell :title="$t(`moreSettingPage.showFloatingRefreshButton`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awShowFloatingRefreshButton" size="mini"
-            @change="setShowFloatingRefreshButton" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awShowFloatingRefreshButton"
+            :aria-label="$t(`moreSettingPage.showFloatingRefreshButton`)"
+            @click="setShowFloatingRefreshButton(!awShowFloatingRefreshButton)"
+          >
+            <span class="native-switch-track" :class="{ active: awShowFloatingRefreshButton }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
       <nut-cell :title="$t(`moreSettingPage.tabBar2`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awtabBar2" size="mini" @change="settabBar2" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awtabBar2"
+            :aria-label="$t(`moreSettingPage.tabBar2`)"
+            @click="settabBar2(!awtabBar2)"
+          >
+            <span class="native-switch-track" :class="{ active: awtabBar2 }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
       <nut-cell :title="$t(`moreSettingPage.tabBar`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="awtabBar" size="mini" @change="settabBar" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="awtabBar"
+            :aria-label="$t(`moreSettingPage.tabBar`)"
+            @click="settabBar(!awtabBar)"
+          >
+            <span class="native-switch-track" :class="{ active: awtabBar }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
     </nut-cell-group>
@@ -128,7 +278,18 @@
     <nut-cell-group>
       <nut-cell :title="$t(`themeSettingPage.auto`)" class="cell-item">
         <template v-slot:link>
-          <nut-switch class="my-switch" v-model="autoSwitch" size="mini" @change="autoSwitchIsChange" />
+          <button
+            type="button"
+            class="native-switch-button"
+            role="switch"
+            :aria-checked="autoSwitch"
+            :aria-label="$t(`themeSettingPage.auto`)"
+            @click="autoSwitchIsChange(!autoSwitch)"
+          >
+            <span class="native-switch-track" :class="{ active: autoSwitch }">
+              <span class="native-switch-thumb"></span>
+            </span>
+          </button>
         </template>
       </nut-cell>
 
@@ -837,5 +998,49 @@
     font-size: 12px;
     color: var(--comment-text-color);
     margin-top: 8px;
+  }
+
+  .native-switch-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 3px;
+      border-radius: 999px;
+    }
+  }
+
+  .native-switch-track {
+    position: relative;
+    width: 34px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--divider-color);
+    transition: background-color 0.2s ease;
+
+    &.active {
+      background: var(--primary-color);
+    }
+  }
+
+  .native-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s ease;
+
+    .native-switch-track.active & {
+      transform: translateX(14px);
+    }
   }
 </style>

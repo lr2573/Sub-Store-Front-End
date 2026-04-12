@@ -59,26 +59,36 @@
       <div class="sub-item-content">
         <div class="sub-item-title-wrapper">
           <h3 v-if="!appearanceSetting.isSimpleMode" class="sub-item-title">
-            {{ displayName }}
-            <!-- <span v-if="appOpenBtnVisible" class="app-url" @click.stop="openAppUrl" :title="typeof flow === 'object' ? flow.appUrl : ''">
-              <font-awesome-icon icon="fa-solid fa-square-arrow-up-right" />
-            </span> -->
-            <span v-for="i in tag" :key="i" class="tag">
-              <nut-tag>{{ i }}</nut-tag>
-            </span>
+            <button
+              type="button"
+              class="sub-item-title-button"
+              :aria-label="getItemActionLabel(getA11yText('preview'))"
+              :title="getItemActionLabel(getA11yText('preview'))"
+              @click.stop="openPreviewPanel"
+            >
+              <span class="sub-item-title-text">{{ displayName }}</span>
+              <span v-for="i in tag" :key="i" class="tag">
+                <nut-tag>{{ i }}</nut-tag>
+              </span>
+            </button>
           </h3>
           <h3
             v-else
             class="sub-item-title"
             style="color: var(--primary-text-color); font-size: 16px"
           >
-            {{ displayName }}
-            <!-- <span v-if="appOpenBtnVisible" class="app-url" @click.stop="openAppUrl" :title="typeof flow === 'object' ? flow.appUrl : ''">
-              <font-awesome-icon icon="fa-solid fa-square-arrow-up-right" />
-            </span> -->
-            <span v-for="i in tag" :key="i" class="tag">
-              <nut-tag>{{ i }}</nut-tag>
-            </span>
+            <button
+              type="button"
+              class="sub-item-title-button"
+              :aria-label="getItemActionLabel(getA11yText('preview'))"
+              :title="getItemActionLabel(getA11yText('preview'))"
+              @click.stop="openPreviewPanel"
+            >
+              <span class="sub-item-title-text">{{ displayName }}</span>
+              <span v-for="i in tag" :key="i" class="tag">
+                <nut-tag>{{ i }}</nut-tag>
+              </span>
+            </button>
           </h3>
 
           <!-- onClickCopyLink 拷贝 -->
@@ -91,8 +101,8 @@
               v-if="appearanceSetting.isSubItemMenuFold"
               type="button"
               class="compare-sub-link"
-              :aria-label="a11yText.openItemActions"
-              :title="a11yText.openItemActions"
+              :aria-label="$i18n.locale.startsWith('zh') ? '打开快捷操作' : 'Open quick actions'"
+              :title="$i18n.locale.startsWith('zh') ? '打开快捷操作' : 'Open quick actions'"
               @click.stop="switchItemMenuVisible"
             >
               <font-awesome-icon
@@ -191,8 +201,8 @@
               ref="moreAction"
               type="button"
               class="copy-sub-link"
-              :aria-label="a11yText.openItemActions"
-              :title="a11yText.openItemActions"
+              :aria-label="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
+              :title="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
               @click.stop="swipeController"
             >
               <font-awesome-icon icon="fa-solid fa-angles-right" />
@@ -1114,6 +1124,28 @@ const onClickRefresh = async () => {
         font-size: 16px;
         color: var(--primary-text-color);
         vertical-align: middle;
+      }
+      .sub-item-title-button {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+          border-radius: 6px;
+        }
+      }
+      .sub-item-title-text {
+        min-width: 0;
       }
       .app-url {
         font-size: 14px !important;

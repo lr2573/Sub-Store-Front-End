@@ -149,10 +149,18 @@
                 </template>
               </div>
               <div class="action-switch">
-                <nut-checkbox
-                  v-model="element.enabled"
-                  class="my-switch"
-                ></nut-checkbox>
+                <button
+                  type="button"
+                  class="native-switch"
+                  role="switch"
+                  :aria-checked="element.enabled"
+                  :aria-label="getEnabledLabel(element)"
+                  @click="toggleActionSwitch(element.id)"
+                >
+                  <span class="native-switch__track" :class="{ active: element.enabled }">
+                    <span class="native-switch__thumb"></span>
+                  </span>
+                </button>
                 <button
                   type="button"
                   class="icon-button-reset switch-label-button"
@@ -165,10 +173,18 @@
                 </button>
               </div>
               <div class="preview-switch">
-                <nut-checkbox
-                  v-model="getItem(element.id)[1]"
-                  class="my-switch"
-                ></nut-checkbox>
+                <button
+                  type="button"
+                  class="native-switch"
+                  role="switch"
+                  :aria-checked="getItem(element.id)[1]"
+                  :aria-label="getPreviewLabel(element)"
+                  @click="togglePreviewSwitch(element.id)"
+                >
+                  <span class="native-switch__track" :class="{ active: getItem(element.id)[1] }">
+                    <span class="native-switch__thumb"></span>
+                  </span>
+                </button>
                 <button
                   type="button"
                   class="icon-button-reset switch-label-button"
@@ -787,11 +803,40 @@ defineExpose({ exitAllEditName });
           flex-shrink: 0;
           color: inherit;
         }
-        .my-switch {
-          width: 18px;
-          :deep(.nut-icon) {
-            font-size: 16px;
-          }
+        .native-switch {
+          border: 0;
+          background: transparent;
+          padding: 0;
+          margin-right: 4px;
+        }
+        .native-switch__track {
+          width: 36px;
+          height: 20px;
+          border-radius: 999px;
+          background: var(--divider-color);
+          display: inline-flex;
+          align-items: center;
+          padding: 2px;
+          transition: background-color 0.2s ease;
+        }
+        .native-switch__track.active {
+          background: linear-gradient(
+            to right,
+            var(--primary-color),
+            var(--primary-color-end)
+          );
+        }
+        .native-switch__thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #fff;
+          box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+          transform: translateX(0);
+          transition: transform 0.2s ease;
+        }
+        .native-switch__track.active .native-switch__thumb {
+          transform: translateX(16px);
         }
       }
       .preview-switch {
@@ -808,13 +853,6 @@ defineExpose({ exitAllEditName });
           font-weight: normal;
           font-size: 12px;
           color: inherit;
-        }
-
-        .my-switch {
-          width: 18px;
-          :deep(.nut-icon) {
-            font-size: 16px;
-          }
         }
       }
       .icon-button {

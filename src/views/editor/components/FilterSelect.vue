@@ -3,29 +3,43 @@
     <p class="des-label">
       {{ $t(`editorPage.subConfig.nodeActions['${type}'].des[1]`) }}
     </p>
-    <nut-radiogroup direction="horizontal" v-model="mode">
-      <nut-radio v-for="(key, index) in opt[type].mode" :label="key" :key="index"
-        >{{
+    <div class="native-radio-group two-column" role="radiogroup" :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].des[1]`)">
+      <button
+        v-for="(key, index) in opt[type].mode"
+        :key="index"
+        type="button"
+        class="native-radio-button"
+        :class="{ current: mode === key }"
+        role="radio"
+        :aria-checked="mode === key"
+        @click="mode = key"
+      >{{
           $t(`editorPage.subConfig.nodeActions['${type}'].modeOptions[${index}]`)
         }}
-      </nut-radio>
-    </nut-radiogroup>
+      </button>
+    </div>
     <p class="des-label">
       {{ $t(`editorPage.subConfig.nodeActions['${type}'].des[0]`) }}
     </p>
-    <nut-checkboxgroup class="checkbox-group" v-model="value">
-      <nut-checkbox
-        :icon-size="16"
+    <div class="checkbox-group" role="group" :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].des[0]`)">
+      <label
         v-for="(item, index) in opt[type].value"
         :key="item"
-        :label="item"
-        >
-      <span class="item" v-if="type === 'Region Filter' && item === 'TW'">
-        <img :src="tw" alt="TW flag">&nbsp;{{ item }}
-      </span>
-      <span v-else>{{ $t(`editorPage.subConfig.nodeActions['${type}'].options[${index}]`) }}</span>
-      </nut-checkbox>
-    </nut-checkboxgroup>
+        class="checkbox-option"
+        :class="{ current: value.includes(item) }"
+      >
+        <input
+          type="checkbox"
+          :checked="value.includes(item)"
+          @change="toggleOption(item)"
+        />
+        <span class="checkbox-indicator" aria-hidden="true"></span>
+        <span class="item" v-if="type === 'Region Filter' && item === 'TW'">
+          <img :src="tw" alt="TW flag">&nbsp;{{ item }}
+        </span>
+        <span v-else>{{ $t(`editorPage.subConfig.nodeActions['${type}'].options[${index}]`) }}</span>
+      </label>
+    </div>
   </div>
 </template>
 
@@ -116,6 +130,16 @@
     const item = form.process.find(item => item.id === id);
     item.args.keep = !mode.value;
   });
+  const toggleOption = (option) => {
+    const current = Array.isArray(value.value) ? [...value.value] : [];
+    const index = current.indexOf(option);
+    if (index > -1) {
+      current.splice(index, 1);
+    } else {
+      current.push(option);
+    }
+    value.value = current;
+  };
 </script>
 
 <style lang="scss" scoped>
@@ -131,6 +155,53 @@
   .checkbox-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 12px 8px;
+
+    .checkbox-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--second-text-color);
+    }
+
+    .checkbox-option input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+    }
+
+    .checkbox-indicator {
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--lowest-text-color);
+      border-radius: 4px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .checkbox-option.current .checkbox-indicator {
+      border-color: var(--primary-color);
+      background: var(--primary-color);
+    }
+
+    .checkbox-option.current .checkbox-indicator::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .checkbox-option input:focus-visible + .checkbox-indicator {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 3px;
+    }
+
     .item {
       display: flex;
       align-items: center;
@@ -140,13 +211,30 @@
       }
     }
 
-    view {
-      margin-bottom: 16px;
+  }
 
-      :deep(.nut-checkbox__label) {
-        font-size: 14px;
-        color: var(--second-text-color);
-      }
-    }
+  .native-radio-group {
+    width: 100%;
+    display: grid;
+    gap: 8px;
+  }
+
+  .native-radio-group.two-column {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .native-radio-button {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: var(--divider-color);
+    color: var(--second-text-color);
+    text-align: center;
+  }
+
+  .native-radio-button.current {
+    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
   }
 </style>

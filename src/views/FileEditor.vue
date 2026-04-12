@@ -449,9 +449,6 @@
               prop="ignoreFailedRemoteFile"
               class="ignore-failed-wrapper"
             >
-              <!-- <div class="switch-wrapper">
-                <nut-switch v-model="form.ignoreFailedRemoteFile" />
-              </div> -->
               <div class="radio-wrapper">
                 <div
                   class="native-radio-group"

@@ -120,8 +120,6 @@
     <!-- 有数据 -->
     <div class="subs-list-wrapper" :class="{ 'dual-column-mode': isDualColumnMode }">
       <div v-if="tags && tags.length > 0" ref="radioWrapperRef" class="radio-wrapper" >
-        <!-- <nut-radiogroup v-model="tag" direction="horizontal"> -->
-          <!-- <nut-radio v-for="i in tags" shape="button" :label="String(i.value)">{{ i.label }}</nut-radio> -->
           <button
             v-for="i in tags"
             :key="i.value"
@@ -137,11 +135,12 @@
       </div>
       <div class="subs-list-container" :style="{ paddingTop: `${radioWrapperHeight}px` }">
         <div v-if="filterdSubsCount > 0" class="subs-list-content">
-          <div class="title-wrappers">
+          <h2 class="title-wrappers">
             <button
               type="button"
               class="list-title"
               :aria-expanded="!isFold('sub')"
+              aria-controls="sub-group-list"
               :title="`${$t(`specificWord.singleSub`)}(${filterdSubsCount})`"
               @click="toggleFold('sub')"
             >
@@ -149,9 +148,10 @@
               <nut-icon v-if="!isFold('sub')" name="rect-down" size="12px"></nut-icon>
               <nut-icon v-else name="rect-right" size="12px"></nut-icon>
             </button>
-          </div>
+          </h2>
 
           <draggable
+            id="sub-group-list"
             v-if="!isFold('sub')"
             class="list-draggable"
             :class="{ 'dual-column': isDualColumnMode }"
@@ -186,11 +186,12 @@
           </draggable>
         </div>
         <div v-if="filterdColsCount > 0" class="subs-list-content">
-          <div class="title-wrappers">
+          <h2 class="title-wrappers">
             <button
               type="button"
               class="list-title"
               :aria-expanded="!isFold('col')"
+              aria-controls="collection-group-list"
               :title="`${$t(`specificWord.collectionSub`)}(${filterdColsCount})`"
               @click="toggleFold('col')"
             >
@@ -198,9 +199,10 @@
               <nut-icon v-if="!isFold('col')" name="rect-down" size="12px"></nut-icon>
               <nut-icon v-else name="rect-right" size="12px"></nut-icon>
             </button>
-          </div>
+          </h2>
 
           <draggable
+            id="collection-group-list"
             v-if="!isFold('col')"
             class="list-draggable"
             :class="{ 'dual-column': isDualColumnMode }"
@@ -819,9 +821,11 @@ const importTips = () => {
   // margin-top: var(--safe-area-side);
   // backdrop-filter: blur(var(--sticky-title-blur));
   // -webkit-backdrop-filter: blur(var(--sticky-title-blur));
+  margin: 0;
   margin-top: 0;
   padding-top: 0;
   color: var(--comment-text-color);
+  font-size: inherit;
 }
 
 .desc-about {

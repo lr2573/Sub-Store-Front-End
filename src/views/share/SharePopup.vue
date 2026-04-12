@@ -52,15 +52,20 @@
               :label="$t(`sharePage.createShare.expiresUnit.label`)"
               prop="expiresUnit"
             >
-              <nut-radiogroup v-model="form.expiresUnit" direction="horizontal">
-                <nut-radio
+              <div class="native-radio-group" role="radiogroup" :aria-label="$t(`sharePage.createShare.expiresUnit.label`)">
+                <button
                   v-for="(item, index) in expiresUnitList"
                   :key="index"
-                  :label="item.value"
+                  type="button"
+                  class="native-radio-button"
+                  :class="{ active: form.expiresUnit === item.value }"
+                  role="radio"
+                  :aria-checked="form.expiresUnit === item.value"
+                  @click="form.expiresUnit = item.value"
                 >
                   {{ item.label }}
-                </nut-radio>
-              </nut-radiogroup>
+                </button>
+              </div>
             </nut-form-item>
             <nut-form-item :label="$t(`sharePage.createShare.token.label`)" prop="token">
               <nut-input
@@ -137,23 +142,23 @@
               />
             </div>
             <div class="btn-wrapper">
-              <nut-button
+              <button
                 class="btn"
-                plain
-                shape="round"
+                type="button"
+                :class="{ secondary: true }"
                 :disabled="form.shareUrl ? false : true"
-                @click="handleCopyShare"
+                @click="handleCopyShare()"
               >
                 {{ $t("sharePage.createShare.copyBtn") }}
-              </nut-button>
-              <nut-button
+              </button>
+              <button
                 class="btn"
-                type="primary"
-                shape="round"
+                type="button"
+                :class="{ primary: true }"
                 @click="handleCreateShare"
               >
                 {{ $t("sharePage.createShare.createBtn") }}
-              </nut-button>
+              </button>
             </div>
           </nut-form>
         </template>
@@ -193,18 +198,20 @@
                 :label="$t(`sharePage.createShare.expiresUnit.label`)"
                 prop="expiresUnit"
               >
-                <nut-radiogroup
-                  v-model="form.expiresUnit"
-                  direction="horizontal"
-                >
-                  <nut-radio
+                <div class="native-radio-group" role="radiogroup" :aria-label="$t(`sharePage.createShare.expiresUnit.label`)">
+                  <button
                     v-for="(item, index) in expiresUnitList"
                     :key="index"
-                    :label="item.value"
+                    type="button"
+                    class="native-radio-button"
+                    :class="{ active: form.expiresUnit === item.value }"
+                    role="radio"
+                    :aria-checked="form.expiresUnit === item.value"
+                    @click="form.expiresUnit = item.value"
                   >
                     {{ item.label }}
-                  </nut-radio>
-                </nut-radiogroup>
+                  </button>
+                </div>
               </nut-form-item>
               <nut-form-item
                 :label="$t(`sharePage.createShare.token.label`)"
@@ -289,33 +296,33 @@
               />
             </div>
             <div class="btn-wrapper">
-              <nut-button
+              <button
                 class="btn"
-                plain
-                shape="round"
+                type="button"
+                :class="{ secondary: true }"
                 :disabled="form.shareUrl ? false : true"
-                @click="handleCopyShare"
+                @click="handleCopyShare()"
               >
                 {{ $t("sharePage.createShare.copyBtn") }}
-              </nut-button>
-              <nut-button
+              </button>
+              <button
                 v-if="!isUpdateShare"
                 class="btn"
-                type="primary"
-                shape="round"
+                type="button"
+                :class="{ primary: true }"
                 @click="handleUpdateShare"
               >
                 {{ $t("sharePage.createShare.updateBtn") }}
-              </nut-button>
-              <nut-button
+              </button>
+              <button
                 v-else
                 class="btn"
-                type="primary"
-                shape="round"
+                type="button"
+                :class="{ primary: true }"
                 @click="confirmUpdateShare"
               >
                 {{ $t("sharePage.createShare.createBtn") }}
-              </nut-button>
+              </button>
             </div>
           </nut-form>
         </template>
@@ -703,10 +710,61 @@ defineExpose({ show, hide, close });
         flex: 1;
         border-radius: 8px;
         margin-right: 20px;
+        min-height: 40px;
+        border: 1px solid var(--primary-color);
+        background: transparent;
+        color: var(--primary-color);
+        cursor: pointer;
+
+        &.primary {
+          background: var(--primary-color);
+          color: #fff;
+        }
+
+        &.secondary {
+          background: transparent;
+        }
+
+        &:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+        }
+
+        &:focus-visible {
+          outline: 3px solid var(--primary-color);
+          outline-offset: 3px;
+        }
+
         &:last-child {
           margin-right: 0;
         }
       }
+    }
+  }
+
+  .native-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .native-radio-button {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--divider-color);
+    color: var(--second-text-color);
+    cursor: pointer;
+
+    &.active {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 3px;
     }
   }
 }

@@ -110,11 +110,12 @@
                   @click.stop="toggleEntrySelection(element)"
                   @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
-                  <nut-checkbox
-                    :model-value="isEntrySelected(element)"
-                    class="share-select-checkbox"
-                    @click.stop="toggleEntrySelection(element)"
-                  />
+                  <span class="share-select-checkbox" aria-hidden="true">
+                    <span
+                      class="share-select-checkbox-indicator"
+                      :class="{ checked: isEntrySelected(element) }"
+                    ></span>
+                  </span>
                   <div class="share-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
@@ -197,11 +198,12 @@
                   @click.stop="toggleEntrySelection(element)"
                   @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
-                  <nut-checkbox
-                    :model-value="isEntrySelected(element)"
-                    class="share-select-checkbox"
-                    @click.stop="toggleEntrySelection(element)"
-                  />
+                  <span class="share-select-checkbox" aria-hidden="true">
+                    <span
+                      class="share-select-checkbox-indicator"
+                      :class="{ checked: isEntrySelected(element) }"
+                    ></span>
+                  </span>
                   <div class="share-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
@@ -284,11 +286,12 @@
                   @click.stop="toggleEntrySelection(element)"
                   @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
-                  <nut-checkbox
-                    :model-value="isEntrySelected(element)"
-                    class="share-select-checkbox"
-                    @click.stop="toggleEntrySelection(element)"
-                  />
+                  <span class="share-select-checkbox" aria-hidden="true">
+                    <span
+                      class="share-select-checkbox-indicator"
+                      :class="{ checked: isEntrySelected(element) }"
+                    ></span>
+                  </span>
                   <div class="share-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
@@ -371,11 +374,12 @@
                   @click.stop="toggleEntrySelection(element)"
                   @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
-                  <nut-checkbox
-                    :model-value="isEntrySelected(element)"
-                    class="share-select-checkbox"
-                    @click.stop="toggleEntrySelection(element)"
-                  />
+                  <span class="share-select-checkbox" aria-hidden="true">
+                    <span
+                      class="share-select-checkbox-indicator"
+                      :class="{ checked: isEntrySelected(element) }"
+                    ></span>
+                  </span>
                   <div class="share-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
@@ -458,11 +462,12 @@
                   @click.stop="toggleEntrySelection(element)"
                   @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
-                  <nut-checkbox
-                    :model-value="isEntrySelected(element)"
-                    class="share-select-checkbox"
-                    @click.stop="toggleEntrySelection(element)"
-                  />
+                  <span class="share-select-checkbox" aria-hidden="true">
+                    <span
+                      class="share-select-checkbox-indicator"
+                      :class="{ checked: isEntrySelected(element) }"
+                    ></span>
+                  </span>
                   <div class="share-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
@@ -489,10 +494,8 @@
           <p>{{ $t('archivePage.empty.desc') }}</p>
         </template>
       </AccessibleEmpty>
-      <router-link to="/" class="router-link">
-        <nut-button type="primary">
-          {{ $t('archivePage.empty.btn') }}
-        </nut-button>
+      <router-link to="/" class="empty-state-action primary">
+        {{ $t('archivePage.empty.btn') }}
       </router-link>
     </div>
 
@@ -503,9 +506,10 @@
           <p>{{ $t('subPage.loadFailed.desc') }}</p>
         </template>
       </AccessibleEmpty>
-      <nut-button icon="refresh" type="primary" @click="init">
+      <button type="button" class="empty-state-action primary" @click="init">
+        <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
         {{ $t('subPage.loadFailed.btn') }}
-      </nut-button>
+      </button>
     </div>
 
     <div
@@ -516,28 +520,25 @@
       <div class="share-selection-summary">
         {{ $t('archivePage.selectMode.selectedCount', { count: selectedEntryCount }) }}
       </div>
-      <nut-button plain size="small" type="primary" @click="toggleSelectAllEntries">
+      <button type="button" class="selection-action-button secondary" @click="toggleSelectAllEntries">
         {{ isAllEntriesSelected ? $t('archivePage.selectMode.clearAll') : $t('archivePage.selectMode.selectAll') }}
-      </nut-button>
-      <nut-button
-        plain
-        size="small"
-        type="primary"
+      </button>
+      <button
+        type="button"
+        class="selection-action-button secondary"
         :disabled="selectedEntryCount === 0 || isRestoringSelectedEntries"
-        :loading="isRestoringSelectedEntries"
         @click="restoreSelectedEntries"
       >
         {{ $t('archivePage.selectMode.restore') }}
-      </nut-button>
-      <nut-button
-        size="small"
-        type="danger"
+      </button>
+      <button
+        type="button"
+        class="selection-action-button danger"
         :disabled="selectedEntryCount === 0 || isDeletingSelectedEntries"
-        :loading="isDeletingSelectedEntries"
         @click="confirmDeleteSelectedEntries"
       >
         {{ $t('archivePage.selectMode.delete') }}
-      </nut-button>
+      </button>
     </div>
   </div>
 </template>
@@ -1252,6 +1253,25 @@ onMounted(() => {
 
 .share-select-checkbox {
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.share-select-checkbox-indicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid var(--comment-text-color);
+  background: transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &.checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+  }
 }
 
 .share-select-item-content {
@@ -1302,5 +1322,49 @@ onMounted(() => {
   min-width: 0;
   color: var(--primary-text-color);
   font-weight: bold;
+}
+
+.empty-state-action,
+.selection-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  color: var(--primary-color);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+
+  &.primary {
+    background: var(--primary-color);
+    color: #fff;
+  }
+
+  &.secondary {
+    background: transparent;
+    color: var(--primary-color);
+  }
+
+  &.danger {
+    border-color: var(--danger-color, #d64545);
+    background: var(--danger-color, #d64545);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 3px;
+  }
 }
 </style>

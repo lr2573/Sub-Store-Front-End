@@ -10,13 +10,22 @@
         {{ $t("subPage.panel.tips.ok") }}
       </a>
     </p>
-    <nut-radiogroup v-model="value.mode" direction="horizontal">
-      <nut-radio v-for="(key, index) in modeList" :key="index" :label="key">
+    <div class="native-radio-group two-column" role="radiogroup" :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].des[0]`)">
+      <button
+        v-for="(key, index) in modeList"
+        :key="index"
+        type="button"
+        class="native-radio-button"
+        :class="{ current: value.mode === key }"
+        role="radio"
+        :aria-checked="value.mode === key"
+        @click="value.mode = key"
+      >
         {{
           $t(`editorPage.subConfig.nodeActions['${type}'].options[${index}]`)
         }}
-      </nut-radio>
-    </nut-radiogroup>
+      </button>
+    </div>
 
     <div v-if="value.mode === 'link'" class="input-wrapper">
       <nut-textarea
@@ -45,7 +54,18 @@
     <div class="input-wrapper-title">
       <!-- 参数编辑开关 -->
       <div class="title-label">
-        <nut-switch v-model="showKeyValue" />
+        <button
+          type="button"
+          class="native-switch"
+          role="switch"
+          :aria-checked="showKeyValue"
+          :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].paramsEdit`)"
+          @click="showKeyValue = !showKeyValue"
+        >
+          <span class="native-switch__track" :class="{ active: showKeyValue }">
+            <span class="native-switch__thumb"></span>
+          </span>
+        </button>
         <span>
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].paramsEdit`) }}
         </span>
@@ -61,7 +81,18 @@
       </div>
       <!-- 无缓存开关 - 仅在link模式时显示 -->
       <div v-if="value.mode === 'link'" class="title-label">
-        <nut-switch v-model="params.noCache" />
+        <button
+          type="button"
+          class="native-switch"
+          role="switch"
+          :aria-checked="params.noCache"
+          :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].noCache`)"
+          @click="params.noCache = !params.noCache"
+        >
+          <span class="native-switch__track" :class="{ active: params.noCache }">
+            <span class="native-switch__thumb"></span>
+          </span>
+        </button>
         <span>
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].noCache`) }}
         </span>
@@ -76,7 +107,18 @@
         </button>
       </div>
       <div v-if="value.mode === 'link'" class="title-label">
-        <nut-switch v-model="params.insecure" />
+        <button
+          type="button"
+          class="native-switch"
+          role="switch"
+          :aria-checked="params.insecure"
+          :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].insecure`)"
+          @click="params.insecure = !params.insecure"
+        >
+          <span class="native-switch__track" :class="{ active: params.insecure }">
+            <span class="native-switch__thumb"></span>
+          </span>
+        </button>
         <span>
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].insecure`) }}
         </span>
@@ -607,10 +649,29 @@ watch(
   }
 }
 
-.nut-radiogroup {
+.native-radio-group {
   width: 100%;
   display: grid;
+  gap: 8px;
+}
+
+.native-radio-group.two-column {
   grid-template-columns: 1fr 1fr;
+}
+
+.native-radio-button {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: var(--divider-color);
+  color: var(--second-text-color);
+  text-align: center;
+}
+
+.native-radio-button.current {
+  border-color: var(--primary-color);
+  background: transparent;
+  color: var(--primary-color);
 }
 
 .input-wrapper {
@@ -648,6 +709,41 @@ watch(
     .icon {
       margin-left: 4px;
       color: var(--unimportant-icon-color);
+    }
+    .native-switch {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      margin-right: 4px;
+    }
+    .native-switch__track {
+      width: 44px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--divider-color);
+      display: inline-flex;
+      align-items: center;
+      padding: 3px;
+      transition: background-color 0.2s ease;
+    }
+    .native-switch__track.active {
+      background: linear-gradient(
+        to right,
+        var(--primary-color),
+        var(--primary-color-end)
+      );
+    }
+    .native-switch__thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+      transform: translateX(0);
+      transition: transform 0.2s ease;
+    }
+    .native-switch__track.active .native-switch__thumb {
+      transform: translateX(20px);
     }
   }
   span {

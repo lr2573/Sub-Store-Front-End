@@ -401,12 +401,24 @@
                   {{ i.label }}
                 </button>
               </div>
-              <nut-checkbox v-model="subCheckbox" :indeterminate="subCheckboxIndeterminate" @click="subCheckboxClick"></nut-checkbox>
+              <button
+                type="button"
+                class="select-all-checkbox icon-button-reset"
+                role="checkbox"
+                :aria-checked="subCheckboxIndeterminate ? 'mixed' : subCheckbox"
+                :title="$t(`editorPage.subConfig.basic.subscriptions.label`)"
+                @click="subCheckboxClick"
+              >
+                <span
+                  class="select-all-checkbox-indicator"
+                  :class="{
+                    checked: subCheckbox,
+                    indeterminate: subCheckboxIndeterminate,
+                  }"
+                ></span>
+              </button>
             </div>
-            <nut-checkboxgroup
-              v-model="form.subscriptions"
-              class="subs-checkbox-wrapper"
-            >
+            <div class="subs-checkbox-wrapper">
               <draggable
                 :list="filteredSubsSelectList"
                 :sort="true"
@@ -421,13 +433,26 @@
                 @end="onEndDrag"
               >
                 <template #item="{ element }">
-                  <nut-checkbox
+                  <div
                     v-show="shouldShowElement(element[3])"
                     :key="element[0]"
-                    :label="element[0]"
-                    text-position="left"
                     class="subs-checkbox"
+                    :class="{ checked: isSubscriptionSelected(element[0]) }"
                   >
+                    <label class="subs-checkbox-control">
+                      <input
+                        type="checkbox"
+                        class="native-checkbox-input"
+                        :checked="isSubscriptionSelected(element[0])"
+                        :aria-label="element[1]"
+                        @change="toggleSubscription(element[0])"
+                      />
+                      <span
+                        class="subs-checkbox-indicator"
+                        :class="{ checked: isSubscriptionSelected(element[0]) }"
+                        aria-hidden="true"
+                      ></span>
+                    </label>
                     <div class="sub-img-wrapper">
                       <nut-avatar
                         :class="{ 'sub-item-customer-icon': !element[4], 'icon': true  }"
@@ -444,10 +469,10 @@
                       </span>
                       <font-awesome-icon icon="fa-solid fa-bars" class="drag-handle"/>
                     </div>
-                  </nut-checkbox>
+                  </div>
                 </template>
               </draggable>
-            </nut-checkboxgroup>
+            </div>
             </nut-form-item>
             <nut-form-item
               :label="$t(`editorPage.subConfig.basic.subUserinfo.label`)"
@@ -488,9 +513,6 @@
           prop="ignoreFailedRemoteSub"
           class="ignore-failed-wrapper"
         >
-          <!-- <div class="switch-wrapper">
-            <nut-switch v-model="form.ignoreFailedRemoteSub" />
-          </div> -->
           <div class="radio-wrapper">
             <div
               class="native-radio-group"
@@ -1294,6 +1316,18 @@ const urlValidator = (val: string): Promise<boolean> => {
     if(tag.value === 'untagged') return !Array.isArray(element) || element.length === 0
     return element.includes(tag.value)
   };
+  const isSubscriptionSelected = (name: string) => {
+    return (form.subscriptions || []).includes(name);
+  };
+  const toggleSubscription = (name: string) => {
+    form.subscriptions = form.subscriptions || [];
+    const index = form.subscriptions.indexOf(name);
+    if (index >= 0) {
+      form.subscriptions.splice(index, 1);
+      return;
+    }
+    form.subscriptions.push(name);
+  };
   const subCheckboxIndeterminate = ref(true);
   const subCheckbox = ref(true);
   // const subCheckboxChange = (v) => {
@@ -1664,6 +1698,14 @@ const handleEditGlobalClick = () => {
 .include-subs-wrapper {
   flex-direction: column;
 
+  .tag-check {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
   .radio-wrapper {
     display: flex;
     justify-content: flex-start;
@@ -1689,6 +1731,59 @@ const handleEditGlobalClick = () => {
     }
   }
 
+  .select-all-checkbox {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+  }
+
+  .select-all-checkbox-indicator,
+  .subs-checkbox-indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--comment-text-color);
+    background: transparent;
+    position: relative;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+
+    &.checked {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    &.indeterminate::after,
+    &.checked::after {
+      content: "";
+      position: absolute;
+      inset: 50% auto auto 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+    }
+
+    &.indeterminate::after {
+      width: 10px;
+      height: 2px;
+      border-radius: 999px;
+    }
+
+    &.checked::after {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+  }
+
   :deep(.nut-form-item__label) {
     width: 100%;
     font-size: 12px;
@@ -1699,8 +1794,9 @@ const handleEditGlobalClick = () => {
     flex-direction: row-reverse;
 
     .subs-checkbox {
-      justify-content: space-between;
-      // margin-left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       padding: 16px 0 0 0;
 
       &:not(:last-child) {
@@ -1709,7 +1805,27 @@ const handleEditGlobalClick = () => {
         border-color: var(--divider-color);
       }
 
+      .subs-checkbox-control {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .native-checkbox-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .native-checkbox-input:focus-visible + .subs-checkbox-indicator {
+        outline: 3px solid var(--primary-color);
+        outline-offset: 3px;
+      }
+
       .sub-img-wrapper {
+        min-width: 0;
+        flex: 1;
         max-width: 100%;
         display: flex;
         align-items: center;

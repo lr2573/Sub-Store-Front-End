@@ -4,19 +4,30 @@
       {{ $t(`editorPage.subConfig.nodeActions['${type}'].des`) }}
     </p>
     <div class="radio-wrapper options-radio">
-      <nut-radiogroup direction="horizontal" v-model="value">
-        <nut-radio v-for="(key, index) in opt[type]" :key="index" :label="key">
-          <div
-            v-if="type === 'Resolve Domain Operator' && value === 'Custom' && key === 'Custom'"
-            class="input-wrapper"
-          >
-            <nut-input placeholder="DoH URL" v-model="rdoUrl" />
-          </div>
-          <div v-else>
-            {{ $t(`editorPage.subConfig.nodeActions['${type}'].options[${index}]`) }}
-          </div>
-        </nut-radio>
-      </nut-radiogroup>
+      <div
+        class="native-radio-group three-column"
+        role="radiogroup"
+        :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].des`)"
+      >
+        <button
+          v-for="(key, index) in opt[type]"
+          :key="index"
+          type="button"
+          class="native-radio-button"
+          :class="{ current: value === key }"
+          role="radio"
+          :aria-checked="value === key"
+          @click="value = key"
+        >
+          {{ $t(`editorPage.subConfig.nodeActions['${type}'].options[${index}]`) }}
+        </button>
+      </div>
+      <div
+        v-if="type === 'Resolve Domain Operator' && value === 'Custom'"
+        class="input-wrapper custom-value-input"
+      >
+        <nut-input placeholder="DoH URL" v-model="rdoUrl" />
+      </div>
     </div>
     <template v-if="type === 'Resolve Domain Operator' && rdoNewVersion">
       <div class="radio-wrapper options-radio">
@@ -29,28 +40,55 @@
         <button type="button" class="des-label info-trigger" @click="rdoTypeInfo">
           Resolve type (IPv6 compatible with IP4P <font-awesome-icon icon="fa-solid fa-circle-question" />)
         </button>
-        <nut-radiogroup direction="horizontal" v-model="rdoType">
-          <nut-radio v-for="(key, index) in rdoTypeOpt" :key="index" :label="key">
+        <div class="native-radio-group two-column" role="radiogroup" aria-label="Resolve type">
+          <button
+            v-for="(key, index) in rdoTypeOpt"
+            :key="index"
+            type="button"
+            class="native-radio-button"
+            :class="{ current: rdoType === key }"
+            role="radio"
+            :aria-checked="rdoType === key"
+            @click="rdoType = key"
+          >
             {{ $t(`editorPage.subConfig.nodeActions['${type}'].types[${index}]`) }}
-          </nut-radio>
-        </nut-radiogroup>
+          </button>
+        </div>
       </div>
 
       <div class="radio-wrapper options-radio">
         <p class="des-label">Filter result</p>
-        <nut-radiogroup direction="horizontal" v-model="rdoFilter">
-          <nut-radio v-for="(key, index) in rdoFilterOpt" :key="index" :label="key">
+        <div class="native-radio-group three-column" role="radiogroup" aria-label="Filter result">
+          <button
+            v-for="(key, index) in rdoFilterOpt"
+            :key="index"
+            type="button"
+            class="native-radio-button"
+            :class="{ current: rdoFilter === key }"
+            role="radio"
+            :aria-checked="rdoFilter === key"
+            @click="rdoFilter = key"
+          >
             {{ $t(`editorPage.subConfig.nodeActions['${type}'].filters[${index}]`) }}
-          </nut-radio>
-        </nut-radiogroup>
+          </button>
+        </div>
       </div>
       <div class="radio-wrapper options-radio">
         <p class="des-label">Cache</p>
-        <nut-radiogroup direction="horizontal" v-model="rdoCache">
-          <nut-radio v-for="(key, index) in rdoCacheOpt" :key="index" :label="key">
+        <div class="native-radio-group two-column" role="radiogroup" aria-label="Cache">
+          <button
+            v-for="(key, index) in rdoCacheOpt"
+            :key="index"
+            type="button"
+            class="native-radio-button"
+            :class="{ current: rdoCache === key }"
+            role="radio"
+            :aria-checked="rdoCache === key"
+            @click="rdoCache = key"
+          >
             {{ $t(`editorPage.subConfig.nodeActions['${type}'].cache[${index}]`) }}
-          </nut-radio>
-        </nut-radiogroup>
+          </button>
+        </div>
       </div>
     </template>
     <template v-if="type === 'Flag Operator' && foNewVersion && value === 'add'">
@@ -61,11 +99,20 @@
           <span>tips</span>
           <nut-icon name="tips" size="12px"></nut-icon>
         </button>
-        <nut-radiogroup direction="horizontal" v-model="foTw">
-          <nut-radio v-for="(key, index) in foTwOpt" :key="index" :label="key">
+        <div class="native-radio-group three-column" role="radiogroup" aria-label="Flag">
+          <button
+            v-for="(key, index) in foTwOpt"
+            :key="index"
+            type="button"
+            class="native-radio-button"
+            :class="{ current: foTw === key }"
+            role="radio"
+            :aria-checked="foTw === key"
+            @click="foTw = key"
+          >
             {{ $t(`editorPage.subConfig.nodeActions['${type}'].twOptions[${index}]`) }}
-          </nut-radio>
-        </nut-radiogroup>
+          </button>
+        </div>
       </div>
     </template>
   </div>
@@ -215,10 +262,33 @@ watch([value, rdoFilter, rdoCache, rdoUrl, rdoEdns, rdoType, foTw], () => {
   }
 }
 
-.nut-radiogroup {
+.native-radio-group {
   width: 100%;
   display: grid;
+  gap: 8px;
+}
+
+.native-radio-group.three-column {
   grid-template-columns: 1fr 1fr 1fr;
+}
+
+.native-radio-group.two-column {
+  grid-template-columns: 1fr 1fr;
+}
+
+.native-radio-button {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: var(--divider-color);
+  color: var(--second-text-color);
+  text-align: center;
+}
+
+.native-radio-button.current {
+  border-color: var(--primary-color);
+  background: transparent;
+  color: var(--primary-color);
 }
 
 .input-wrapper {
@@ -232,5 +302,9 @@ watch([value, rdoFilter, rdoCache, rdoUrl, rdoEdns, rdoType, foTw], () => {
     border-bottom: 1px solid var(--lowest-text-color);
     color: var(--second-text-color);
   }
+}
+
+.custom-value-input {
+  margin-top: 12px;
 }
 </style>

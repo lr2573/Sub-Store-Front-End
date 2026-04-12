@@ -123,8 +123,6 @@
     <!-- 有数据 -->
     <div class="subs-list-wrapper" :class="{ 'dual-column-mode': isDualColumnMode }">
       <div v-if="tags && tags.length > 0" ref="radioWrapperRef" class="radio-wrapper" >
-        <!-- <nut-radiogroup v-model="tag" direction="horizontal"> -->
-          <!-- <nut-radio v-for="i in tags" shape="button" :label="String(i.value)">{{ i.label }}</nut-radio> -->
           <button
             v-for="i in tags"
             :key="i.value"

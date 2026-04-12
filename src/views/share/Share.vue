@@ -168,11 +168,12 @@
                   @click.stop="toggleShareSelection(element)"
                   @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
-                  <nut-checkbox
-                    :model-value="isShareSelected(element)"
-                    class="share-select-checkbox"
-                    @click.stop="toggleShareSelection(element)"
-                  />
+                  <span class="share-select-checkbox" aria-hidden="true">
+                    <span
+                      class="share-select-checkbox-indicator"
+                      :class="{ checked: isShareSelected(element) }"
+                    ></span>
+                  </span>
                   <div class="share-select-item-content">
                     <ShareListItem
                       :data="element"
@@ -268,11 +269,12 @@
                   @click.stop="toggleShareSelection(element)"
                   @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
-                  <nut-checkbox
-                    :model-value="isShareSelected(element)"
-                    class="share-select-checkbox"
-                    @click.stop="toggleShareSelection(element)"
-                  />
+                  <span class="share-select-checkbox" aria-hidden="true">
+                    <span
+                      class="share-select-checkbox-indicator"
+                      :class="{ checked: isShareSelected(element) }"
+                    ></span>
+                  </span>
                   <div class="share-select-item-content">
                     <ShareListItem
                       :data="element"
@@ -364,11 +366,12 @@
                   @click.stop="toggleShareSelection(element)"
                   @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
-                  <nut-checkbox
-                    :model-value="isShareSelected(element)"
-                    class="share-select-checkbox"
-                    @click.stop="toggleShareSelection(element)"
-                  />
+                  <span class="share-select-checkbox" aria-hidden="true">
+                    <span
+                      class="share-select-checkbox-indicator"
+                      :class="{ checked: isShareSelected(element) }"
+                    ></span>
+                  </span>
                   <div class="share-select-item-content">
                     <ShareListItem
                       :data="element"
@@ -399,10 +402,8 @@
           <p>{{ $t(`sharePage.emptyShare.desc`) }}</p>
         </template>
       </AccessibleEmpty>
-      <router-link to="/subs" class="router-link">
-        <nut-button type="primary">
-          {{ $t(`sharePage.emptyShare.btn`) }}
-        </nut-button>
+      <router-link to="/subs" class="empty-state-action primary">
+        {{ $t(`sharePage.emptyShare.btn`) }}
       </router-link>
     </div>
 
@@ -424,9 +425,10 @@
           </p>
         </template>
       </AccessibleEmpty>
-      <nut-button icon="refresh" type="primary" @click="refresh">
+      <button type="button" class="empty-state-action primary" @click="refresh">
+        <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
         {{ $t(`subPage.loadFailed.btn`) }}
-      </nut-button>
+      </button>
       <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
@@ -450,31 +452,29 @@
       <div class="share-selection-summary">
         {{ $t(`sharePage.selectMode.selectedCount`, { count: selectedShareCount }) }}
       </div>
-      <nut-button plain size="small" type="primary" @click="toggleSelectAllShares">
+      <button type="button" class="selection-action-button secondary" @click="toggleSelectAllShares">
         {{
           isAllSharesSelected
             ? $t(`sharePage.selectMode.clearAll`)
             : $t(`sharePage.selectMode.selectAll`)
         }}
-      </nut-button>
-      <nut-button
-        plain
-        size="small"
-        type="primary"
+      </button>
+      <button
+        type="button"
+        class="selection-action-button secondary"
         :disabled="expiredShareCount === 0"
         @click="selectExpiredShares"
       >
         {{ $t(`sharePage.selectMode.selectExpired`) }}
-      </nut-button>
-      <nut-button
-        size="small"
-        type="danger"
+      </button>
+      <button
+        type="button"
+        class="selection-action-button danger"
         :disabled="selectedShareCount === 0 || isDeletingSelectedShares"
-        :loading="isDeletingSelectedShares"
         @click="confirmDeleteSelectedShares"
       >
         {{ $t(`sharePage.selectMode.delete`) }}
-      </nut-button>
+      </button>
     </div>
   </div>
 </template>
@@ -1299,6 +1299,25 @@ const handleShareDetail = (detail: Share) => {
 
 .share-select-checkbox {
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.share-select-checkbox-indicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid var(--comment-text-color);
+  background: transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &.checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+  }
 }
 
 .share-select-item-content {
@@ -1349,5 +1368,49 @@ const handleShareDetail = (detail: Share) => {
   min-width: 0;
   color: var(--primary-text-color);
   font-weight: bold;
+}
+
+.empty-state-action,
+.selection-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  color: var(--primary-color);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+
+  &.primary {
+    background: var(--primary-color);
+    color: #fff;
+  }
+
+  &.secondary {
+    background: transparent;
+    color: var(--primary-color);
+  }
+
+  &.danger {
+    border-color: var(--danger-color, #d64545);
+    background: var(--danger-color, #d64545);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 3px;
+  }
 }
 </style>

@@ -234,22 +234,6 @@
   <!--      <p class="options-label">-->
   <!--        {{ $t(`editorPage.subConfig.surgeOptions.hybrid.label`) }}-->
   <!--      </p>-->
-  <!--      <div class="radio-wrapper options-radio">-->
-  <!--        <nut-radiogroup-->
-  <!--          direction="horizontal"-->
-  <!--          v-model="options['surge-hybrid']"-->
-  <!--        >-->
-  <!--          <nut-radio label="DEFAULT"-->
-  <!--            >{{ $t(`editorPage.subConfig.surgeOptions.hybrid.default`) }}-->
-  <!--          </nut-radio>-->
-  <!--          <nut-radio label="FORCE_OPEN"-->
-  <!--            >{{ $t(`editorPage.subConfig.surgeOptions.hybrid.open`) }}-->
-  <!--          </nut-radio>-->
-  <!--          <nut-radio label="FORCE_CLOSE"-->
-  <!--            >{{ $t(`editorPage.subConfig.surgeOptions.hybrid.close`) }}-->
-  <!--          </nut-radio>-->
-  <!--        </nut-radiogroup>-->
-  <!--      </div>-->
   <!--    </nut-form-item>-->
   <!--  </nut-form>-->
   <!--</div>-->

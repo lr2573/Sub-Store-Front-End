@@ -82,8 +82,8 @@
             <button
               class="copy-sub-link"
               type="button"
-              :aria-label="a11yText.openItemActions"
-              :title="a11yText.openItemActions"
+              :aria-label="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
+              :title="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
               @click.stop="swipeController"
               v-if="!isMobile()"
               ref="moreAction"
@@ -143,8 +143,8 @@
                   <button
                     class="copy-sub-link"
                     type="button"
-                    :aria-label="a11yText.openItemActions"
-                    :title="a11yText.openItemActions"
+                    :aria-label="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
+                    :title="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
                     @click.stop="swipeController"
                     v-if="!isMobile()"
                     ref="moreAction"
@@ -156,12 +156,20 @@
               <span class="switch-label" v-if="!appearanceSetting.isSimpleMode">
                 {{ $t(`syncPage.syncSwitcher`) }}
               </span>
-              <nut-switch
-                class="my-switch"
-                v-model="isSyncOpen"
-                :loading="isSwitcherLoading"
+              <button
+                type="button"
+                class="native-switch-button"
+                role="switch"
+                :aria-checked="isSyncOpen"
+                :aria-label="$t(`syncPage.syncSwitcher`)"
+                :disabled="isSwitcherLoading"
                 @click.stop
-              />
+                @click="isSyncOpen = !isSyncOpen"
+              >
+                <span class="native-switch-track" :class="{ active: isSyncOpen }">
+                  <span class="native-switch-thumb"></span>
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -778,14 +786,52 @@ watch(isSyncOpen, async () => {
             flex-shrink: 0;
           }
 
-          .my-switch {
-            height: 22px;
-            width: 45px;
-            min-width: 40px;
+          .native-switch-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
 
-            :deep(.switch-button) {
-              width: 18px;
-              height: 18px;
+            &:disabled {
+              opacity: 0.45;
+              cursor: not-allowed;
+            }
+
+            &:focus-visible {
+              outline: 3px solid var(--primary-color);
+              outline-offset: 3px;
+              border-radius: 999px;
+            }
+          }
+
+          .native-switch-track {
+            position: relative;
+            width: 45px;
+            height: 22px;
+            border-radius: 999px;
+            background: var(--divider-color);
+            transition: background-color 0.2s ease;
+
+            &.active {
+              background: var(--primary-color);
+            }
+          }
+
+          .native-switch-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.2s ease;
+
+            .native-switch-track.active & {
+              transform: translateX(23px);
             }
           }
         }

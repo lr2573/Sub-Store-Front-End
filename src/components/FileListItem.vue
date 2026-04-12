@@ -123,8 +123,8 @@
             <button
               class="copy-sub-link"
               type="button"
-              :aria-label="a11yText.openItemActions"
-              :title="a11yText.openItemActions"
+              :aria-label="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
+              :title="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
               @click.stop="swipeController"
               v-if="!isMobile()"
               ref="moreAction"

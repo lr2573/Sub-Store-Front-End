@@ -4,21 +4,39 @@
       <p class="des-label">
         {{ $t(`editorPage.subConfig.nodeActions['${type}'].des[1]`) }}
       </p>
-      <nut-radiogroup direction="horizontal" v-model="mode">
-        <nut-radio v-for="(key, index) in opt[type]" :key="index" :label="key">
+      <div class="native-radio-group three-column" role="radiogroup" :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].des[1]`)">
+        <button
+          v-for="(key, index) in opt[type]"
+          :key="index"
+          type="button"
+          class="native-radio-button"
+          :class="{ current: mode === key }"
+          role="radio"
+          :aria-checked="mode === key"
+          @click="mode = key"
+        >
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].options[${index}]`) }}
-        </nut-radio>
-      </nut-radiogroup>
+        </button>
+      </div>
     </template>
     <template v-if="type === 'Regex Sort Operator'">
       <p class="des-label">
         {{ $t(`editorPage.subConfig.nodeActions['${type}'].des[1]`) }}
       </p>
-      <nut-radiogroup direction="horizontal" v-model="mode">
-        <nut-radio v-for="(key, index) in opt[type]" :key="index" :label="key">
+      <div class="native-radio-group three-column" role="radiogroup" :aria-label="$t(`editorPage.subConfig.nodeActions['${type}'].des[1]`)">
+        <button
+          v-for="(key, index) in opt[type]"
+          :key="index"
+          type="button"
+          class="native-radio-button"
+          :class="{ current: mode === key }"
+          role="radio"
+          :aria-checked="mode === key"
+          @click="mode = key"
+        >
           {{ $t(`editorPage.subConfig.nodeActions['${type}'].options[${index}]`) }}
-        </nut-radio>
-      </nut-radiogroup>
+        </button>
+      </div>
     </template>
     <p class="des-label">
       {{ $t(`editorPage.subConfig.nodeActions['${type}'].des[0]`) }}
@@ -245,10 +263,29 @@ onBeforeRouteLeave(async (to, from, next) => {
   }
 }
 
-.nut-radiogroup {
+.native-radio-group {
   width: 100%;
   display: grid;
+  gap: 8px;
+}
+
+.native-radio-group.three-column {
   grid-template-columns: 1fr 1fr 1fr;
+}
+
+.native-radio-button {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: var(--divider-color);
+  color: var(--second-text-color);
+  text-align: center;
+}
+
+.native-radio-button.current {
+  border-color: var(--primary-color);
+  background: transparent;
+  color: var(--primary-color);
 }
 
 .tag-wrapper {

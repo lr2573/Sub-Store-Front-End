@@ -52,11 +52,18 @@
         </div>
         <div class="switch-wrapper">
           <div class="switch-item">
-            <nut-switch
-              v-model="showCustomIconCollection"
-              class="my-switch"
-              size="mini"
-            />
+            <button
+              type="button"
+              class="native-switch-button"
+              role="switch"
+              :aria-checked="showCustomIconCollection"
+              :aria-label="$t(`iconCollectionPage.useCustomIconCollection`)"
+              @click="showCustomIconCollection = !showCustomIconCollection"
+            >
+              <span class="native-switch-track" :class="{ active: showCustomIconCollection }">
+                <span class="native-switch-thumb"></span>
+              </span>
+            </button>
             <span class="label">
               {{ $t(`iconCollectionPage.useCustomIconCollection`) }}
             </span>
@@ -500,16 +507,6 @@ defineExpose({ show, hide, close });
     padding-top: 20px;
     .switch-item {
       margin-bottom: 10px;
-      .my-switch {
-        height: 22px;
-        width: 45px;
-        min-width: 40px;
-
-        :deep(.switch-button) {
-          width: 18px;
-          height: 18px;
-        }
-      }
       flex-direction: row;
       display: flex;
       justify-content: flex-start;
@@ -523,6 +520,47 @@ defineExpose({ show, hide, close });
         justify-content: space-between;
         align-items: center;
       }
+    }
+  }
+  .native-switch-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 3px;
+      border-radius: 999px;
+    }
+  }
+  .native-switch-track {
+    position: relative;
+    width: 45px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--divider-color);
+    transition: background-color 0.2s ease;
+
+    &.active {
+      background: var(--primary-color);
+    }
+  }
+  .native-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s ease;
+
+    .native-switch-track.active & {
+      transform: translateX(23px);
     }
   }
   .icon-list-section {

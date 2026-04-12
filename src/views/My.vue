@@ -13,13 +13,7 @@
         >{{$t(`myPage.storage.${i.value}.label`) }}</button>
         <p class="storage-info">{{ $t(`myPage.storage.${storageType}.info`) }}</p>
       </div>
-      <!-- <div class="radio-wrapper" >
-        <nut-radiogroup v-model="storageType" direction="horizontal">
-          <nut-radio shape="button" label="gist">{{ $t(`myPage.storage.gist.label`) }}</nut-radio>
-          <nut-radio shape="button" label="manual">{{ $t(`myPage.storage.manual.label`) }}</nut-radio>
-        </nut-radiogroup>
-      </div> -->
-    
+
       <div class="info">
         <div v-if="storageType === 'manual'" class="avatar-wrapper">
           <nut-avatar
@@ -475,50 +469,61 @@
         </div>
       </div>
 
-      <nut-cell-group v-if="shareBtnVisible">
-        <nut-cell
-          :title="$t(`moreSettingPage.shareManageTitle`)"
-          class="right-icon"
-          @click.stop="onClickShareManage"
-          is-link
-        ></nut-cell>
-        <nut-cell
+      <div v-if="shareBtnVisible" class="settings-nav-group">
+        <button
+          type="button"
+          class="settings-nav-button"
+          @click="onClickShareManage"
+        >
+          <span>{{ $t(`moreSettingPage.shareManageTitle`) }}</span>
+          <nut-icon name="right"></nut-icon>
+        </button>
+        <button
           v-if="archiveVisible"
-          :title="$t(`moreSettingPage.archiveTitle`)"
-          class="right-icon"
-          @click.stop="onClickArchive"
-          is-link
-        ></nut-cell>
-      </nut-cell-group>
-      <nut-cell-group v-else-if="archiveVisible">
-        <nut-cell
-          :title="$t(`moreSettingPage.archiveTitle`)"
-          class="right-icon"
-          @click.stop="onClickArchive"
-          is-link
-        ></nut-cell>
-      </nut-cell-group>
-      <nut-cell-group>
-        <nut-cell
-          :title="$t(`apiSettingPage.apiSettingTitle`)"
-          class="right-icon"
-          @click.stop="onClickAPISetting"
-          is-link
-        ></nut-cell>
-        <nut-cell
-          :title="$t(`moreSettingPage.moreSettingTitle`)"
-          class="right-icon"
-          @click.stop="onClickMore"
-          is-link
-        ></nut-cell>
-
-        <nut-cell
-          :title="$t(`navBar.pagesTitle.aboutUs`)"
-          class="right-icon"
-          @click.stop="onClickAbout"
-          is-link
-        ></nut-cell>
-      </nut-cell-group>
+          type="button"
+          class="settings-nav-button"
+          @click="onClickArchive"
+        >
+          <span>{{ $t(`moreSettingPage.archiveTitle`) }}</span>
+          <nut-icon name="right"></nut-icon>
+        </button>
+      </div>
+      <div v-else-if="archiveVisible" class="settings-nav-group">
+        <button
+          type="button"
+          class="settings-nav-button"
+          @click="onClickArchive"
+        >
+          <span>{{ $t(`moreSettingPage.archiveTitle`) }}</span>
+          <nut-icon name="right"></nut-icon>
+        </button>
+      </div>
+      <div class="settings-nav-group">
+        <button
+          type="button"
+          class="settings-nav-button"
+          @click="onClickAPISetting"
+        >
+          <span>{{ $t(`apiSettingPage.apiSettingTitle`) }}</span>
+          <nut-icon name="right"></nut-icon>
+        </button>
+        <button
+          type="button"
+          class="settings-nav-button"
+          @click="onClickMore"
+        >
+          <span>{{ $t(`moreSettingPage.moreSettingTitle`) }}</span>
+          <nut-icon name="right"></nut-icon>
+        </button>
+        <button
+          type="button"
+          class="settings-nav-button"
+          @click="onClickAbout"
+        >
+          <span>{{ $t(`navBar.pagesTitle.aboutUs`) }}</span>
+          <nut-icon name="right"></nut-icon>
+        </button>
+      </div>
     </div>
 
     <div class="env-block">
@@ -1376,10 +1381,40 @@ const setTag = (current) => {
       }
     }
 
-    .right-icon {
-      // color: var(--comment-text-color);
-      box-shadow: none;
+    .settings-nav-group {
+      margin-top: 10px;
+      border-radius: var(--item-card-radios);
+      overflow: hidden;
+      background: var(--card-color);
+    }
+
+    .settings-nav-button {
+      width: 100%;
+      min-height: 56px;
+      padding: 0 16px;
+      border: 0;
+      background: transparent;
+      color: var(--primary-text-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+      font-size: 14px;
       font-weight: bold;
+      cursor: pointer;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--divider-color);
+      }
+
+      :deep(.nut-icon) {
+        color: var(--comment-text-color);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--primary-color);
+        outline-offset: -2px;
+      }
     }
   }
 
