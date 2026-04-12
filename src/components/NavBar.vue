@@ -94,10 +94,12 @@
           </button>
           <button
             type="button"
+            ref="langSwitchTriggerRef"
             class="icon-button-reset nav-icon-button navBar-right-icon fa-lg"
             :aria-label="a11yText.language"
             :title="t('navBar.langSwitcher.cellTitle')"
             :aria-expanded="showLangSwitchPopup ? 'true' : 'false'"
+            aria-controls="nav-language-popup"
             @click.stop="showLangSwitchPopup = true"
           >
             <font-awesome-icon aria-hidden="true" icon="fa-solid fa-language" />
@@ -115,37 +117,39 @@
     :style="{ paddingTop: 'env(safe-area-inset-top)' }"
     :aria-label="t('navBar.langSwitcher.cellTitle')"
   >
-    <nut-cell-group>
-      <div
-        style="
-          color: var(--comment-text-color);
-          padding: 10px 0 10px 15px;
-          font-size: 14px;
-        "
-      >
+    <div
+      id="nav-language-popup"
+      class="nav-language-switch-popup"
+      role="radiogroup"
+      :aria-label="t(`navBar.langSwitcher.cellTitle`)"
+    >
+      <div class="nav-language-switch-heading">
         {{ $t(`navBar.langSwitcher.cellTitle`) }}
       </div>
-      <nut-cell
+      <button
         v-for="lang in langList"
-        :title="$t(`navBar.langSwitcher.${lang}`)"
-        @click="changeLang(lang)"
         :key="lang"
+        type="button"
+        class="nav-language-option"
         :class="{ selected: lang === locale }"
+        role="radio"
+        :aria-checked="lang === locale"
+        :ref="(el) => setLangOptionRef(lang, el)"
+        @click="changeLang(lang)"
       >
-        <template v-slot:icon>
-          <font-awesome-icon
-            v-if="lang === locale"
-            class="fa-lg"
-            icon="fa-solid fa-check"
-          />
-        </template>
-      </nut-cell>
-    </nut-cell-group>
+        <span>{{ $t(`navBar.langSwitcher.${lang}`) }}</span>
+        <font-awesome-icon
+          v-if="lang === locale"
+          class="fa-lg"
+          icon="fa-solid fa-check"
+        />
+      </button>
+    </div>
   </nut-popup>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect, onMounted } from "vue";
+import { computed, nextTick, onMounted, ref, watch, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useGlobalStore } from "@/store/global";
@@ -171,6 +175,8 @@ const globalStore = useGlobalStore();
 const systemStore = useSystemStore();
 const showLangSwitchPopup = ref(false);
 const langList = ["zh", "en"];
+const langSwitchTriggerRef = ref<HTMLButtonElement | null>(null);
+const langOptionRefs = ref<Record<string, HTMLButtonElement | null>>({});
 const settingsStore = useSettingsStore();
 const { changeAppearanceSetting } = settingsStore;
 const { appearanceSetting } = storeToRefs(settingsStore);
@@ -225,6 +231,19 @@ const changeLang = (type: string) => {
   localStorage.setItem("locale", type);
   showLangSwitchPopup.value = false;
 };
+
+const setLangOptionRef = (lang: string, el: any) => {
+  langOptionRefs.value[lang] = el as HTMLButtonElement | null;
+};
+
+watch(showLangSwitchPopup, async (visible) => {
+  await nextTick();
+  if (visible) {
+    (langOptionRefs.value[locale.value] || langOptionRefs.value[langList[0]])?.focus();
+    return;
+  }
+  langSwitchTriggerRef.value?.focus();
+});
 
 const add = (route: any) => {
   const routePath = route.path;
@@ -429,37 +448,41 @@ const refresh = async () => {
   }
 }
 
-.nav-bar-lang-switch-popup > .nut-cell-group {
+.nav-language-switch-popup {
   width: 100%;
-
   background-color: var(--popup-color);
+}
 
-  > .nut-cell-group__title {
-    color: var(--comment-text-color);
+.nav-language-switch-heading {
+  color: var(--comment-text-color);
+  padding: 10px 0 10px 15px;
+  font-size: 14px;
+}
+
+.nav-language-option {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-top: 1px solid var(--divider-color);
+  background: var(--popup-color);
+  color: var(--primary-text-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
   }
 
-  > .nut-cell-group__warp {
-    background-color: var(--popup-color);
-
-    > .nut-cell {
-      background-color: var(--popup-color);
-
-      &::after {
-        border-color: var(--divider-color);
-      }
-    }
-
-    > .nut-cell:not(.selected) {
-      color: var(--primary-text-color);
-    }
-  }
-
-  .selected.nut-cell {
+  &.selected {
     color: var(--primary-color);
     font-weight: bold;
     display: flex;
     align-items: center;
-    flex-direction: row-reverse;
   }
 }
 

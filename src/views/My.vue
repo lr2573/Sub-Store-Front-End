@@ -69,42 +69,37 @@
           <!-- <input type="file" @change="uploadFile" /> -->
           <!-- accept="application/json,text/json,.json"  -->
           <input type="file" ref="fileInput" @change="fileChange" style="display: none">
-          <nut-button
-            class="upload-btn"
-            plain
-            type="primary"
+          <button
+            type="button"
+            class="my-action-button my-action-button--plain my-action-button--small upload-btn"
             :disabled="restoreIsLoading"
-            size="small"
-            :loading="restoreIsLoading"
+            :aria-busy="restoreIsLoading ? 'true' : 'false'"
             @click="upload()"
           >
             <font-awesome-icon
               icon="fa-solid fa-cloud-arrow-up"
-              v-if="!uploadIsLoading"
+              v-if="!restoreIsLoading"
             />
             {{ $t(`myPage.storage.manual.restore`) }}
-          </nut-button>
-          <a :href="host + '/api/storage'" target="_blank" rel="noreferrer noopener">
-            <nut-button
-              class="download-btn"
-              type="primary"
-              size="small"
-            >
-              <font-awesome-icon
-                icon="fa-solid fa-cloud-arrow-down"
-              />
-              {{ $t(`myPage.storage.manual.backup`) }}
-            </nut-button>
+          </button>
+          <a
+            :href="host + '/api/storage'"
+            target="_blank"
+            rel="noreferrer noopener"
+            class="my-action-button my-action-button--primary my-action-button--small download-btn"
+          >
+            <font-awesome-icon
+              icon="fa-solid fa-cloud-arrow-down"
+            />
+            {{ $t(`myPage.storage.manual.backup`) }}
           </a>
         </div>
         <div v-else class="actions">
-          <nut-button
-            class="upload-btn"
-            plain
-            type="primary"
+          <button
+            type="button"
+            class="my-action-button my-action-button--plain my-action-button--small upload-btn"
             :disabled="syncIsDisabled"
-            size="small"
-            :loading="uploadIsLoading"
+            :aria-busy="uploadIsLoading ? 'true' : 'false'"
             @click="uploadBtn"
           >
             <font-awesome-icon
@@ -112,13 +107,12 @@
               v-if="!uploadIsLoading"
             />
             {{ $t(`myPage.btn.upload`) }}
-          </nut-button>
-          <nut-button
-            class="download-btn"
-            type="primary"
-            size="small"
+          </button>
+          <button
+            type="button"
+            class="my-action-button my-action-button--primary my-action-button--small download-btn"
             :disabled="syncIsDisabled"
-            :loading="downloadIsLoading"
+            :aria-busy="downloadIsLoading ? 'true' : 'false'"
             @click="downloadBtn"
           >
             <font-awesome-icon
@@ -126,7 +120,7 @@
               icon="fa-solid fa-cloud-arrow-down"
             />
             {{ $t(`myPage.btn.download`) }}
-          </nut-button>
+          </button>
         </div>
       </div>
       <div class="config-card" v-if="storageType !== 'manual'" >
@@ -142,25 +136,23 @@
             </button>
           </h2>
           <div class="config-btn-wrapper">
-            <nut-button
+            <button
               v-if="isGitHubConfigEditing"
-              class="cancel-btn"
-              plain
-              type="info"
-              size="mini"
+              type="button"
+              class="config-action-button config-action-button--plain cancel-btn"
               @click.stop="exitEditMode('github')"
               :disabled="isEditLoading"
             >
               <font-awesome-icon icon="fa-solid fa-ban" />
               {{ $t(`myPage.btn.cancel`) }}
-            </nut-button>
-            <nut-button
+            </button>
+            <button
               v-if="isGitHubConfigEditing"
-              class="save-btn"
-              type="primary"
-              size="mini"
+              type="button"
+              class="config-action-button config-action-button--primary save-btn"
               @click.stop="toggleEditMode('github')"
-              :loading="isEditLoading"
+              :disabled="isEditLoading"
+              :aria-busy="isEditLoading ? 'true' : 'false'"
             >
               <font-awesome-icon
                 v-if="!isGitHubConfigEditing"
@@ -171,7 +163,7 @@
                 icon="fa-solid fa-floppy-disk"
               />
               {{ !isGitHubConfigEditing ? $t(`myPage.btn.edit`) : $t(`myPage.btn.save`) }}
-            </nut-button>
+            </button>
             <nut-icon v-else class="right-icon" name="right"></nut-icon>
           </div>
         </div>
@@ -260,25 +252,23 @@
             </button>
           </h2>
           <div class="config-btn-wrapper">
-            <nut-button
+            <button
               v-if="isRequestConfigEditing"
-              class="cancel-btn"
-              plain
-              type="info"
-              size="mini"
+              type="button"
+              class="config-action-button config-action-button--plain cancel-btn"
               @click.stop="exitEditMode('request')"
               :disabled="isEditLoading"
             >
               <font-awesome-icon icon="fa-solid fa-ban" />
               {{ $t(`myPage.btn.cancel`) }}
-            </nut-button>
-            <nut-button
+            </button>
+            <button
              v-if="isRequestConfigEditing"
-              class="save-btn"
-              type="primary"
-              size="mini"
+              type="button"
+              class="config-action-button config-action-button--primary save-btn"
               @click.stop="toggleEditMode('request')"
-              :loading="isEditLoading"
+              :disabled="isEditLoading"
+              :aria-busy="isEditLoading ? 'true' : 'false'"
             >
               <font-awesome-icon
                 v-if="!isRequestConfigEditing"
@@ -289,7 +279,7 @@
                 icon="fa-solid fa-floppy-disk"
               />
               {{ !isRequestConfigEditing ? $t(`myPage.btn.edit`) : $t(`myPage.btn.save`) }}
-            </nut-button>
+            </button>
              <nut-icon v-else class="right-icon" name="right"></nut-icon>
           </div>
         </div>
@@ -375,25 +365,23 @@
             </button>
           </h2>
           <div class="config-btn-wrapper">
-            <nut-button
+            <button
               v-if="isCacheConfigEditing"
-              class="cancel-btn"
-              plain
-              type="info"
-              size="mini"
+              type="button"
+              class="config-action-button config-action-button--plain cancel-btn"
               @click.stop="exitEditMode('cache')"
               :disabled="isEditLoading"
             >
               <font-awesome-icon icon="fa-solid fa-ban" />
               {{ $t(`myPage.btn.cancel`) }}
-            </nut-button>
-            <nut-button
+            </button>
+            <button
               v-if="isCacheConfigEditing"
-              class="save-btn"
-              type="primary"
-              size="mini"
+              type="button"
+              class="config-action-button config-action-button--primary save-btn"
               @click.stop="toggleEditMode('cache')"
-              :loading="isEditLoading"
+              :disabled="isEditLoading"
+              :aria-busy="isEditLoading ? 'true' : 'false'"
             >
               <font-awesome-icon
                 v-if="!isCacheConfigEditing"
@@ -404,7 +392,7 @@
                 icon="fa-solid fa-floppy-disk"
               />
               {{ !isCacheConfigEditing ? $t(`myPage.btn.edit`) : $t(`myPage.btn.save`) }}
-            </nut-button>
+            </button>
             <nut-icon v-else class="right-icon" name="right"></nut-icon>
           </div>
         </div>
@@ -513,25 +501,23 @@
             </button>
           </h2>
           <div class="config-btn-wrapper">
-            <nut-button
+            <button
               v-if="isFrontEndConfigEditing"
-              class="cancel-btn"
-              plain
-              type="info"
-              size="mini"
+              type="button"
+              class="config-action-button config-action-button--plain cancel-btn"
               @click.stop="exitEditMode('frontEnd')"
               :disabled="isEditLoading"
             >
               <font-awesome-icon icon="fa-solid fa-ban" />
               {{ $t(`myPage.btn.cancel`) }}
-            </nut-button>
-            <nut-button
+            </button>
+            <button
               v-if="isFrontEndConfigEditing"
-              class="save-btn"
-              type="primary"
-              size="mini"
+              type="button"
+              class="config-action-button config-action-button--primary save-btn"
               @click.stop="toggleEditMode('frontEnd')"
-              :loading="isEditLoading"
+              :disabled="isEditLoading"
+              :aria-busy="isEditLoading ? 'true' : 'false'"
             >
               <font-awesome-icon
                 v-if="!isFrontEndConfigEditing"
@@ -542,7 +528,7 @@
                 icon="fa-solid fa-floppy-disk"
               />
               {{ !isFrontEndConfigEditing ? $t(`myPage.btn.edit`) : $t(`myPage.btn.save`) }}
-            </nut-button>
+            </button>
             <nut-icon v-else class="right-icon" name="right"></nut-icon>
           </div>
         </div>
@@ -1519,6 +1505,40 @@ const setTag = (current) => {
         display: flex;
         justify-content: flex-end;
 
+        .config-action-button {
+          min-height: 28px;
+          padding: 0 10px;
+          border-radius: 999px;
+          border: 1px solid transparent;
+          font-size: 12px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          cursor: pointer;
+        }
+
+        .config-action-button--plain {
+          background: transparent;
+          color: var(--second-text-color);
+          border-color: var(--divider-color);
+        }
+
+        .config-action-button--primary {
+          background: var(--primary-color);
+          color: #fff;
+        }
+
+        .config-action-button:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+
+        .config-action-button:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
+
         .cancel-btn {
           background: transparent;
         }
@@ -1593,6 +1613,40 @@ const setTag = (current) => {
         margin-left: 12px;
         display: flex;
         flex-direction: column;
+
+        .my-action-button {
+          min-height: 32px;
+          border-radius: 999px;
+          border: 1px solid transparent;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          text-decoration: none;
+          font-size: 13px;
+          cursor: pointer;
+        }
+
+        .my-action-button--plain {
+          background: transparent;
+          color: var(--primary-color);
+          border-color: var(--primary-color);
+        }
+
+        .my-action-button--primary {
+          background: var(--primary-color);
+          color: #fff;
+        }
+
+        .my-action-button:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+
+        .my-action-button:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
 
         svg {
           margin-right: 4px;

@@ -187,31 +187,34 @@
     </div>
 
     <template v-if="appearanceSetting.isLeftRight" #left>
-      <div class="sub-item-swipe-btn-wrapper">
+      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
         <nut-button
           shape="square"
           type="primary"
           class="sub-item-swipe-btn"
+          :disabled="!swipeIsOpen"
           @click="onClickSync"
         >
           <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
         </nut-button>
       </div>
-      <div class="sub-item-swipe-btn-wrapper">
+      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
         <nut-button
           shape="square"
           type="warning"
           class="sub-item-swipe-btn"
+          :disabled="!swipeIsOpen"
           @click="onClickEdit"
         >
           <font-awesome-icon icon="fa-solid fa-pen-nib" />
         </nut-button>
       </div>
-      <div class="sub-item-swipe-btn-wrapper">
+      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
         <nut-button
           shape="square"
           type="danger"
           class="sub-item-swipe-btn"
+          :disabled="!swipeIsOpen"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
@@ -220,31 +223,34 @@
     </template>
 
     <template v-else #right>
-      <div class="sub-item-swipe-btn-wrapper">
+      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
         <nut-button
           shape="square"
           type="primary"
           class="sub-item-swipe-btn"
+          :disabled="!swipeIsOpen"
           @click="onClickSync"
         >
           <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
         </nut-button>
       </div>
-      <div class="sub-item-swipe-btn-wrapper">
+      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
         <nut-button
           shape="square"
           type="warning"
           class="sub-item-swipe-btn"
+          :disabled="!swipeIsOpen"
           @click="onClickEdit"
         >
           <font-awesome-icon icon="fa-solid fa-pen-nib" />
         </nut-button>
       </div>
-      <div class="sub-item-swipe-btn-wrapper">
+      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
         <nut-button
           shape="square"
           type="danger"
           class="sub-item-swipe-btn"
+          :disabled="!swipeIsOpen"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
