@@ -130,16 +130,17 @@
         </div>
       </div>
       <div class="config-card" v-if="storageType !== 'manual'" >
-        <div
-          class="title-wrapper"
-          role="button"
-          tabindex="0"
-          :aria-expanded="isGitHubConfigEditing"
-          @click="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')"
-          @keydown.enter.prevent="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')"
-          @keydown.space.prevent="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')"
-        >
-          <h1>{{ $t(`myPage.githubConfig`) }}</h1>
+        <div class="title-wrapper">
+          <h2 class="config-heading">
+            <button
+              type="button"
+              class="title-toggle"
+              :aria-expanded="isGitHubConfigEditing"
+              @click="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')"
+            >
+              {{ $t(`myPage.githubConfig`) }}
+            </button>
+          </h2>
           <div class="config-btn-wrapper">
             <nut-button
               v-if="isGitHubConfigEditing"
@@ -176,6 +177,7 @@
         </div>
         <div class="config-input-wrapper" v-if="isGitHubConfigEditing">
           <nut-input
+            ref="githubUserInputRef"
             class="input"
             v-model="userInput"
             :disabled="!isGitHubConfigEditing"
@@ -189,6 +191,7 @@
             </template> -->
           </nut-input>
           <nut-input
+            ref="gistTokenInputRef"
             class="input"
             v-model="tokenInput"
             :disabled="!isGitHubConfigEditing"
@@ -197,42 +200,65 @@
             input-align="left"
             :left-icon="iconKey"
           />
-          <nut-input
-            class="input"
-            v-model="githubProxyInput"
-            :disabled="!isGitHubConfigEditing"
-            :placeholder="$t(`myPage.placeholder.githubProxy`)"
-            type="text"
-            input-align="left"
-            :left-icon="icongithubProxy"
-            right-icon="tips"
-            @click-right-icon="githubProxyTips"
-          />
-          <nut-input
-            class="input"
-            v-model="githubProxyRegexInput"
-            :disabled="!isGitHubConfigEditing"
-            :placeholder="$t(`myPage.placeholder.githubProxyRegex`)"
-            type="text"
-            input-align="left"
-            :left-icon="icongithubProxy"
-            right-icon="tips"
-            @click-right-icon="githubProxyRegexTips"
-          />
+          <div class="input-with-help">
+            <nut-input
+              ref="githubProxyInputRef"
+              class="input"
+              v-model="githubProxyInput"
+              :disabled="!isGitHubConfigEditing"
+              :placeholder="$t(`myPage.placeholder.githubProxy`)"
+              type="text"
+              input-align="left"
+              :left-icon="icongithubProxy"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isGitHubConfigEditing"
+              :aria-label="githubProxyHelpLabel"
+              :title="githubProxyHelpLabel"
+              @click="githubProxyTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="githubProxyRegexInputRef"
+              class="input"
+              v-model="githubProxyRegexInput"
+              :disabled="!isGitHubConfigEditing"
+              :placeholder="$t(`myPage.placeholder.githubProxyRegex`)"
+              type="text"
+              input-align="left"
+              :left-icon="icongithubProxy"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isGitHubConfigEditing"
+              :aria-label="githubProxyRegexHelpLabel"
+              :title="githubProxyRegexHelpLabel"
+              @click="githubProxyRegexTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
           
         </div>
       </div>
       <div class="config-card">
-        <div
-          class="title-wrapper"
-          role="button"
-          tabindex="0"
-          :aria-expanded="isRequestConfigEditing"
-          @click="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')"
-          @keydown.enter.prevent="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')"
-          @keydown.space.prevent="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')"
-        >
-          <h1>{{ $t(`myPage.requestConfig`) }}</h1>
+        <div class="title-wrapper">
+          <h2 class="config-heading">
+            <button
+              type="button"
+              class="title-toggle"
+              :aria-expanded="isRequestConfigEditing"
+              @click="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')"
+            >
+              {{ $t(`myPage.requestConfig`) }}
+            </button>
+          </h2>
           <div class="config-btn-wrapper">
             <nut-button
               v-if="isRequestConfigEditing"
@@ -268,52 +294,86 @@
           </div>
         </div>
         <div class="config-input-wrapper" v-if="isRequestConfigEditing">
-          <nut-input
-            class="input"
-            v-model="proxyInput"
-            :disabled="!isRequestConfigEditing"
-            :placeholder="$t(`myPage.placeholder.defaultProxy`)"
-            type="text"
-            input-align="left"
-            :left-icon="iconProxy"
-            right-icon="tips"
-            @click-right-icon="proxyTips"
-          />
-          <nut-input
-            class="input"
-            v-model="uaInput"
-            :disabled="!isRequestConfigEditing"
-            :placeholder="$t(`myPage.placeholder.defaultUserAgent`)"
-            type="text"
-            input-align="left"
-            :left-icon="iconUA"
-            right-icon="tips"
-            @click-right-icon="uaTips"
-          />
-          <nut-input
-            class="input"
-            v-model="timeoutInput"
-            :disabled="!isRequestConfigEditing"
-            :placeholder="$t(`myPage.placeholder.defaultTimeout`)"
-            type="number"
-            input-align="left"
-            :left-icon="iconTimeout"
-            right-icon="tips"
-            @click-right-icon="timeoutTips"
-          />
+          <div class="input-with-help">
+            <nut-input
+              ref="defaultProxyInputRef"
+              class="input"
+              v-model="proxyInput"
+              :disabled="!isRequestConfigEditing"
+              :placeholder="$t(`myPage.placeholder.defaultProxy`)"
+              type="text"
+              input-align="left"
+              :left-icon="iconProxy"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isRequestConfigEditing"
+              :aria-label="defaultProxyHelpLabel"
+              :title="defaultProxyHelpLabel"
+              @click="proxyTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="defaultUserAgentInputRef"
+              class="input"
+              v-model="uaInput"
+              :disabled="!isRequestConfigEditing"
+              :placeholder="$t(`myPage.placeholder.defaultUserAgent`)"
+              type="text"
+              input-align="left"
+              :left-icon="iconUA"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isRequestConfigEditing"
+              :aria-label="defaultUserAgentHelpLabel"
+              :title="defaultUserAgentHelpLabel"
+              @click="uaTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="defaultTimeoutInputRef"
+              class="input"
+              v-model="timeoutInput"
+              :disabled="!isRequestConfigEditing"
+              :placeholder="$t(`myPage.placeholder.defaultTimeout`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconTimeout"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isRequestConfigEditing"
+              :aria-label="defaultTimeoutHelpLabel"
+              :title="defaultTimeoutHelpLabel"
+              @click="timeoutTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
         </div>
       </div>
       <div class="config-card">
-        <div
-          class="title-wrapper"
-          role="button"
-          tabindex="0"
-          :aria-expanded="isCacheConfigEditing"
-          @click="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')"
-          @keydown.enter.prevent="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')"
-          @keydown.space.prevent="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')"
-        >
-          <h1>{{ $t(`myPage.cacheConfig`) }}</h1>
+        <div class="title-wrapper">
+          <h2 class="config-heading">
+            <button
+              type="button"
+              class="title-toggle"
+              :aria-expanded="isCacheConfigEditing"
+              @click="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')"
+            >
+              {{ $t(`myPage.cacheConfig`) }}
+            </button>
+          </h2>
           <div class="config-btn-wrapper">
             <nut-button
               v-if="isCacheConfigEditing"
@@ -350,63 +410,108 @@
         </div>
         <div class="config-input-wrapper" v-if="isCacheConfigEditing">
         
-          <nut-input
-            class="input"
-            v-model="cacheThresholdInput"
-            :disabled="!isCacheConfigEditing"
-            :placeholder="$t(`myPage.placeholder.cacheThreshold`)"
-            type="number"
-            input-align="left"
-            :left-icon="iconMax"
-            right-icon="tips"
-            @click-right-icon="cacheThresholdTips"
-          />
-          <nut-input
-            class="input"
-            v-model="resourceCacheTtlInput"
-            :disabled="!isCacheConfigEditing"
-            :placeholder="$t(`myPage.placeholder.resourceCacheTtl`)"
-            type="number"
-            input-align="left"
-            :left-icon="iconResourceCacheTtl"
-            right-icon="tips"
-            @click-right-icon="resourceCacheTtlTips"
-          />
-          <nut-input
-            class="input"
-            v-model="headersCacheTtlInput"
-            :disabled="!isCacheConfigEditing"
-            :placeholder="$t(`myPage.placeholder.headersCacheTtl`)"
-            type="number"
-            input-align="left"
-            :left-icon="iconHeadersCacheTtl"
-            right-icon="tips"
-            @click-right-icon="headersCacheTtlTips"
-          />
-          <nut-input
-            class="input"
-            v-model="scriptCacheTtlInput"
-            :disabled="!isCacheConfigEditing"
-            :placeholder="$t(`myPage.placeholder.scriptCacheTtl`)"
-            type="number"
-            input-align="left"
-            :left-icon="iconScriptCacheTtl"
-            right-icon="tips"
-            @click-right-icon="scriptCacheTtlTips"
-          />
+          <div class="input-with-help">
+            <nut-input
+              ref="cacheThresholdInputRef"
+              class="input"
+              v-model="cacheThresholdInput"
+              :disabled="!isCacheConfigEditing"
+              :placeholder="$t(`myPage.placeholder.cacheThreshold`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconMax"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isCacheConfigEditing"
+              :aria-label="cacheThresholdHelpLabel"
+              :title="cacheThresholdHelpLabel"
+              @click="cacheThresholdTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="resourceCacheTtlInputRef"
+              class="input"
+              v-model="resourceCacheTtlInput"
+              :disabled="!isCacheConfigEditing"
+              :placeholder="$t(`myPage.placeholder.resourceCacheTtl`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconResourceCacheTtl"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isCacheConfigEditing"
+              :aria-label="resourceCacheTtlHelpLabel"
+              :title="resourceCacheTtlHelpLabel"
+              @click="resourceCacheTtlTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="headersCacheTtlInputRef"
+              class="input"
+              v-model="headersCacheTtlInput"
+              :disabled="!isCacheConfigEditing"
+              :placeholder="$t(`myPage.placeholder.headersCacheTtl`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconHeadersCacheTtl"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isCacheConfigEditing"
+              :aria-label="headersCacheTtlHelpLabel"
+              :title="headersCacheTtlHelpLabel"
+              @click="headersCacheTtlTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="scriptCacheTtlInputRef"
+              class="input"
+              v-model="scriptCacheTtlInput"
+              :disabled="!isCacheConfigEditing"
+              :placeholder="$t(`myPage.placeholder.scriptCacheTtl`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconScriptCacheTtl"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isCacheConfigEditing"
+              :aria-label="scriptCacheTtlHelpLabel"
+              :title="scriptCacheTtlHelpLabel"
+              @click="scriptCacheTtlTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
         </div>
       </div>
       <div class="config-card">
-        <div
-          class="title-wrapper"
-          role="button"
-          tabindex="0"
-          :aria-expanded="isFrontEndConfigEditing"
-          @click="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')"
-          @keydown.enter.prevent="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')"
-          @keydown.space.prevent="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')"
-        >
-          <h1>{{ $t(`myPage.frontEndConfig`) }}</h1>
+        <div class="title-wrapper">
+          <h2 class="config-heading">
+            <button
+              type="button"
+              class="title-toggle"
+              :aria-expanded="isFrontEndConfigEditing"
+              @click="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')"
+            >
+              {{ $t(`myPage.frontEndConfig`) }}
+            </button>
+          </h2>
           <div class="config-btn-wrapper">
             <nut-button
               v-if="isFrontEndConfigEditing"
@@ -443,28 +548,50 @@
         </div>
         <div class="config-input-wrapper" v-if="isFrontEndConfigEditing">
         
-          <nut-input
-            class="input"
-            v-model="concurrencyInput"
-            :disabled="!isFrontEndConfigEditing"
-            :placeholder="$t(`myPage.placeholder.concurrency`)"
-            type="number"
-            input-align="left"
-            :left-icon="iconConcurrency"
-            right-icon="tips"
-            @click-right-icon="concurrencyTips"
-          />
-          <nut-input
-            class="input"
-            v-model="apiCheckTimeoutInput"
-            :disabled="!isFrontEndConfigEditing"
-            :placeholder="$t(`myPage.placeholder.apiCheckTimeout`)"
-            type="number"
-            input-align="left"
-            :left-icon="iconTimeout"
-            right-icon="tips"
-            @click-right-icon="apiCheckTimeoutTips"
-          />
+          <div class="input-with-help">
+            <nut-input
+              ref="concurrencyInputRef"
+              class="input"
+              v-model="concurrencyInput"
+              :disabled="!isFrontEndConfigEditing"
+              :placeholder="$t(`myPage.placeholder.concurrency`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconConcurrency"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isFrontEndConfigEditing"
+              :aria-label="concurrencyHelpLabel"
+              :title="concurrencyHelpLabel"
+              @click="concurrencyTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="apiCheckTimeoutInputRef"
+              class="input"
+              v-model="apiCheckTimeoutInput"
+              :disabled="!isFrontEndConfigEditing"
+              :placeholder="$t(`myPage.placeholder.apiCheckTimeout`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconTimeout"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isFrontEndConfigEditing"
+              :aria-label="apiCheckTimeoutHelpLabel"
+              :title="apiCheckTimeoutHelpLabel"
+              @click="apiCheckTimeoutTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
         
         </div>
       </div>
@@ -567,14 +694,15 @@ import { butifyDate } from "@/utils/butifyDate";
 import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
 import { initStores } from "@/utils/initApp";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch, watchEffect } from "vue";
+import { computed, nextTick, onMounted, ref, watch, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useBackend } from "@/hooks/useBackend";
 import { useHostAPI } from '@/hooks/useHostAPI';
+import { syncInnerInputA11y } from '@/hooks/useA11y';
 import { Dialog, Toast } from '@nutui/nutui';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 // const route = useRoute();
 const router = useRouter();
@@ -704,6 +832,53 @@ const isEditLoading = ref(false);
 const isInit = ref(false);
 const storageType = ref('gist');
 const fileInput = ref(null);
+const githubUserInputRef = ref(null);
+const gistTokenInputRef = ref(null);
+const githubProxyInputRef = ref(null);
+const githubProxyRegexInputRef = ref(null);
+const defaultProxyInputRef = ref(null);
+const defaultUserAgentInputRef = ref(null);
+const defaultTimeoutInputRef = ref(null);
+const cacheThresholdInputRef = ref(null);
+const resourceCacheTtlInputRef = ref(null);
+const headersCacheTtlInputRef = ref(null);
+const scriptCacheTtlInputRef = ref(null);
+const concurrencyInputRef = ref(null);
+const apiCheckTimeoutInputRef = ref(null);
+
+const createHelpLabel = (key: string) => computed(() => {
+  const label = t(key);
+  return locale.value.startsWith('zh') ? `查看${label}帮助` : `Open help for ${label}`;
+});
+
+const githubProxyHelpLabel = createHelpLabel(`myPage.placeholder.githubProxy`);
+const githubProxyRegexHelpLabel = createHelpLabel(`myPage.placeholder.githubProxyRegex`);
+const defaultProxyHelpLabel = createHelpLabel(`myPage.placeholder.defaultProxy`);
+const defaultUserAgentHelpLabel = createHelpLabel(`myPage.placeholder.defaultUserAgent`);
+const defaultTimeoutHelpLabel = createHelpLabel(`myPage.placeholder.defaultTimeout`);
+const cacheThresholdHelpLabel = createHelpLabel(`myPage.placeholder.cacheThreshold`);
+const resourceCacheTtlHelpLabel = createHelpLabel(`myPage.placeholder.resourceCacheTtl`);
+const headersCacheTtlHelpLabel = createHelpLabel(`myPage.placeholder.headersCacheTtl`);
+const scriptCacheTtlHelpLabel = createHelpLabel(`myPage.placeholder.scriptCacheTtl`);
+const concurrencyHelpLabel = createHelpLabel(`myPage.placeholder.concurrency`);
+const apiCheckTimeoutHelpLabel = createHelpLabel(`myPage.placeholder.apiCheckTimeout`);
+
+const updateInputA11y = async () => {
+  await nextTick();
+  syncInnerInputA11y(githubUserInputRef.value, { label: t(`myPage.placeholder.githubUser`) });
+  syncInnerInputA11y(gistTokenInputRef.value, { label: t(`myPage.placeholder.gistToken`) });
+  syncInnerInputA11y(githubProxyInputRef.value, { label: t(`myPage.placeholder.githubProxy`) });
+  syncInnerInputA11y(githubProxyRegexInputRef.value, { label: t(`myPage.placeholder.githubProxyRegex`) });
+  syncInnerInputA11y(defaultProxyInputRef.value, { label: t(`myPage.placeholder.defaultProxy`) });
+  syncInnerInputA11y(defaultUserAgentInputRef.value, { label: t(`myPage.placeholder.defaultUserAgent`) });
+  syncInnerInputA11y(defaultTimeoutInputRef.value, { label: t(`myPage.placeholder.defaultTimeout`) });
+  syncInnerInputA11y(cacheThresholdInputRef.value, { label: t(`myPage.placeholder.cacheThreshold`) });
+  syncInnerInputA11y(resourceCacheTtlInputRef.value, { label: t(`myPage.placeholder.resourceCacheTtl`) });
+  syncInnerInputA11y(headersCacheTtlInputRef.value, { label: t(`myPage.placeholder.headersCacheTtl`) });
+  syncInnerInputA11y(scriptCacheTtlInputRef.value, { label: t(`myPage.placeholder.scriptCacheTtl`) });
+  syncInnerInputA11y(concurrencyInputRef.value, { label: t(`myPage.placeholder.concurrency`) });
+  syncInnerInputA11y(apiCheckTimeoutInputRef.value, { label: t(`myPage.placeholder.apiCheckTimeout`) });
+};
 
 const toggleEditMode = async (type) => {
   isEditLoading.value = true;
@@ -1176,6 +1351,15 @@ watchEffect(() => {
     isInit.value = true;
   }
 });
+watch(
+  [isGitHubConfigEditing, isRequestConfigEditing, isCacheConfigEditing, isFrontEndConfigEditing],
+  () => {
+    updateInputA11y();
+  },
+);
+onMounted(() => {
+  updateInputA11y();
+});
 const setTag = (current) => {
   storageType.value = current
 };
@@ -1234,26 +1418,77 @@ const setTag = (current) => {
       background: var(--card-color);
 
       .title-wrapper {
-        cursor: pointer;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 12px;
         padding: 0 0 0 10px;
+      }
+
+      .config-heading {
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+      }
+
+      .title-toggle {
+        width: 100%;
+        padding: 8px 0 2px 0;
+        border: 0;
+        background: transparent;
+        color: var(--primary-text-color);
+        text-align: left;
+        cursor: pointer;
         border-radius: 10px;
       }
 
-      .title-wrapper:focus-visible {
+      .title-toggle:focus-visible {
         outline: 2px solid var(--primary-color);
         outline-offset: 2px;
       }
 
-      h1 {
+      h1,
+      h2 {
         font-size: 14px;
-        padding: 8px 0 2px 0;
         margin-bottom: 8px;
       }
 
       .config-input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .input-with-help {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .input-help-button {
+          width: 32px;
+          height: 32px;
+          padding: 0;
+          border: 0;
+          border-radius: 999px;
+          background: transparent;
+          color: var(--lowest-text-color);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          cursor: pointer;
+
+          &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+          }
+        }
+
         .input.nut-input-disabled {
           :deep(input):disabled {
             -webkit-text-fill-color: var(--lowest-text-color);
@@ -1261,6 +1496,7 @@ const setTag = (current) => {
         }
 
         .input {
+          flex: 1;
           background: transparent;
           padding: 12px;
           color: var(--second-text-color);
@@ -1276,9 +1512,6 @@ const setTag = (current) => {
             cursor: pointer;
           }
 
-          &:not(:first-child) {
-            margin-top: 8px;
-          }
         }
       }
 

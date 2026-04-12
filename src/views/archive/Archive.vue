@@ -23,19 +23,17 @@
         ref="radioWrapperRef"
         class="radio-wrapper"
       >
-        <span
+        <button
           v-for="item in tagOptions"
           :key="item.value"
           class="tag"
+          type="button"
           :class="{ current: item.value === tag }"
-          role="button"
-          tabindex="0"
           :aria-pressed="item.value === tag"
           @click="setTag(item.value)"
-          @keydown="onKeyboardActivate($event, () => setTag(item.value))"
         >
           {{ item.label }}
-        </span>
+        </button>
       </div>
       <div
         v-if="hasEntries"
@@ -47,23 +45,25 @@
       >
         <div v-if="subEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div
-              class="list-title"
-              role="button"
-              tabindex="0"
-              :aria-expanded="!isFold('sub')"
-              @click="toggleFold('sub')"
-              @keydown="onKeyboardActivate($event, () => toggleFold('sub'))"
-            >
-              <div class="list-title-main">
-                <p>{{ `${$t('specificWord.singleSub')}(${subEntryCount})` }}</p>
-                <nut-icon
-                  v-if="!isFold('sub')"
-                  name="rect-down"
-                  size="12px"
-                ></nut-icon>
-                <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-              </div>
+            <div class="list-title-row">
+              <h2 class="section-heading">
+                <button
+                  type="button"
+                  class="list-title"
+                  :aria-expanded="!isFold('sub')"
+                  @click="toggleFold('sub')"
+                >
+                  <span class="list-title-main">
+                    <span>{{ `${$t('specificWord.singleSub')}(${subEntryCount})` }}</span>
+                    <nut-icon
+                      v-if="!isFold('sub')"
+                      name="rect-down"
+                      size="12px"
+                    ></nut-icon>
+                    <nut-icon v-else name="rect-right" size="12px"></nut-icon>
+                  </span>
+                </button>
+              </h2>
               <button
                 v-if="isSelectionMode"
                 type="button"
@@ -104,13 +104,17 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
-                  role="button"
-                  tabindex="0"
-                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
-                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <span class="share-select-checkbox" aria-hidden="true">
+                    <input
+                      type="checkbox"
+                      class="share-select-input"
+                      :checked="isEntrySelected(element)"
+                      :aria-label="getEntrySelectionA11yLabel(element)"
+                      @click.stop
+                      @change="toggleEntrySelection(element)"
+                    >
                     <span
                       class="share-select-checkbox-indicator"
                       :class="{ checked: isEntrySelected(element) }"
@@ -135,23 +139,25 @@
 
         <div v-if="colEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div
-              class="list-title"
-              role="button"
-              tabindex="0"
-              :aria-expanded="!isFold('col')"
-              @click="toggleFold('col')"
-              @keydown="onKeyboardActivate($event, () => toggleFold('col'))"
-            >
-              <div class="list-title-main">
-                <p>{{ `${$t('specificWord.collectionSub')}(${colEntryCount})` }}</p>
-                <nut-icon
-                  v-if="!isFold('col')"
-                  name="rect-down"
-                  size="12px"
-                ></nut-icon>
-                <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-              </div>
+            <div class="list-title-row">
+              <h2 class="section-heading">
+                <button
+                  type="button"
+                  class="list-title"
+                  :aria-expanded="!isFold('col')"
+                  @click="toggleFold('col')"
+                >
+                  <span class="list-title-main">
+                    <span>{{ `${$t('specificWord.collectionSub')}(${colEntryCount})` }}</span>
+                    <nut-icon
+                      v-if="!isFold('col')"
+                      name="rect-down"
+                      size="12px"
+                    ></nut-icon>
+                    <nut-icon v-else name="rect-right" size="12px"></nut-icon>
+                  </span>
+                </button>
+              </h2>
               <button
                 v-if="isSelectionMode"
                 type="button"
@@ -192,13 +198,17 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
-                  role="button"
-                  tabindex="0"
-                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
-                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <span class="share-select-checkbox" aria-hidden="true">
+                    <input
+                      type="checkbox"
+                      class="share-select-input"
+                      :checked="isEntrySelected(element)"
+                      :aria-label="getEntrySelectionA11yLabel(element)"
+                      @click.stop
+                      @change="toggleEntrySelection(element)"
+                    >
                     <span
                       class="share-select-checkbox-indicator"
                       :class="{ checked: isEntrySelected(element) }"
@@ -223,23 +233,25 @@
 
         <div v-if="fileEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div
-              class="list-title"
-              role="button"
-              tabindex="0"
-              :aria-expanded="!isFold('file')"
-              @click="toggleFold('file')"
-              @keydown="onKeyboardActivate($event, () => toggleFold('file'))"
-            >
-              <div class="list-title-main">
-                <p>{{ `${$t('specificWord.file')}(${fileEntryCount})` }}</p>
-                <nut-icon
-                  v-if="!isFold('file')"
-                  name="rect-down"
-                  size="12px"
-                ></nut-icon>
-                <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-              </div>
+            <div class="list-title-row">
+              <h2 class="section-heading">
+                <button
+                  type="button"
+                  class="list-title"
+                  :aria-expanded="!isFold('file')"
+                  @click="toggleFold('file')"
+                >
+                  <span class="list-title-main">
+                    <span>{{ `${$t('specificWord.file')}(${fileEntryCount})` }}</span>
+                    <nut-icon
+                      v-if="!isFold('file')"
+                      name="rect-down"
+                      size="12px"
+                    ></nut-icon>
+                    <nut-icon v-else name="rect-right" size="12px"></nut-icon>
+                  </span>
+                </button>
+              </h2>
               <button
                 v-if="isSelectionMode"
                 type="button"
@@ -280,13 +292,17 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
-                  role="button"
-                  tabindex="0"
-                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
-                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <span class="share-select-checkbox" aria-hidden="true">
+                    <input
+                      type="checkbox"
+                      class="share-select-input"
+                      :checked="isEntrySelected(element)"
+                      :aria-label="getEntrySelectionA11yLabel(element)"
+                      @click.stop
+                      @change="toggleEntrySelection(element)"
+                    >
                     <span
                       class="share-select-checkbox-indicator"
                       :class="{ checked: isEntrySelected(element) }"
@@ -311,23 +327,25 @@
 
         <div v-if="artifactEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div
-              class="list-title"
-              role="button"
-              tabindex="0"
-              :aria-expanded="!isFold('artifact')"
-              @click="toggleFold('artifact')"
-              @keydown="onKeyboardActivate($event, () => toggleFold('artifact'))"
-            >
-              <div class="list-title-main">
-                <p>{{ `${$t('specificWord.syncConfig')}(${artifactEntryCount})` }}</p>
-                <nut-icon
-                  v-if="!isFold('artifact')"
-                  name="rect-down"
-                  size="12px"
-                ></nut-icon>
-                <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-              </div>
+            <div class="list-title-row">
+              <h2 class="section-heading">
+                <button
+                  type="button"
+                  class="list-title"
+                  :aria-expanded="!isFold('artifact')"
+                  @click="toggleFold('artifact')"
+                >
+                  <span class="list-title-main">
+                    <span>{{ `${$t('specificWord.syncConfig')}(${artifactEntryCount})` }}</span>
+                    <nut-icon
+                      v-if="!isFold('artifact')"
+                      name="rect-down"
+                      size="12px"
+                    ></nut-icon>
+                    <nut-icon v-else name="rect-right" size="12px"></nut-icon>
+                  </span>
+                </button>
+              </h2>
               <button
                 v-if="isSelectionMode"
                 type="button"
@@ -368,13 +386,17 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
-                  role="button"
-                  tabindex="0"
-                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
-                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <span class="share-select-checkbox" aria-hidden="true">
+                    <input
+                      type="checkbox"
+                      class="share-select-input"
+                      :checked="isEntrySelected(element)"
+                      :aria-label="getEntrySelectionA11yLabel(element)"
+                      @click.stop
+                      @change="toggleEntrySelection(element)"
+                    >
                     <span
                       class="share-select-checkbox-indicator"
                       :class="{ checked: isEntrySelected(element) }"
@@ -399,23 +421,25 @@
 
         <div v-if="shareEntryCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div
-              class="list-title"
-              role="button"
-              tabindex="0"
-              :aria-expanded="!isFold('share')"
-              @click="toggleFold('share')"
-              @keydown="onKeyboardActivate($event, () => toggleFold('share'))"
-            >
-              <div class="list-title-main">
-                <p>{{ `${$t('specificWord.share')}(${shareEntryCount})` }}</p>
-                <nut-icon
-                  v-if="!isFold('share')"
-                  name="rect-down"
-                  size="12px"
-                ></nut-icon>
-                <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-              </div>
+            <div class="list-title-row">
+              <h2 class="section-heading">
+                <button
+                  type="button"
+                  class="list-title"
+                  :aria-expanded="!isFold('share')"
+                  @click="toggleFold('share')"
+                >
+                  <span class="list-title-main">
+                    <span>{{ `${$t('specificWord.share')}(${shareEntryCount})` }}</span>
+                    <nut-icon
+                      v-if="!isFold('share')"
+                      name="rect-down"
+                      size="12px"
+                    ></nut-icon>
+                    <nut-icon v-else name="rect-right" size="12px"></nut-icon>
+                  </span>
+                </button>
+              </h2>
               <button
                 v-if="isSelectionMode"
                 type="button"
@@ -456,13 +480,17 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
-                  role="button"
-                  tabindex="0"
-                  :aria-pressed="isEntrySelected(element)"
                   @click.stop="toggleEntrySelection(element)"
-                  @keydown="onKeyboardActivate($event, () => toggleEntrySelection(element))"
                 >
                   <span class="share-select-checkbox" aria-hidden="true">
+                    <input
+                      type="checkbox"
+                      class="share-select-input"
+                      :checked="isEntrySelected(element)"
+                      :aria-label="getEntrySelectionA11yLabel(element)"
+                      @click.stop
+                      @change="toggleEntrySelection(element)"
+                    >
                     <span
                       class="share-select-checkbox-indicator"
                       :class="{ checked: isEntrySelected(element) }"
@@ -551,7 +579,6 @@ import draggable from 'vuedraggable';
 
 import ArchiveListItem from '@/components/ArchiveListItem.vue';
 import AccessibleEmpty from '@/components/AccessibleEmpty.vue';
-import { onKeyboardActivate } from '@/hooks/useA11y';
 import { useFilteredDraggableList } from '@/hooks/useFilteredDraggableList';
 import { useListViewMode } from '@/hooks/useListViewMode';
 import { useListViewModeSelectionLock } from '@/hooks/useListViewModeSelectionLock';
@@ -584,7 +611,7 @@ const archiveTypeLabelKeyMap: Record<ArchiveGroupKey, string> = {
   share: 'share',
 };
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { showNotify } = useAppNotifyStore();
 const archiveStore = useArchiveStore();
 const globalStore = useGlobalStore();
@@ -784,6 +811,13 @@ const toggleSelectionMode = () => {
 
 const isEntrySelected = (entry: ArchiveEntry) => {
   return selectedEntryIdSet.value.has(entry.id);
+};
+
+const getEntrySelectionA11yLabel = (entry: ArchiveEntry) => {
+  const action = isEntrySelected(entry)
+    ? (locale.value.startsWith('zh') ? '取消选择' : 'Deselect')
+    : (locale.value.startsWith('zh') ? '选择' : 'Select');
+  return `${action}${getArchiveEntryDisplayName(entry)}`;
 };
 
 const toggleEntrySelection = (entry: ArchiveEntry) => {
@@ -1080,9 +1114,15 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
+  width: 100%;
   padding-left: 8px;
   padding-right: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
   font-weight: bold;
 
   p {
@@ -1186,6 +1226,9 @@ onMounted(() => {
       cursor: pointer;
       -webkit-user-select: none;
       user-select: none;
+      border: 0;
+      background: transparent;
+      font: inherit;
       border-bottom: 1px solid transparent;
     }
 
@@ -1238,6 +1281,19 @@ onMounted(() => {
   outline-offset: 3px;
 }
 
+.list-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-heading {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
 .share-select-item {
   display: flex;
   align-items: center;
@@ -1252,12 +1308,25 @@ onMounted(() => {
 }
 
 .share-select-checkbox {
+  position: relative;
   flex-shrink: 0;
   width: 20px;
   height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.share-select-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.share-select-input:focus-visible + .share-select-checkbox-indicator {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .share-select-checkbox-indicator {

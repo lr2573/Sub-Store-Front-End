@@ -22,14 +22,11 @@
         class="progress"
         :style="{ width: `${flow.progress * 100}%` }"
       ></div>
-      <button
+      <div
         v-if="appearanceSetting.isShowIcon"
-        type="button"
-        class="sub-img-wrappers preview-trigger icon-button-reset"
+        class="sub-img-wrappers"
         :style="{ 'margin-top': imageMarginTop }"
-        :aria-label="getItemActionLabel(getA11yText('preview'))"
-        :title="getItemActionLabel(getA11yText('preview'))"
-        @click.stop="compareSub"
+        aria-hidden="true"
       >
         <div>
           <div v-if="isIconColor">
@@ -55,7 +52,7 @@
             />
           </div>
         </div>
-      </button>
+      </div>
       <div class="sub-item-content">
         <div class="sub-item-title-wrapper">
           <h3 v-if="!appearanceSetting.isSimpleMode" class="sub-item-title">

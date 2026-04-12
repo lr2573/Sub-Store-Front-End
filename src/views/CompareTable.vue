@@ -39,38 +39,31 @@
           <div class="sticky-title-wrapperse compare-title">
             <p>
               {{ $t(`comparePage.remain.title`) }}({{ remainDesc }})
-              <small
+              <button
                 v-if="filteredOriginalData.length > 0"
-                role="button"
-                tabindex="0"
+                type="button"
+                class="filter-jump-button"
                 @click="goToFilterRef"
-                @keydown="onKeyboardActivate($event, goToFilterRef)"
               >
                 {{ $t(`comparePage.filter.title`) }}({{ filterDesc }})
-              </small>
+              </button>
             </p>
           </div>
 
           <!--指示器说明-->
           <div class="compare-des">
-            <span
+            <button
+              type="button"
               @click="toggleProcessedVisible"
-              class="processed-item indicator"
-              role="button"
-              tabindex="0"
+              class="processed-item indicator indicator-button"
               :aria-pressed="isProcessedVisible"
-              @keydown="onKeyboardActivate($event, toggleProcessedVisible)"
-              >{{ $t(`comparePage.remain.afterIndicator`) }}</span
-            >
-            <span
+            >{{ $t(`comparePage.remain.afterIndicator`) }}</button>
+            <button
+              type="button"
               @click="toggleOriginalVisible"
-              class="original-item indicator"
-              role="button"
-              tabindex="0"
+              class="original-item indicator indicator-button"
               :aria-pressed="isOriginalVisible"
-              @keydown="onKeyboardActivate($event, toggleOriginalVisible)"
-              >{{ $t(`comparePage.remain.beforeIndicator`) }}</span
-            >
+            >{{ $t(`comparePage.remain.beforeIndicator`) }}</button>
           </div>
 
           <!--表格标题-->
@@ -86,20 +79,21 @@
               <tr
                 v-if="isProcessedVisible"
                 class="compare-table-row processed-tr"
-                role="button"
-                tabindex="0"
-                :aria-label="processed.name"
-                @click="openNodeInfoPanel(processed)"
-                @keydown="onKeyboardActivate($event, () => openNodeInfoPanel(processed))"
               >
                 <td class="processed-item">
-                  <div class="name-wrapper">
-                    <div>
-                      <nut-tag class="type-tag">{{ processed.type }}</nut-tag
-                      >{{ processed.name }}
+                  <button
+                    type="button"
+                    class="row-open-button"
+                    @click="openNodeInfoPanel(processed)"
+                  >
+                    <div class="name-wrapper">
+                      <div>
+                        <nut-tag class="type-tag">{{ processed.type }}</nut-tag
+                        >{{ processed.name }}
+                      </div>
+                      <div>{{ processed.server || processed.addresses?.join(',') }}:{{ processed.port || processed["local-port"] }}</div>
                     </div>
-                    <div>{{ processed.server || processed.addresses?.join(',') }}:{{ processed.port || processed["local-port"] }}</div>
-                  </div>
+                  </button>
                 </td>
                 <td>
                   <span :class="processed.udp ? 'item-true' : 'item-false'">
@@ -138,19 +132,20 @@
               <tr
                 v-if="isOriginalVisible"
                 class="compare-table-row original-tr"
-                role="button"
-                tabindex="0"
-                :aria-label="original.name"
-                @click="openNodeInfoPanel(original)"
-                @keydown="onKeyboardActivate($event, () => openNodeInfoPanel(original))"
               >
                 <td class="original-item">
-                  <div class="name-wrapper">
-                    <div>
-                      {{ original.name }}
+                  <button
+                    type="button"
+                    class="row-open-button"
+                    @click="openNodeInfoPanel(original)"
+                  >
+                    <div class="name-wrapper">
+                      <div>
+                        {{ original.name }}
+                      </div>
+                      <div>{{ original.server || original.addresses?.join(',') }}:{{ original.port || original["local-port"] }}</div>
                     </div>
-                    <div>{{ original.server || original.addresses?.join(',') }}:{{ original.port || original["local-port"] }}</div>
-                  </div>
+                  </button>
                 </td>
                 <td>
                   <span :class="original.udp ? 'item-true' : 'item-false'">
@@ -219,20 +214,21 @@
             <template v-for="node in filteredOriginalData" :key="node.id">
               <tr
                 class="compare-table-row original-tr"
-                role="button"
-                tabindex="0"
-                :aria-label="node.name"
-                @click="openNodeInfoPanel(node)"
-                @keydown="onKeyboardActivate($event, () => openNodeInfoPanel(node))"
               >
                 <td class="original-item">
-                  <div class="name-wrapper">
-                    <div>
-                      <nut-tag class="type-tag">{{ node.type }} </nut-tag
-                      >{{ node.name }}
+                  <button
+                    type="button"
+                    class="row-open-button"
+                    @click="openNodeInfoPanel(node)"
+                  >
+                    <div class="name-wrapper">
+                      <div>
+                        <nut-tag class="type-tag">{{ node.type }} </nut-tag
+                        >{{ node.name }}
+                      </div>
+                      <div>{{ node.server || node.addresses?.join(',') }}:{{ node.port || node["local-port"] }}</div>
                     </div>
-                    <div>{{ node.server || node.addresses?.join(',') }}:{{ node.port || node["local-port"] }}</div>
-                  </div>
+                  </button>
                 </td>
                 <td>
                   <span :class="node.udp ? 'item-true' : 'item-false'">
@@ -289,7 +285,6 @@
 <script lang="ts" setup>
   import { useSubsApi } from '@/api/subs';
   import NodeInfoPanel from '@/components/NodeInfoPanel.vue';
-  import { onKeyboardActivate } from '@/hooks/useA11y';
   import { useSubsStore } from '@/store/subs';
   import { computed, ref, toRaw } from 'vue';
 
@@ -496,7 +491,6 @@
   .compare-table-row {
     padding: 0 var(--safe-area-side);
     width: 100%;
-    cursor: pointer;
   }
 
   .compare-table-head {
@@ -556,6 +550,45 @@
     margin-right: 24px;
   }
 
+  .indicator-button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .filter-jump-button {
+    margin-left: 8px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .row-open-button {
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .row-open-button:focus-visible,
+  .indicator-button:focus-visible,
+  .filter-jump-button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
   .processed-item::before {
     background: var(--third-color);
     flex-shrink: 0;
@@ -571,7 +604,7 @@
       margin-top: 0;
       top: var(--compare-header-offset);
       background: var(--background-color);
-      small {
+      .filter-jump-button {
         cursor: pointer;
         text-decoration: underline;
       }

@@ -4,40 +4,12 @@
     :class="{ disabled: props.disabled, 'is-dual-column': props.isDualColumn }"
     :style="{ padding: itemPadding }"
     data-testid="share-card"
-    @click="onClickPreviews"
   >
-    <button
-      v-if="appearanceSetting.isShowIcon && type !== 'file'"
-      type="button"
-      class="sub-img-wrappers preview-trigger icon-button-reset"
-      :style="{ 'margin-top': imageMarginTop }"
-      :disabled="props.disabled"
-      :aria-label="getItemActionLabel(getA11yText('preview'))"
-      :title="getItemActionLabel(getA11yText('preview'))"
-      @click.stop="onClickPreviews"
-    >
-      <div>
-        <div v-if="isIconColor">
-          <nut-avatar
-            :size="avatarSize"
-            :url="shareIcon"
-            bg-color=""
-          />
-        </div>
-        <div v-else>
-          <nut-avatar
-            class="sub-item-customer-icon"
-            :size="avatarSize"
-            :url="shareIcon"
-            bg-color=""
-          />
-        </div>
-      </div>
-    </button>
     <div
-      v-else-if="appearanceSetting.isShowIcon"
+      v-if="appearanceSetting.isShowIcon"
       class="sub-img-wrappers"
       :style="{ 'margin-top': imageMarginTop }"
+      aria-hidden="true"
     >
       <div>
         <div v-if="isIconColor">
@@ -60,20 +32,38 @@
     <div class="sub-item-content">
       <div class="sub-item-title-wrapper">
         <h3 v-if="!appearanceSetting.isSimpleMode" class="sub-item-title">
-          {{ displayName || name }}
-          <span v-for="item in shareTags" :key="item" class="tag">
-            <nut-tag>{{ item }}</nut-tag>
-          </span>
+          <button
+            type="button"
+            class="sub-item-title-button"
+            :disabled="props.disabled"
+            :aria-label="getItemActionLabel(type === 'file' ? getA11yText('open') : getA11yText('preview'))"
+            :title="getItemActionLabel(type === 'file' ? getA11yText('open') : getA11yText('preview'))"
+            @click.stop="onClickPrimaryAction"
+          >
+            <span class="sub-item-title-text">{{ displayName || name }}</span>
+            <span v-for="item in shareTags" :key="item" class="tag">
+              <nut-tag>{{ item }}</nut-tag>
+            </span>
+          </button>
         </h3>
         <h3
           v-else
           class="sub-item-title"
           style="color: var(--primary-text-color); font-size: 16px"
         >
-          {{ displayName || name }}
-          <span v-for="item in shareTags" :key="item" class="tag">
-            <nut-tag>{{ item }}</nut-tag>
-          </span>
+          <button
+            type="button"
+            class="sub-item-title-button"
+            :disabled="props.disabled"
+            :aria-label="getItemActionLabel(type === 'file' ? getA11yText('open') : getA11yText('preview'))"
+            :title="getItemActionLabel(type === 'file' ? getA11yText('open') : getA11yText('preview'))"
+            @click.stop="onClickPrimaryAction"
+          >
+            <span class="sub-item-title-text">{{ displayName || name }}</span>
+            <span v-for="item in shareTags" :key="item" class="tag">
+              <nut-tag>{{ item }}</nut-tag>
+            </span>
+          </button>
         </h3>
 
         <div
@@ -447,6 +437,14 @@ const onClickPreviews = () => {
     lockScroll: false,
   });
 };
+
+const onClickPrimaryAction = () => {
+  if (type.value === "file") {
+    onClickShareLink();
+    return;
+  }
+  onClickPreviews();
+};
 </script>
 
 <style lang="scss" scoped>
@@ -467,7 +465,6 @@ const onClickPreviews = () => {
   display: flex;
   min-width: 0;
   background: var(--card-color);
-  cursor: pointer;
   overflow: hidden;
 
   &.disabled {
@@ -503,14 +500,39 @@ const onClickPreviews = () => {
       .sub-item-title {
         flex: 1;
         min-width: 0;
+        font-size: 16px;
+        color: var(--primary-text-color);
+      }
+
+      .sub-item-title-button {
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+        font: inherit;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 1;
         word-wrap: break-word;
         word-break: break-all;
         overflow: hidden;
-        font-size: 16px;
-        color: var(--primary-text-color);
+      }
+
+      .sub-item-title-button:disabled {
+        cursor: default;
+      }
+
+      .sub-item-title-button:focus-visible {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+        border-radius: 6px;
+      }
+
+      .sub-item-title-text {
+        min-width: 0;
       }
 
       .tag {
@@ -652,9 +674,4 @@ const onClickPreviews = () => {
   align-items: center;
 }
 
-.preview-trigger {
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
 </style>

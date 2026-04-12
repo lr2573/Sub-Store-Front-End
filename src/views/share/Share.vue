@@ -75,19 +75,17 @@
         ref="radioWrapperRef"
         class="radio-wrapper"
       >
-        <span
+        <button
           v-for="item in tagOptions"
           :key="item.value"
           class="tag"
+          type="button"
           :class="{ current: item.value === tag }"
-          role="button"
-          tabindex="0"
           :aria-pressed="item.value === tag"
           @click="setTag(item.value)"
-          @keydown="onKeyboardActivate($event, () => setTag(item.value))"
         >
           {{ item.label }}
-        </span>
+        </button>
       </div>
       <div
         v-if="hasShares"
@@ -100,25 +98,27 @@
         <!-- 单条订阅 -->
         <div v-if="subShareDataCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div
-              class="list-title"
-              role="button"
-              tabindex="0"
-              :aria-expanded="!isFold('sub')"
-              @click="toggleFold('sub')"
-              @keydown="onKeyboardActivate($event, () => toggleFold('sub'))"
-            >
-              <div class="list-title-main">
-                <p>
-                  {{ `${$t(`specificWord.singleSub`)}(${subShareDataCount})` }}
-                </p>
-                <nut-icon
-                  v-if="!isFold('sub')"
-                  name="rect-down"
-                  size="12px"
-                ></nut-icon>
-                <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-              </div>
+            <div class="list-title-row">
+              <h2 class="section-heading">
+                <button
+                  type="button"
+                  class="list-title"
+                  :aria-expanded="!isFold('sub')"
+                  @click="toggleFold('sub')"
+                >
+                  <span class="list-title-main">
+                    <span>
+                      {{ `${$t(`specificWord.singleSub`)}(${subShareDataCount})` }}
+                    </span>
+                    <nut-icon
+                      v-if="!isFold('sub')"
+                      name="rect-down"
+                      size="12px"
+                    ></nut-icon>
+                    <nut-icon v-else name="rect-right" size="12px"></nut-icon>
+                  </span>
+                </button>
+              </h2>
               <button
                 v-if="isSelectionMode"
                 type="button"
@@ -162,13 +162,17 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isShareSelected(element), 'is-dual-column': isDualColumnMode }"
-                  role="button"
-                  tabindex="0"
-                  :aria-pressed="isShareSelected(element)"
                   @click.stop="toggleShareSelection(element)"
-                  @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
                   <span class="share-select-checkbox" aria-hidden="true">
+                    <input
+                      type="checkbox"
+                      class="share-select-input"
+                      :checked="isShareSelected(element)"
+                      :aria-label="getShareSelectionA11yLabel(element)"
+                      @click.stop
+                      @change="toggleShareSelection(element)"
+                    >
                     <span
                       class="share-select-checkbox-indicator"
                       :class="{ checked: isShareSelected(element) }"
@@ -197,29 +201,31 @@
         <!-- 组合订阅 -->
         <div v-if="collectionShareDataCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div
-              class="list-title"
-              role="button"
-              tabindex="0"
-              :aria-expanded="!isFold('col')"
-              @click="toggleFold('col')"
-              @keydown="onKeyboardActivate($event, () => toggleFold('col'))"
-            >
-              <div class="list-title-main">
-                <p>
-                  {{
-                    `${$t(
-                      `specificWord.collectionSub`,
-                    )}(${collectionShareDataCount})`
-                  }}
-                </p>
-                <nut-icon
-                  v-if="!isFold('col')"
-                  name="rect-down"
-                  size="12px"
-                ></nut-icon>
-                <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-              </div>
+            <div class="list-title-row">
+              <h2 class="section-heading">
+                <button
+                  type="button"
+                  class="list-title"
+                  :aria-expanded="!isFold('col')"
+                  @click="toggleFold('col')"
+                >
+                  <span class="list-title-main">
+                    <span>
+                      {{
+                        `${$t(
+                          `specificWord.collectionSub`,
+                        )}(${collectionShareDataCount})`
+                      }}
+                    </span>
+                    <nut-icon
+                      v-if="!isFold('col')"
+                      name="rect-down"
+                      size="12px"
+                    ></nut-icon>
+                    <nut-icon v-else name="rect-right" size="12px"></nut-icon>
+                  </span>
+                </button>
+              </h2>
               <button
                 v-if="isSelectionMode"
                 type="button"
@@ -263,13 +269,17 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isShareSelected(element), 'is-dual-column': isDualColumnMode }"
-                  role="button"
-                  tabindex="0"
-                  :aria-pressed="isShareSelected(element)"
                   @click.stop="toggleShareSelection(element)"
-                  @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
                   <span class="share-select-checkbox" aria-hidden="true">
+                    <input
+                      type="checkbox"
+                      class="share-select-input"
+                      :checked="isShareSelected(element)"
+                      :aria-label="getShareSelectionA11yLabel(element)"
+                      @click.stop
+                      @change="toggleShareSelection(element)"
+                    >
                     <span
                       class="share-select-checkbox-indicator"
                       :class="{ checked: isShareSelected(element) }"
@@ -298,25 +308,27 @@
         <!-- 文件 -->
         <div v-if="fileShareDataCount > 0" class="share-data">
           <div class="sticky-title-wrappers">
-            <div
-              class="list-title"
-              role="button"
-              tabindex="0"
-              :aria-expanded="!isFold('file')"
-              @click="toggleFold('file')"
-              @keydown="onKeyboardActivate($event, () => toggleFold('file'))"
-            >
-              <div class="list-title-main">
-                <p>
-                  {{ `${$t(`specificWord.file`)}(${fileShareDataCount})` }}
-                </p>
-                <nut-icon
-                  v-if="!isFold('file')"
-                  name="rect-down"
-                  size="12px"
-                ></nut-icon>
-                <nut-icon v-else name="rect-right" size="12px"></nut-icon>
-              </div>
+            <div class="list-title-row">
+              <h2 class="section-heading">
+                <button
+                  type="button"
+                  class="list-title"
+                  :aria-expanded="!isFold('file')"
+                  @click="toggleFold('file')"
+                >
+                  <span class="list-title-main">
+                    <span>
+                      {{ `${$t(`specificWord.file`)}(${fileShareDataCount})` }}
+                    </span>
+                    <nut-icon
+                      v-if="!isFold('file')"
+                      name="rect-down"
+                      size="12px"
+                    ></nut-icon>
+                    <nut-icon v-else name="rect-right" size="12px"></nut-icon>
+                  </span>
+                </button>
+              </h2>
               <button
                 v-if="isSelectionMode"
                 type="button"
@@ -360,13 +372,17 @@
                   v-if="isSelectionMode"
                   class="share-select-item"
                   :class="{ selected: isShareSelected(element), 'is-dual-column': isDualColumnMode }"
-                  role="button"
-                  tabindex="0"
-                  :aria-pressed="isShareSelected(element)"
                   @click.stop="toggleShareSelection(element)"
-                  @keydown="onKeyboardActivate($event, () => toggleShareSelection(element))"
                 >
                   <span class="share-select-checkbox" aria-hidden="true">
+                    <input
+                      type="checkbox"
+                      class="share-select-input"
+                      :checked="isShareSelected(element)"
+                      :aria-label="getShareSelectionA11yLabel(element)"
+                      @click.stop
+                      @change="toggleShareSelection(element)"
+                    >
                     <span
                       class="share-select-checkbox-indicator"
                       :class="{ checked: isShareSelected(element) }"
@@ -487,7 +503,7 @@ import { useRouter } from "vue-router";
 import draggable from "vuedraggable";
 import ShareListItem from "@/components/ShareListItem.vue";
 import { useShareApi } from "@/api/share";
-import { onKeyboardActivate, useA11y } from "@/hooks/useA11y";
+import { useA11y } from "@/hooks/useA11y";
 import { useBackend } from "@/hooks/useBackend";
 import { useFilteredDraggableList } from "@/hooks/useFilteredDraggableList";
 import { useHostAPI } from "@/hooks/useHostAPI";
@@ -531,7 +547,7 @@ const { env } = useBackend();
 const isArchiveEnabled = computed(() => {
   return env.value?.feature?.archive;
 });
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { getA11yText } = useA11y();
 const shareApi = useShareApi();
 const { showNotify } = useAppNotifyStore();
@@ -757,6 +773,13 @@ function toggleSelectionMode() {
 
 function isShareSelected(item: Share) {
   return selectedShareKeySet.value.has(getShareSelectionKey(item));
+}
+
+function getShareSelectionA11yLabel(item: Share) {
+  const action = isShareSelected(item)
+    ? (locale.value.startsWith("zh") ? "取消选择" : "Deselect")
+    : (locale.value.startsWith("zh") ? "选择" : "Select");
+  return `${action}${item.name}`;
 }
 
 function toggleShareSelection(item: Share) {
@@ -1101,9 +1124,15 @@ const handleShareDetail = (detail: Share) => {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
+  width: 100%;
   padding-left: 8px;
   padding-right: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
   font-weight: bold;
   //padding-left: var(--safe-area-side);
   p {
@@ -1232,6 +1261,9 @@ const handleShareDetail = (detail: Share) => {
       cursor: pointer;
       -webkit-user-select: none;
       user-select: none;
+      border: 0;
+      background: transparent;
+      font: inherit;
       border-bottom: 1px solid transparent;
     }
 
@@ -1284,6 +1316,19 @@ const handleShareDetail = (detail: Share) => {
   outline-offset: 3px;
 }
 
+.list-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-heading {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
 .share-select-item {
   display: flex;
   align-items: center;
@@ -1298,12 +1343,25 @@ const handleShareDetail = (detail: Share) => {
 }
 
 .share-select-checkbox {
+  position: relative;
   flex-shrink: 0;
   width: 20px;
   height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.share-select-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.share-select-input:focus-visible + .share-select-checkbox-indicator {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .share-select-checkbox-indicator {

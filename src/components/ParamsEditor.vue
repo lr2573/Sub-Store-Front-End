@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="containerRef">
     <div v-if="visible" class="key-value-container">
       <div class="key-value-box">
         <div class="header">
@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 
 type ParamItem = {
@@ -139,6 +139,26 @@ const deleteParamsText = computed(() =>
 const emptyTipsText = computed(() =>
   t(`editorPage.subConfig.nodeActions['${props.type}'].paramsEmpty`),
 );
+const containerRef = ref<HTMLElement | null>(null);
+
+const syncTextareaLabels = async () => {
+  await nextTick();
+  const rows = containerRef.value?.querySelectorAll<HTMLElement>(".key-value-row");
+  if (!rows?.length) {
+    return;
+  }
+
+  rows.forEach((row, index) => {
+    const textareas = row.querySelectorAll<HTMLTextAreaElement>("textarea");
+    const sequence = index + 1;
+    if (textareas[0]) {
+      textareas[0].setAttribute("aria-label", `key ${sequence}`);
+    }
+    if (textareas[1]) {
+      textareas[1].setAttribute("aria-label", `value ${sequence}`);
+    }
+  });
+};
 
 const deleteItem = (index) => {
   const newParamsArguments = [...props.paramsArguments];
@@ -162,6 +182,12 @@ const handleKeyBlur = (item, index) => {
   // 更新键名出现次数统计
   updateKeyOccurrences(props.paramsArguments);
 };
+
+watchEffect(() => {
+  if (props.visible) {
+    syncTextareaLabels();
+  }
+});
 </script>
 
 <style lang="scss" scoped>

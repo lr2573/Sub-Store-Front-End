@@ -21,6 +21,7 @@
     <div class="popup-header">
       <div class="tag-input">
         <nut-input
+          ref="searchInputRef"
           class="nut-input-text"
           v-model.trim="keyword"
           :placeholder="t('subPage.tag.tagPlaceholder')"
@@ -46,22 +47,21 @@
           @end="onEndDrag"
         >
           <template #item="{ element }">
-            <nut-tag
+            <button
+              type="button"
               :key="element.label"
+              class="tag-chip"
               :class="{ 'active': element.isActive }"
-              role="button"
-              tabindex="0"
               :aria-pressed="element.isActive"
               @click="handleTagItem(element)"
-              @keydown.enter.prevent="handleTagItem(element)"
-              @keydown.space.prevent="handleTagItem(element)"
-            >{{ element.label }}</nut-tag>
+            >{{ element.label }}</button>
           </template>
         </draggable>
         <!-- 新建标签 -->
         <div class="add-tag-box">
         <nut-input
           v-if="isAddTag"
+          ref="addTagInputRef"
           class="add-tag-input"
           v-model.trim="addTagValue"
           :placeholder="t('subPage.tag.tagPlaceholder')"
@@ -73,15 +73,12 @@
           @blur="saveTag"
           closeable
         />
-        <nut-tag
+        <button
           v-else
+          type="button"
           class="add-tag"
-          role="button"
-          tabindex="0"
           @click="addTag"
-          @keydown.enter.prevent="addTag"
-          @keydown.space.prevent="addTag"
-        >{{ t('subPage.tag.addTagBtn') }}</nut-tag>
+        >{{ t('subPage.tag.addTagBtn') }}</button>
         </div>
       </div>
     </div>
@@ -89,11 +86,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from "vue";
+import { ref, watch, computed, onMounted, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import { useSubsStore } from "@/store/subs";
 import { useArtifactsStore } from "@/store/artifacts";
 import { normalizeTagArray } from "@/utils/shareTags";
+import { syncInnerInputA11y } from "@/hooks/useA11y";
 import draggable from "vuedraggable";
 
 import { useI18n } from "vue-i18n";
@@ -122,6 +120,8 @@ const isVisible = ref(props.visible);
 const keyword = ref("");
 const isAddTag = ref(false);
 const addTagValue = ref('');
+const searchInputRef = ref(null);
+const addTagInputRef = ref(null);
 //拖拽开始的事件
 const onStartDrag = () => {
   console.log("开始拖拽");
@@ -273,13 +273,25 @@ const handleTagItem = (item) => {
 
 onMounted(() => {
   getTags();
+  updateInputA11y();
 })
+
+const updateInputA11y = async () => {
+  await nextTick();
+  syncInnerInputA11y(searchInputRef.value, {
+    label: t('subPage.tag.tagPlaceholder'),
+  });
+  syncInnerInputA11y(addTagInputRef.value, {
+    label: t('subPage.tag.addTagBtn'),
+  });
+};
 
 const emit = defineEmits(["update:visible", "setTag"]);
 
 const show = () => {
   isVisible.value = true;
   emit("update:visible", true);
+  updateInputA11y();
 };
 
 const close = () => {
@@ -333,12 +345,16 @@ defineExpose({ show, close });
         flex-wrap: wrap;
         gap: 10px;
       }
-      .nut-tag {
+      .tag-chip {
         padding: 4px 10px;
         text-align: center;
         font-size: 14px;
         cursor: pointer;
         color: var(--primary-text-color);
+        border: 1px solid var(--divider-color);
+        border-radius: 999px;
+        background: var(--card-color);
+        font: inherit;
 
         &:focus-visible {
           outline: 2px solid var(--primary-color);
@@ -357,9 +373,13 @@ defineExpose({ show, close });
         align-items: center;
         height: 31px;
         .add-tag {
+          padding: 4px 10px;
           border: 1px dashed var(--primary-color);
+          border-radius: 999px;
           color: var(--primary-color);
           background: var(--background-color);
+          font: inherit;
+          cursor: pointer;
 
         }
         .add-tag-input {
