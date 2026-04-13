@@ -142,7 +142,8 @@ export default {
       tipsContent: "On the Subscription management page, click on the Export icon button on the left/right slide of a subscription with more items.",
     },
     addSubTitle: "Choose Subscription type",
-    previewTitle: "Copy/Preview a subscription",
+    previewTitle: "Subscription links",
+    previewTitleAction: "Open subscription links for {name}",
     tag: {
       addTagTitle: "Add Tag",
       tagPlaceholder: "Please enter tag name",

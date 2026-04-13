@@ -11,11 +11,6 @@
       class="sub-item-wrapper"
       :class="{ 'is-dual-column': props.isDualColumn }"
       :style="{ padding: itemPadding }"
-      role="button"
-      tabindex="0"
-      :aria-label="getItemActionLabel(getA11yText('preview'))"
-      @click="handleContentClick"
-      @keydown="onKeyboardActivate($event, handleContentClick)"
     >
       <button
         v-if="appearanceSetting.isShowIcon && artifact.url"
@@ -43,10 +38,25 @@
       <div class="sub-item-content">
         <div class="sub-item-title-wrapper">
           <h3 class="sub-item-title">
-            {{ displayName }}
-            <span v-for="item in tag" :key="item" class="tag">
-              <nut-tag>{{ item }}</nut-tag>
-            </span>
+            <button
+              v-if="sourceUrl"
+              type="button"
+              class="sub-item-title-button"
+              :aria-label="getItemActionLabel(getA11yText('preview'))"
+              :title="getItemActionLabel(getA11yText('preview'))"
+              @click.stop="openPreviewSource"
+            >
+              <span class="sub-item-title-text">{{ displayName }}</span>
+              <span v-for="item in tag" :key="item" class="tag">
+                <nut-tag>{{ item }}</nut-tag>
+              </span>
+            </button>
+            <template v-else>
+              {{ displayName }}
+              <span v-for="item in tag" :key="item" class="tag">
+                <nut-tag>{{ item }}</nut-tag>
+              </span>
+            </template>
           </h3>
           <div class="title-right-wrapper" v-if="!appearanceSetting.isSimpleMode">
             <button
@@ -87,6 +97,8 @@
               @click.stop="swipeController"
               v-if="!isMobile()"
               ref="moreAction"
+              :aria-expanded="swipeIsOpen"
+              :aria-controls="swipeActionsId"
             >
               <font-awesome-icon icon="fa-solid fa-angles-right" />
             </button>
@@ -148,6 +160,8 @@
                     @click.stop="swipeController"
                     v-if="!isMobile()"
                     ref="moreAction"
+                    :aria-expanded="swipeIsOpen"
+                    :aria-controls="swipeActionsId"
                   >
                   <font-awesome-icon icon="fa-solid fa-angles-right" />
                 </button>
@@ -187,74 +201,80 @@
     </div>
 
     <template v-if="appearanceSetting.isLeftRight" #left>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="primary"
-          class="sub-item-swipe-btn"
+        <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
           :disabled="!swipeIsOpen"
+          :aria-label="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
+          :title="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
           @click="onClickSync"
         >
           <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
-        </nut-button>
+        </button>
       </div>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="warning"
-          class="sub-item-swipe-btn"
+        <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--warning"
           :disabled="!swipeIsOpen"
+          :aria-label="getItemActionLabel(getA11yText('edit'))"
+          :title="getItemActionLabel(getA11yText('edit'))"
           @click="onClickEdit"
         >
           <font-awesome-icon icon="fa-solid fa-pen-nib" />
-        </nut-button>
+        </button>
       </div>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="danger"
-          class="sub-item-swipe-btn"
+      <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
           :disabled="!swipeIsOpen"
+          :aria-label="getItemActionLabel(getA11yText('delete'))"
+          :title="getItemActionLabel(getA11yText('delete'))"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </nut-button>
+        </button>
       </div>
     </template>
 
     <template v-else #right>
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="primary"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
           :disabled="!swipeIsOpen"
+          :aria-label="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
+          :title="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
           @click="onClickSync"
         >
           <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
-        </nut-button>
+        </button>
       </div>
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="warning"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--warning"
           :disabled="!swipeIsOpen"
+          :aria-label="getItemActionLabel(getA11yText('edit'))"
+          :title="getItemActionLabel(getA11yText('edit'))"
           @click="onClickEdit"
         >
           <font-awesome-icon icon="fa-solid fa-pen-nib" />
-        </nut-button>
+        </button>
       </div>
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="danger"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
           :disabled="!swipeIsOpen"
+          :aria-label="getItemActionLabel(getA11yText('delete'))"
+          :title="getItemActionLabel(getA11yText('delete'))"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </nut-button>
+        </button>
       </div>
     </template>
   </nut-swipe>
@@ -265,7 +285,7 @@ import { useAppNotifyStore } from "@/store/appNotify";
 import { useArtifactsStore } from "@/store/artifacts";
 import { useSettingsStore } from "@/store/settings";
 import { useSubsStore } from "@/store/subs";
-import { onKeyboardActivate, useA11y } from "@/hooks/useA11y";
+import { useA11y } from "@/hooks/useA11y";
 import { butifyDate } from "@/utils/butifyDate";
 import { resolveArtifactIcon } from "@/utils/artifactIcon";
 import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
@@ -316,6 +336,8 @@ const displayName = computed(() => {
     artifact.value.name
   );
 });
+const itemIdBase = computed(() => `${props.name}`.replace(/[^\w-]/g, "-"));
+const swipeActionsId = computed(() => `artifact-item-swipe-actions-${itemIdBase.value}`);
 const getItemActionLabel = (action: string) => {
   return `${action} ${displayName.value}`;
 };
@@ -469,21 +491,6 @@ const handleGlobalClick = (event: MouseEvent) => {
   if (moreAction.value) moreAction.value.style.transform = "rotate(0deg)";
 
   document.removeEventListener('click', handleGlobalClick);
-};
-
-const handleContentClick = (event: MouseEvent) => {
-  event.stopPropagation();
-
-  if (swipeIsOpen.value) {
-    swipe.value.close();
-    swipeIsOpen.value = false;
-    if (moreAction.value) moreAction.value.style.transform = "rotate(0deg)";
-    return;
-  }
-
-  if (!ismove.value && sourceUrl.value) {
-    openPreviewSource();
-  }
 };
 
 const openPreviewSource = () => {
@@ -738,6 +745,30 @@ watch(isSyncOpen, async () => {
         font-size: 16px;
         color: var(--primary-text-color);
 
+        .sub-item-title-button {
+          width: 100%;
+          display: inline-flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 4px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: inherit;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .sub-item-title-button:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+          border-radius: 6px;
+        }
+
+        .sub-item-title-text {
+          min-width: 0;
+        }
+
         .tag {
           margin-left: 4px;
           display: inline-flex;
@@ -892,9 +923,37 @@ watch(isSyncOpen, async () => {
       }
 
       .sub-item-swipe-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        color: #fff;
+        background: var(--primary-color);
         border-radius: 50%;
         height: 46px;
         width: 44px;
+
+        &--primary {
+          background: var(--primary-color);
+        }
+
+        &--warning {
+          background: #d18b1d;
+        }
+
+        &--danger {
+          background: var(--danger-color, #d64545);
+        }
+
+        &:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
       }
     }
   }

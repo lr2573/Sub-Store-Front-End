@@ -104,6 +104,7 @@
                   type="button"
                   class="list-title"
                   :aria-expanded="!isFold('sub')"
+                  aria-controls="share-sub-list"
                   @click="toggleFold('sub')"
                 >
                   <span class="list-title-main">
@@ -134,6 +135,7 @@
           </div>
           <draggable
             v-if="!isFold('sub')"
+            id="share-sub-list"
             v-model="filteredSubShareData"
             item-key="token"
             class="draggable-list"
@@ -207,6 +209,7 @@
                   type="button"
                   class="list-title"
                   :aria-expanded="!isFold('col')"
+                  aria-controls="share-col-list"
                   @click="toggleFold('col')"
                 >
                   <span class="list-title-main">
@@ -241,6 +244,7 @@
           </div>
           <draggable
             v-if="!isFold('col')"
+            id="share-col-list"
             v-model="filteredCollectionShareData"
             item-key="token"
             class="draggable-list"
@@ -314,6 +318,7 @@
                   type="button"
                   class="list-title"
                   :aria-expanded="!isFold('file')"
+                  aria-controls="share-file-list"
                   @click="toggleFold('file')"
                 >
                   <span class="list-title-main">
@@ -344,6 +349,7 @@
           </div>
           <draggable
             v-if="!isFold('file')"
+            id="share-file-list"
             v-model="filteredFileShareData"
             item-key="token"
             class="draggable-list"
@@ -455,6 +461,7 @@
       </a>
     </div>
     <SharePopup
+      v-if="sharePopupVisible"
       v-model:visible="sharePopupVisible"
       :data="shareData"
       :type="shareDataType"

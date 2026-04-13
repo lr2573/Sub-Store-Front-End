@@ -59,8 +59,8 @@
             <button
               type="button"
               class="sub-item-title-button"
-              :aria-label="getItemActionLabel(getA11yText('preview'))"
-              :title="getItemActionLabel(getA11yText('preview'))"
+              :aria-label="openLinkPanelLabel"
+              :title="openLinkPanelLabel"
               @click.stop="openPreviewPanel"
             >
               <span class="sub-item-title-text">{{ displayName }}</span>
@@ -77,8 +77,8 @@
             <button
               type="button"
               class="sub-item-title-button"
-              :aria-label="getItemActionLabel(getA11yText('preview'))"
-              :title="getItemActionLabel(getA11yText('preview'))"
+              :aria-label="openLinkPanelLabel"
+              :title="openLinkPanelLabel"
               @click.stop="openPreviewPanel"
             >
               <span class="sub-item-title-text">{{ displayName }}</span>
@@ -98,6 +98,8 @@
               v-if="appearanceSetting.isSubItemMenuFold"
               type="button"
               class="compare-sub-link"
+              :aria-expanded="itemMenuVisible"
+              :aria-controls="quickActionsId"
               :aria-label="$i18n.locale.startsWith('zh') ? '打开快捷操作' : 'Open quick actions'"
               :title="$i18n.locale.startsWith('zh') ? '打开快捷操作' : 'Open quick actions'"
               @click.stop="switchItemMenuVisible"
@@ -110,8 +112,12 @@
                 "
               />
             </button>
-            <template
-              v-if="itemMenuVisible || !appearanceSetting.isSubItemMenuFold"
+            <div
+              :id="quickActionsId"
+              class="sub-item-quick-actions"
+              v-show="itemMenuVisible || !appearanceSetting.isSubItemMenuFold"
+              :aria-hidden="appearanceSetting.isSubItemMenuFold ? !itemMenuVisible : undefined"
+              :inert="appearanceSetting.isSubItemMenuFold ? !itemMenuVisible : undefined"
             >
               <!-- 官网 -->
               <button
@@ -129,8 +135,8 @@
                 v-if="!appearanceSetting.isShowIcon"
                 type="button"
                 class="compare-sub-link"
-                :aria-label="getItemActionLabel(getA11yText('preview'))"
-                :title="getItemActionLabel(getA11yText('preview'))"
+                :aria-label="openLinkPanelLabel"
+                :title="openLinkPanelLabel"
                 @click.stop="compareSub"
               >
                 <font-awesome-icon icon="fa-solid fa-eye" />
@@ -155,7 +161,7 @@
               >
                 <font-awesome-icon icon="fa-solid fa-clone" />
               </button>
-            </template>
+            </div>
             <!-- 刷新 -->
             <button
               v-if="
@@ -196,6 +202,8 @@
             <button
               v-if="!isMobile()"
               ref="moreAction"
+              :aria-expanded="swipeIsOpen"
+              :aria-controls="swipeActionsId"
               type="button"
               class="copy-sub-link"
               :aria-label="$i18n.locale.startsWith('zh') ? '打开侧边操作' : 'Open side actions'"
@@ -274,31 +282,29 @@
     <!-- 加入判断 开启拖动不显示 -->
     <template v-if="appearanceSetting.isLeftRight" #left>
       <!-- Copy -->
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="primary"
-          class="sub-item-swipe-btn"
+      <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('duplicate'))"
           :title="getItemActionLabel(getA11yText('duplicate'))"
           @click="onClickCopyConfig"
         >
           <font-awesome-icon icon="fa-solid fa-paste" />
-        </nut-button>
+        </button>
       </div>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="success"
-          class="sub-item-swipe-btn"
+      <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--success"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('export'))"
           :title="getItemActionLabel(getA11yText('export'))"
           @click="openRawConfig"
         >
           <font-awesome-icon icon="fa-solid fa-file-export" />
-        </nut-button>
+        </button>
       </div>
       <!-- preview -->
       <!-- <div class="sub-item-swipe-btn-wrapper">
@@ -308,59 +314,55 @@
       </div> -->
       <!-- del -->
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="danger"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('delete'))"
           :title="getItemActionLabel(getA11yText('delete'))"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </nut-button>
+        </button>
       </div>
     </template>
 
     <template v-else #right>
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="primary"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('duplicate'))"
           :title="getItemActionLabel(getA11yText('duplicate'))"
           @click.stop="onClickCopyConfig"
         >
           <font-awesome-icon icon="fa-solid fa-paste" />
-        </nut-button>
+        </button>
       </div>
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="success"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--success"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('export'))"
           :title="getItemActionLabel(getA11yText('export'))"
           @click.stop="openRawConfig"
         >
           <font-awesome-icon icon="fa-solid fa-file-export" />
-        </nut-button>
+        </button>
       </div>
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="danger"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('delete'))"
           :title="getItemActionLabel(getA11yText('delete'))"
           @click.stop="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </nut-button>
+        </button>
       </div>
     </template>
   </nut-swipe>
@@ -373,6 +375,41 @@
     @closeCompare="closeCompare"
     @refresh="refreshCompare"
   />
+  <nut-popup
+    v-model:visible="previewPanelVisible"
+    pop-class="sub-preview-popup"
+    position="center"
+    :style="{
+      width: isMobile() ? '92%' : '560px',
+      maxWidth: '92vw',
+      maxHeight: '85vh',
+      overflowY: 'auto',
+      padding: '20px 12px 0 12px',
+      backgroundColor: 'var(--popup-color)',
+    }"
+    :lock-scroll="true"
+    :safe-area-inset-bottom="true"
+    close-icon="close-little"
+    z-index="1100"
+    :close-on-click-overlay="true"
+    closeable
+    round
+    @close="closePreviewPanel"
+  >
+    <div class="preview-popup-title">{{ t("subPage.previewTitle") }}</div>
+    <PreviewPanel
+      :name="name"
+      :display-name="displayName"
+      :type="props.type"
+      :general="t('subPage.panel.general')"
+      :notify="t('subPage.copyNotify.succeed')"
+      :tips-title="t('subPage.panel.tips.title')"
+      :tips-content="`${t('subPage.panel.tips.content')}\n${t('syncPage.addArtForm.includeUnsupportedProxy.tips.content')}`"
+      :desc="t('subPage.panel.tips.desc')"
+      :tips-ok-text="t('subPage.panel.tips.ok')"
+      :tips-cancel-text="t('subPage.panel.tips.cancel')"
+    />
+  </nut-popup>
 </template>
 
 <script lang="ts" setup>
@@ -380,7 +417,7 @@ import { Dialog, Toast } from "@nutui/nutui";
 import { useClipboard } from "@vueuse/core";
 import dayjs from "dayjs";
 import { storeToRefs } from "pinia";
-import { computed, createVNode, ref, toRaw } from "vue";
+import { computed, ref, toRaw } from "vue";
 import useV3Clipboard from "vue-clipboard3";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -425,6 +462,8 @@ let scrollTop = 0;
 
 const compareTableIsVisible = ref(false);
 usePopupRoute(compareTableIsVisible);
+const previewPanelVisible = ref(false);
+usePopupRoute(previewPanelVisible);
 
 const moreAction = ref();
 const swipe = ref();
@@ -454,6 +493,9 @@ const displayName =
   props[props.type].displayName || props[props.type]["display-name"] || props[props.type].name;
 
 const name = props[props.type].name;
+const itemIdBase = computed(() => `${props.type}-${name}`.replace(/[^\w-]/g, "-"));
+const quickActionsId = computed(() => `sub-item-quick-actions-${itemIdBase.value}`);
+const swipeActionsId = computed(() => `sub-item-swipe-actions-${itemIdBase.value}`);
 const tag = props[props.type].tag;
 const remark = props[props.type].remark;
 const remarkText = computed(() => {
@@ -910,31 +952,12 @@ const handleContentClick = (event) => {
 
 const openPreviewPanel = () => {
   if (ismove.value) return;
-  Dialog({
-    title: t("subPage.previewTitle"),
-    content: createVNode(PreviewPanel, {
-      name,
-      displayName,
-      type: props.type,
-      general: t("subPage.panel.general"),
-      notify: t("subPage.copyNotify.succeed"),
-      tipsTitle: t(`subPage.panel.tips.title`),
-      tipsContent: `${t("subPage.panel.tips.content")}\n${t(
-        "syncPage.addArtForm.includeUnsupportedProxy.tips.content",
-      )}`,
-      desc: t(`subPage.panel.tips.desc`),
-      tipsOkText: t(`subPage.panel.tips.ok`),
-      tipsCancelText: t(`subPage.panel.tips.cancel`),
-    }),
-    onOpened: () => swipe.value.close(),
-    popClass: "auto-dialog",
-    // @ts-ignore
-    closeOnClickOverlay: true,
-    noOkBtn: true,
-    noCancelBtn: true,
-    closeOnPopstate: true,
-    lockScroll: false,
-  });
+  swipe.value?.close();
+  previewPanelVisible.value = true;
+};
+
+const closePreviewPanel = () => {
+  previewPanelVisible.value = false;
 };
 const shareBtnVisible = computed(() => {
   return env.value?.feature?.share;
@@ -943,6 +966,10 @@ const shareBtnVisible = computed(() => {
 const getItemActionLabel = (action: string) => {
   return `${action} ${displayName}`;
 };
+
+const openLinkPanelLabel = computed(() => {
+  return t("subPage.previewTitleAction", { name: displayName });
+});
 
 const closeExpandedMenu = () => {
   swipe.value.close();
@@ -1157,21 +1184,25 @@ const onClickRefresh = async () => {
       .tag {
         margin: 0 2px;
       }
-      .sub-item-menu {
-        position: relative;
-        top: 0;
+        .sub-item-menu {
+          position: relative;
+          top: 0;
         // background: var(--card-color);
         padding: 4px 0;
         border-radius: var(--item-card-radios);
         display: flex;
         align-items: center;
         flex-shrink: 0;
-        &.simple-mode {
-          position: relative;
-          top: 8px;
+          &.simple-mode {
+            position: relative;
+            top: 8px;
+          }
         }
-      }
-      .compare-sub-link,
+        .sub-item-quick-actions {
+          display: flex;
+          align-items: center;
+        }
+        .compare-sub-link,
       .share-sub-link,
       .copy-sub-link,
       .refresh-sub-flow {
@@ -1326,12 +1357,48 @@ const onClickRefresh = async () => {
       }
 
       .sub-item-swipe-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        color: #fff;
+        background: var(--primary-color);
         border-radius: 50%;
         height: 46px;
         width: 44px;
+
+        &--primary {
+          background: var(--primary-color);
+        }
+
+        &--success {
+          background: var(--second-color);
+        }
+
+        &--danger {
+          background: var(--danger-color, #d64545);
+        }
+
+        &:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
       }
     }
   }
+}
+
+.preview-popup-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--second-text-color);
+  margin-bottom: 12px;
 }
 
 .desc-about {

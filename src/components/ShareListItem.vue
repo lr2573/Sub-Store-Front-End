@@ -36,8 +36,8 @@
             type="button"
             class="sub-item-title-button"
             :disabled="props.disabled"
-            :aria-label="getItemActionLabel(type === 'file' ? getA11yText('open') : getA11yText('preview'))"
-            :title="getItemActionLabel(type === 'file' ? getA11yText('open') : getA11yText('preview'))"
+            :aria-label="primaryActionLabel"
+            :title="primaryActionLabel"
             @click.stop="onClickPrimaryAction"
           >
             <span class="sub-item-title-text">{{ displayName || name }}</span>
@@ -55,8 +55,8 @@
             type="button"
             class="sub-item-title-button"
             :disabled="props.disabled"
-            :aria-label="getItemActionLabel(type === 'file' ? getA11yText('open') : getA11yText('preview'))"
-            :title="getItemActionLabel(type === 'file' ? getA11yText('open') : getA11yText('preview'))"
+            :aria-label="primaryActionLabel"
+            :title="primaryActionLabel"
             @click.stop="onClickPrimaryAction"
           >
             <span class="sub-item-title-text">{{ displayName || name }}</span>
@@ -132,6 +132,42 @@
       </p>
     </div>
   </div>
+  <nut-popup
+    v-model:visible="previewPanelVisible"
+    pop-class="share-preview-popup"
+    position="center"
+    :style="{
+      width: isMobile() ? '92%' : '560px',
+      maxWidth: '92vw',
+      maxHeight: '85vh',
+      overflowY: 'auto',
+      padding: '20px 12px 0 12px',
+      backgroundColor: 'var(--popup-color)',
+    }"
+    :lock-scroll="true"
+    :safe-area-inset-bottom="true"
+    close-icon="close-little"
+    z-index="1100"
+    :close-on-click-overlay="true"
+    closeable
+    round
+    @close="closePreviewPanel"
+  >
+    <div class="preview-popup-title">{{ t("subPage.previewTitle") }}</div>
+    <PreviewPanel
+      :name="name"
+      :display-name="displayName"
+      type="share"
+      :url="previewUrl"
+      :general="t('subPage.panel.general')"
+      :notify="t('subPage.copyNotify.succeed')"
+      :tips-title="t('subPage.panel.tips.title')"
+      :tips-content="`${t('subPage.panel.tips.content')}\n${t('syncPage.addArtForm.includeUnsupportedProxy.tips.content')}`"
+      :desc="t('subPage.panel.tips.desc')"
+      :tips-ok-text="t('subPage.panel.tips.ok')"
+      :tips-cancel-text="t('subPage.panel.tips.cancel')"
+    />
+  </nut-popup>
 </template>
 
 <script lang="ts" setup>
@@ -139,7 +175,7 @@ import { useClipboard } from "@vueuse/core";
 import { Dialog, Toast } from "@nutui/nutui";
 import dayjs from "dayjs";
 import { storeToRefs } from "pinia";
-import { computed, createVNode } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import useV3Clipboard from "vue-clipboard3";
 import { useRouter } from "vue-router";
@@ -149,12 +185,14 @@ import PreviewPanel from "@/components/PreviewPanel.vue";
 import { useA11y } from "@/hooks/useA11y";
 import { useBackend } from "@/hooks/useBackend";
 import { useHostAPI } from "@/hooks/useHostAPI";
+import { usePopupRoute } from "@/hooks/usePopupRoute";
 import { useAppNotifyStore } from "@/store/appNotify";
 import { useSettingsStore } from "@/store/settings";
 import { useSubsStore } from "@/store/subs";
 import { openManagedDeleteDialog } from "@/utils/archive";
 import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
 import { normalizeTagArray } from "@/utils/shareTags";
+import { isMobile } from "@/utils/isMobile";
 
 const { showNotify } = useAppNotifyStore();
 const router = useRouter();
@@ -176,6 +214,8 @@ const settingsStore = useSettingsStore();
 const subsStore = useSubsStore();
 const { appearanceSetting, githubProxy, githubProxyRegex } = storeToRefs(settingsStore);
 const { currentUrl: host } = useHostAPI();
+const previewPanelVisible = ref(false);
+usePopupRoute(previewPanelVisible);
 const avatarSize = computed(() => {
   if (appearanceSetting.value.isSimpleMode) return "36";
   return props.isDualColumn ? "40" : "48";
@@ -297,6 +337,15 @@ const getItemActionLabel = (action: string) => {
   return `${action} ${displayName.value || name.value}`;
 };
 
+const primaryActionLabel = computed(() => {
+  if (type.value === "file") {
+    return getItemActionLabel(getA11yText("open"));
+  }
+  return t("subPage.previewTitleAction", {
+    name: displayName.value || name.value,
+  });
+});
+
 const onDeleteConfirm = async (mode: DeleteMode = "permanent") => {
   await subsStore.deleteShare(token.value, type.value, name.value, mode);
 };
@@ -405,37 +454,17 @@ const getShareUrl = () => {
   }
 };
 
+const previewUrl = computed(() => getShareUrl());
+
 const onClickPreviews = () => {
   if (props.disabled || type.value === "file") {
     return;
   }
-  const url = getShareUrl();
+  previewPanelVisible.value = true;
+};
 
-  Dialog({
-    title: t("subPage.previewTitle"),
-    content: createVNode(PreviewPanel, {
-      name: name.value,
-      displayName: displayName.value,
-      type: "share",
-      url,
-      general: t("subPage.panel.general"),
-      notify: t("subPage.copyNotify.succeed"),
-      tipsTitle: t("subPage.panel.tips.title"),
-      tipsContent: `${t("subPage.panel.tips.content")}\n${t(
-        "syncPage.addArtForm.includeUnsupportedProxy.tips.content",
-      )}`,
-      desc: t("subPage.panel.tips.desc"),
-      tipsOkText: t("subPage.panel.tips.ok"),
-      tipsCancelText: t("subPage.panel.tips.cancel"),
-    }),
-    popClass: "auto-dialog",
-    // @ts-ignore
-    closeOnClickOverlay: true,
-    noOkBtn: true,
-    noCancelBtn: true,
-    closeOnPopstate: true,
-    lockScroll: false,
-  });
+const closePreviewPanel = () => {
+  previewPanelVisible.value = false;
 };
 
 const onClickPrimaryAction = () => {
@@ -455,6 +484,14 @@ const onClickPrimaryAction = () => {
       filter: brightness(var(--img-brightness));
     }
   }
+}
+
+.preview-popup-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--second-text-color);
+  margin-bottom: 12px;
 }
 
 .sub-item-wrapper {

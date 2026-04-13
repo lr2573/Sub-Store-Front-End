@@ -41,6 +41,7 @@
               data-1p-ignore
               @blur="customerBlurValidate('name')"
               v-model.trim="form.name"
+              :aria-label="$t(`editorPage.subConfig.basic.name.label`)"
               :placeholder="$t(`editorPage.subConfig.basic.name.placeholder`)"
               type="text"
             />
@@ -54,6 +55,7 @@
               class="nut-input-text"
               data-1p-ignore
               v-model.trim="form.displayName"
+              :aria-label="$t(`editorPage.subConfig.basic.displayName.label`)"
               :placeholder="$t(`editorPage.subConfig.basic.displayName.placeholder`)"
               type="text"
             />
@@ -64,6 +66,7 @@
             prop="remark"
           >
             <nut-textarea
+              ref="remarkInputRef"
               class="nut-input-text"
               :border="false"
               v-model="form.remark"
@@ -101,6 +104,7 @@
           prop="tag"
         >
           <nut-input
+            ref="tagInputRef"
             class="nut-input-text"
             v-model.trim="form.tag"
             :border="false"
@@ -115,6 +119,7 @@
           <!-- icon -->
           <nut-form-item :label="$t(`editorPage.subConfig.basic.icon.label`)" prop="icon">
             <nut-input
+              ref="iconInputRef"
               :border="false"
               class="nut-input-text"
               v-model.trim="form.icon"
@@ -154,6 +159,7 @@
               class="nut-input-text"
               data-1p-ignore
               v-model.trim="form.subInfoUrl"
+              :aria-label="$t(`editorPage.subConfig.basic.subInfoUrl.label`)"
               :placeholder="$t(`editorPage.subConfig.basic.subInfoUrl.placeholder`)"
               type="text"
             />
@@ -166,6 +172,7 @@
               class="nut-input-text"
               data-1p-ignore
               v-model.trim="form.subInfoUserAgent"
+              :aria-label="$t(`editorPage.subConfig.basic.subInfoUserAgent.label`)"
               :placeholder="
                 $t(`editorPage.subConfig.basic.subInfoUserAgent.placeholder`)
               "
@@ -260,6 +267,7 @@
               ]"
             >
               <nut-input
+                ref="sourceNameInputRef"
                 class="nut-input-text"
                 :border="false"
                 data-1p-ignore
@@ -325,6 +333,7 @@
               ]"
             >
               <nut-textarea
+                ref="urlInputRef"
                 class="textarea-wrapper"
                 @blur="customerBlurValidate('url')"
                 v-model="form.url"
@@ -382,6 +391,7 @@
               <input
                 class="nut-input-text"
                 v-model.trim="form.ua"
+                :aria-label="$t(`editorPage.subConfig.basic.ua.label`)"
                 :placeholder="$t(`editorPage.subConfig.basic.ua.placeholder`)"
                 type="text"
               />
@@ -391,6 +401,7 @@
               prop="proxy"
             >
               <nut-input
+                ref="proxyInputRef"
                 :border="false"
                 class="nut-input-text"
                 v-model.trim="form.proxy"
@@ -552,6 +563,7 @@
     </button>
   </nut-picker>
   <tag-popup
+    v-if="tagPopupVisible"
     v-model:visible="tagPopupVisible"
     ref="tagPopupRef"
     :currentTag="currentTag"
@@ -590,6 +602,7 @@ import {
   toRaw,
   watchEffect,
   watch,
+  watchPostEffect,
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -597,6 +610,7 @@ import cmView from "@/views/editCode/cmView.vue";
 import { useCodeStore } from "@/store/codeStore";
 import clashmetaIcon from '@/assets/icons/clashmeta_color.png';
 import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
+import { syncInnerInputA11y } from "@/hooks/useA11y";
 
 const cmStore = useCodeStore();
 const isDis = ref(true);
@@ -653,6 +667,12 @@ const tag = ref('all');
 const tagPopupVisible = ref(false);
 const tagType = ref('tag');
 const tagPopupRef = ref(null);
+const remarkInputRef = ref<any>(null);
+const tagInputRef = ref<any>(null);
+const iconInputRef = ref<any>(null);
+const sourceNameInputRef = ref<any>(null);
+const urlInputRef = ref<any>(null);
+const proxyInputRef = ref<any>(null);
 const currentTag = computed(() => {
   return form.tag
 })
@@ -792,6 +812,27 @@ watchEffect(() => {
     console.log('form', form);
     return;
   }
+});
+
+watchPostEffect(() => {
+  syncInnerInputA11y(remarkInputRef.value, {
+    label: t(`editorPage.subConfig.basic.remark.label`),
+  });
+  syncInnerInputA11y(tagInputRef.value, {
+    label: t(`editorPage.subConfig.basic.tag.label`),
+  });
+  syncInnerInputA11y(iconInputRef.value, {
+    label: t(`editorPage.subConfig.basic.icon.label`),
+  });
+  syncInnerInputA11y(sourceNameInputRef.value, {
+    label: `${t(`tabBar.sub`)}${t(`editorPage.subConfig.basic.name.label`)}`,
+  });
+  syncInnerInputA11y(urlInputRef.value, {
+    label: t(`editorPage.subConfig.basic.url.label`),
+  });
+  syncInnerInputA11y(proxyInputRef.value, {
+    label: t(`editorPage.subConfig.basic.proxy.label`),
+  });
 });
 
 const addAction = (val) => {

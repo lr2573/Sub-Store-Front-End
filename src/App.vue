@@ -33,7 +33,7 @@ import { useSubsStore } from "@/store/subs";
 import { getFlowsUrlList } from "@/utils/getFlowsUrlList";
 import { initStores } from "@/utils/initApp";
 import { storeToRefs } from "pinia";
-import { ref, watchEffect, onMounted } from "vue";
+import { ref, watch, watchEffect, onMounted } from "vue";
 import { useHostAPI } from "@/hooks/useHostAPI"; //onMounted
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -281,17 +281,37 @@ watchEffect(() => {
 });
 
 // 检测是否需要显示后端配置对话框
+watch(
+  () => route.path,
+  (path) => {
+    if (path === '/subs') {
+      checkAndShowMagicPathDialog();
+      return;
+    }
+
+    showMagicPathDialog.value = false;
+  },
+  { immediate: true },
+);
+
 onMounted(() => {
   // 添加路由守卫，确保在每次路由变化时检查是否需要显示magicpath对话框
   router.afterEach((to) => {
     // 只在主页面（/subs）显示对话框
     if (to.path === '/subs') {
       checkAndShowMagicPathDialog();
+      return;
     }
+
+    showMagicPathDialog.value = false;
   });
 
   // 初始检查
-  checkAndShowMagicPathDialog();
+  if (route.path === '/subs') {
+    checkAndShowMagicPathDialog();
+  } else {
+    showMagicPathDialog.value = false;
+  }
 });
 
 function checkAndShowMagicPathDialog() {

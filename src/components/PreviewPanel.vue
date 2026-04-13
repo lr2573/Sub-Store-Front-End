@@ -109,7 +109,7 @@
   const { name, displayName, type, url, general, notify, tipsTitle, tipsContent, desc,tipsCancelText, tipsOkText } = defineProps<{
     name: string;
     displayName?: string;
-    type: 'sub' | 'collection';
+    type: 'sub' | 'collection' | 'share';
     general: string;
     notify: string;
     desc: string;

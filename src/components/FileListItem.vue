@@ -128,6 +128,8 @@
               @click.stop="swipeController"
               v-if="!isMobile()"
               ref="moreAction"
+              :aria-expanded="swipeIsOpen"
+              :aria-controls="swipeActionsId"
             >
               <font-awesome-icon icon="fa-solid fa-angles-right" />
             </button>
@@ -170,35 +172,33 @@
     <!-- 加入判断 开启拖动不显示 -->
     <template v-if="appearanceSetting.isLeftRight" #left>
       <!-- Copy -->
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="primary"
-          class="sub-item-swipe-btn"
+        <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('duplicate'))"
           :title="getItemActionLabel(getA11yText('duplicate'))"
           @click="onClickCopyConfig"
         >
           <font-awesome-icon icon="fa-solid fa-paste" />
-        </nut-button>
+        </button>
       </div>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
+        <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
         <!-- <a
           :href="`${host}/api/wholeFile/${encodeURIComponent(name)}?raw=1`"
           target="_blank"
         > -->
-        <nut-button
-          shape="square"
-          type="success"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--success"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('export'))"
           :title="getItemActionLabel(getA11yText('export'))"
           @click="onClickExportFile(name)"
         >
           <font-awesome-icon icon="fa-solid fa-file-export" />
-        </nut-button>
+        </button>
       </div>
       <!-- preview -->
       <!-- <div class="sub-item-swipe-btn-wrapper">
@@ -207,47 +207,44 @@
         </nut-button>
       </div> -->
       <!-- del -->
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="danger"
-          class="sub-item-swipe-btn"
+      <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('delete'))"
           :title="getItemActionLabel(getA11yText('delete'))"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </nut-button>
+        </button>
       </div>
     </template>
 
     <template v-else #right>
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="primary"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('duplicate'))"
           :title="getItemActionLabel(getA11yText('duplicate'))"
           @click="onClickCopyConfig"
         >
           <font-awesome-icon icon="fa-solid fa-paste" />
-        </nut-button>
+        </button>
       </div>
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="success"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--success"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('export'))"
           :title="getItemActionLabel(getA11yText('export'))"
           @click="onClickExportFile(name)"
         >
           <font-awesome-icon icon="fa-solid fa-file-export" />
-        </nut-button>
+        </button>
       </div>
       <!-- <div class="sub-item-swipe-btn-wrapper">
         <nut-button shape="square" type="success" class="sub-item-swipe-btn" @click="onClickPreview">
@@ -255,17 +252,16 @@
         </nut-button>
       </div> -->
       <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <nut-button
-          shape="square"
-          type="danger"
-          class="sub-item-swipe-btn"
+        <button
+          type="button"
+          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
           :disabled="!swipeIsOpen"
           :aria-label="getItemActionLabel(getA11yText('delete'))"
           :title="getItemActionLabel(getA11yText('delete'))"
           @click="onClickDelete"
         >
           <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </nut-button>
+        </button>
       </div>
     </template>
   </nut-swipe>
@@ -357,6 +353,8 @@
     props[props.type].displayName || props[props.type]['display-name'] || props[props.type].name;
 
   const name = props[props.type].name;
+  const itemIdBase = computed(() => `${props.type}-${name}`.replace(/[^\w-]/g, '-'));
+  const swipeActionsId = computed(() => `file-item-swipe-actions-${itemIdBase.value}`);
   const tag = props[props.type].tag;
   const remark = props[props.type].remark;
   const remarkText = computed(() => {
@@ -892,9 +890,37 @@
         }
 
         .sub-item-swipe-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 0;
+          color: #fff;
+          background: var(--primary-color);
           border-radius: 50%;
           height: 46px;
           width: 44px;
+
+          &--primary {
+            background: var(--primary-color);
+          }
+
+          &--success {
+            background: var(--second-color);
+          }
+
+          &--danger {
+            background: var(--danger-color, #d64545);
+          }
+
+          &:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+          }
         }
       }
     }

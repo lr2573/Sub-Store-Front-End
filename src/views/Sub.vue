@@ -9,6 +9,7 @@
     <!-- lock-scroll -->
     <div>
       <nut-popup
+        v-if="addSubBtnIsVisible"
         v-model:visible="addSubBtnIsVisible"
         pop-class="add-sub-popup"
         position="bottom"
@@ -286,6 +287,7 @@
     </div>
 
     <SharePopup
+      v-if="sharePopupVisible"
       v-model:visible="sharePopupVisible"
       :data="shareData"
       action="add"

@@ -51,6 +51,7 @@
                   type="button"
                   class="list-title"
                   :aria-expanded="!isFold('sub')"
+                  aria-controls="archive-sub-list"
                   @click="toggleFold('sub')"
                 >
                   <span class="list-title-main">
@@ -79,6 +80,7 @@
           </div>
           <draggable
             v-if="!isFold('sub')"
+            id="archive-sub-list"
             v-model="filteredSubEntries"
             item-key="id"
             class="draggable-list"
@@ -145,6 +147,7 @@
                   type="button"
                   class="list-title"
                   :aria-expanded="!isFold('col')"
+                  aria-controls="archive-col-list"
                   @click="toggleFold('col')"
                 >
                   <span class="list-title-main">
@@ -173,6 +176,7 @@
           </div>
           <draggable
             v-if="!isFold('col')"
+            id="archive-col-list"
             v-model="filteredColEntries"
             item-key="id"
             class="draggable-list"
@@ -239,6 +243,7 @@
                   type="button"
                   class="list-title"
                   :aria-expanded="!isFold('file')"
+                  aria-controls="archive-file-list"
                   @click="toggleFold('file')"
                 >
                   <span class="list-title-main">
@@ -267,6 +272,7 @@
           </div>
           <draggable
             v-if="!isFold('file')"
+            id="archive-file-list"
             v-model="filteredFileEntries"
             item-key="id"
             class="draggable-list"
@@ -333,6 +339,7 @@
                   type="button"
                   class="list-title"
                   :aria-expanded="!isFold('artifact')"
+                  aria-controls="archive-artifact-list"
                   @click="toggleFold('artifact')"
                 >
                   <span class="list-title-main">
@@ -361,6 +368,7 @@
           </div>
           <draggable
             v-if="!isFold('artifact')"
+            id="archive-artifact-list"
             v-model="filteredArtifactEntries"
             item-key="id"
             class="draggable-list"
@@ -427,6 +435,7 @@
                   type="button"
                   class="list-title"
                   :aria-expanded="!isFold('share')"
+                  aria-controls="archive-share-list"
                   @click="toggleFold('share')"
                 >
                   <span class="list-title-main">
@@ -455,6 +464,7 @@
           </div>
           <draggable
             v-if="!isFold('share')"
+            id="archive-share-list"
             v-model="filteredShareEntries"
             item-key="id"
             class="draggable-list"

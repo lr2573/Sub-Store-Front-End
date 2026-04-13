@@ -167,7 +167,8 @@ export default {
       tipsContent: '订阅管理页面, 在某个订阅左滑/右滑的更多项中, 点击导出图标按钮',
     },
     addSubTitle: '选择要创建的订阅类型',
-    previewTitle: '预览/拷贝订阅',
+    previewTitle: '订阅链接面板',
+    previewTitleAction: '打开订阅链接面板 {name}',
     tag: {
       addTagTitle: '添加标签',
       tagPlaceholder: '请输入标签名称',

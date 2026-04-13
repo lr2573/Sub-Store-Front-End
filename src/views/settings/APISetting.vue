@@ -26,35 +26,51 @@
       :title="$t(`apiSettingPage.apiList.title`)"
       :desc="$t(`apiSettingPage.apiList.desc`)"
     >
-      <nut-cell @click="setCurrent('')">
-        <div class="api-list-item">
-          <div class="api-item-left">
-            <h2>
-              {{ $t(`apiSettingPage.apiList.defaultName`) }}
-              <nut-tag v-if="currentName === ''" type="primary" plain>
-                {{ $t(`apiSettingPage.apiList.currentTag`) }}
-              </nut-tag>
-            </h2>
-            <p>{{ defaultAPI }}</p>
+      <div class="api-list-cell">
+        <button
+          type="button"
+          class="api-list-button"
+          :aria-pressed="currentName === ''"
+          :title="$t(`apiSettingPage.apiList.defaultName`)"
+          @click="setCurrent('')"
+        >
+          <div class="api-list-item">
+            <div class="api-item-left">
+              <h2>
+                {{ $t(`apiSettingPage.apiList.defaultName`) }}
+                <nut-tag v-if="currentName === ''" type="primary" plain>
+                  {{ $t(`apiSettingPage.apiList.currentTag`) }}
+                </nut-tag>
+              </h2>
+              <p>{{ defaultAPI }}</p>
+            </div>
           </div>
-        </div>
-      </nut-cell>
+        </button>
+      </div>
 
-      <nut-cell
+      <div
         v-for="api in apis"
         :key="api.name"
-        @click="setCurrent(api.name)"
+        class="api-list-cell"
       >
         <div class="api-list-item">
-          <div class="api-item-left">
-            <h2>
-              {{ api.name }}
-              <nut-tag v-if="currentName === api.name" type="primary" plain>
-                {{ $t(`apiSettingPage.apiList.currentTag`) }}
-              </nut-tag>
-            </h2>
-            <p>{{ `${api.url.slice(0, 20)}******` }}</p>
-          </div>
+          <button
+            type="button"
+            class="api-list-button api-list-button--with-actions"
+            :aria-pressed="currentName === api.name"
+            :title="api.name"
+            @click="setCurrent(api.name)"
+          >
+            <div class="api-item-left">
+              <h2>
+                {{ api.name }}
+                <nut-tag v-if="currentName === api.name" type="primary" plain>
+                  {{ $t(`apiSettingPage.apiList.currentTag`) }}
+                </nut-tag>
+              </h2>
+              <p>{{ `${api.url.slice(0, 20)}******` }}</p>
+            </div>
+          </button>
           <div class="api-item-right">
             <button
               type="button"
@@ -76,7 +92,7 @@
             </button>
           </div>
         </div>
-      </nut-cell>
+      </div>
     </nut-cell-group>
 
     <nut-cell-group :title="$t(`apiSettingPage.addApi.title`)">
@@ -123,11 +139,11 @@
             </div>
           </div>
         </div>
-        <nut-button
+        <button
+          type="button"
           class="save-btn"
-          type="primary"
           :disabled="!addForm.name || !addForm.url"
-          :loading="checkingAPI"
+          :aria-busy="checkingAPI ? 'true' : 'false'"
           :aria-label="addApiLabel"
           :title="addApiLabel"
           @click="addApiHandler"
@@ -136,8 +152,7 @@
             v-if="!checkingAPI"
             icon="fa-solid fa-floppy-disk"
           />
-
-        </nut-button>
+        </button>
       </div>
     </nut-cell-group>
 
@@ -498,11 +513,34 @@ watch(
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+
+      .api-list-button {
+        flex: 1;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+          border-radius: 8px;
+        }
+      }
+
+      .api-list-button--with-actions {
+        flex: 1;
+      }
 
       .api-item-left {
         display: flex;
         flex-direction: column;
         gap: 4px;
+        min-width: 0;
 
         :deep(.nut-tag) {
           background: transparent !important;
@@ -522,6 +560,7 @@ watch(
         > p {
           font-size: 12px;
           color: var(--comment-text-color);
+          word-break: break-all;
         }
       }
 
@@ -538,6 +577,16 @@ watch(
         .copy-icon {
           margin-right: 16px;
         }
+      }
+    }
+
+    .api-list-cell {
+      margin: 0 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--divider-color);
+
+      &:last-child {
+        border-bottom: 0;
       }
     }
 
@@ -640,7 +689,27 @@ watch(
         width: 5%;
         flex-shrink: 0;
         flex-grow: 0;
+        min-width: 48px;
+        min-height: 48px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--primary-color);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
         font-size: 18px;
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
       }
     }
 

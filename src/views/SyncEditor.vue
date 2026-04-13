@@ -38,6 +38,7 @@
           ]"
         >
           <nut-input
+            ref="nameInputRef"
             :border="false"
             input-align="right"
             class="nut-input-text"
@@ -55,6 +56,7 @@
           prop="displayName"
         >
           <nut-input
+            ref="displayNameInputRef"
             :border="false"
             input-align="right"
             class="nut-input-text"
@@ -69,6 +71,7 @@
           prop="remark"
         >
           <nut-textarea
+            ref="remarkInputRef"
             class="nut-input-text"
             :border="false"
             v-model="form.remark"
@@ -85,6 +88,7 @@
           prop="tag"
         >
           <nut-input
+            ref="tagInputRef"
             class="nut-input-text"
             v-model.trim="form.tag"
             :border="false"
@@ -101,6 +105,7 @@
           prop="icon"
         >
           <nut-input
+            ref="iconInputRef"
             :border="false"
             input-align="right"
             class="nut-input-text"
@@ -145,6 +150,7 @@
           ]"
         >
           <nut-input
+            ref="sourceFieldInputRef"
             :border="false"
             input-align="right"
             class="nut-input-text source-input"
@@ -283,6 +289,7 @@
     </Teleport>
 
     <tag-popup
+      v-if="tagPopupVisible"
       v-model:visible="tagPopupVisible"
       :currentTag="currentTag"
       @setTag="setTagValue"
@@ -308,9 +315,10 @@ import { resolveArtifactIcon } from "@/utils/artifactIcon";
 import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
 import { Dialog, Toast } from "@nutui/nutui";
 import { storeToRefs } from "pinia";
-import { computed, reactive, ref, toRaw, watch, watchEffect, onMounted } from "vue";
+import { computed, reactive, ref, toRaw, watch, watchEffect, onMounted, watchPostEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import { syncInnerInputA11y } from "@/hooks/useA11y";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -336,6 +344,12 @@ const sourceInput = ref("");
 const sourceModel = ref<string[]>([]);
 const tagPopupVisible = ref(false);
 const iconPopupVisible = ref(false);
+const nameInputRef = ref<any>(null);
+const displayNameInputRef = ref<any>(null);
+const remarkInputRef = ref<any>(null);
+const tagInputRef = ref<any>(null);
+const iconInputRef = ref<any>(null);
+const sourceFieldInputRef = ref<any>(null);
 
 const githubUrlRewriter = computed(() => {
   return createGithubProxyUrlRewriter(githubProxy.value, githubProxyRegex.value);
@@ -520,6 +534,27 @@ watch(
   },
   { deep: true }
 );
+
+watchPostEffect(() => {
+  syncInnerInputA11y(nameInputRef.value, {
+    label: t(`syncPage.addArtForm.name.label`),
+  });
+  syncInnerInputA11y(displayNameInputRef.value, {
+    label: t(`syncPage.addArtForm.displayName.label`),
+  });
+  syncInnerInputA11y(remarkInputRef.value, {
+    label: t(`editorPage.subConfig.basic.remark.label`),
+  });
+  syncInnerInputA11y(tagInputRef.value, {
+    label: t(`editorPage.subConfig.basic.tag.label`),
+  });
+  syncInnerInputA11y(iconInputRef.value, {
+    label: t(`editorPage.subConfig.basic.icon.label`),
+  });
+  syncInnerInputA11y(sourceFieldInputRef.value, {
+    label: t(`syncPage.addArtForm.source.label`),
+  });
+});
 
 onMounted(async () => {
   if (isEditMode.value && artifactsStore.artifacts.length === 0) {

@@ -10,6 +10,105 @@ import { defineStore } from "pinia";
 const settingsApi = useSettingsApi();
 const { t } = i18n.global;
 
+const defaultAppearanceSetting: SettingsStoreState["appearanceSetting"] = {
+  isSimpleMode: false,
+  isLeftRight: false,
+  isDefaultIcon: false,
+  isIconColor: false,
+  isShowIcon: true,
+  isSimpleShowRemark: false,
+  isEditorCommon: true,
+  isSimpleReicon: false,
+  isSubItemMenuFold: true,
+  showFloatingRefreshButton: false,
+  showFloatingAddButton: false,
+  createItemPosition: "bottom",
+  displayPreviewInWebPage: true,
+  invalidShareFakeNode: false,
+  istabBar: false,
+  istabBar2: false,
+  subProgressStyle: "hidden",
+  listPageViewMode: undefined,
+};
+
+const getBooleanAppearanceSetting = (
+  value: unknown,
+  fallback: boolean
+): boolean => (typeof value === "boolean" ? value : fallback);
+
+const normalizeAppearanceSetting = (
+  appearanceSetting?: Partial<SettingsStoreState["appearanceSetting"]>
+): SettingsStoreState["appearanceSetting"] => ({
+  ...defaultAppearanceSetting,
+  ...appearanceSetting,
+  isSimpleMode: getBooleanAppearanceSetting(
+    appearanceSetting?.isSimpleMode,
+    defaultAppearanceSetting.isSimpleMode
+  ),
+  isLeftRight: getBooleanAppearanceSetting(
+    appearanceSetting?.isLeftRight,
+    defaultAppearanceSetting.isLeftRight
+  ),
+  isDefaultIcon: getBooleanAppearanceSetting(
+    appearanceSetting?.isDefaultIcon,
+    defaultAppearanceSetting.isDefaultIcon
+  ),
+  isIconColor: getBooleanAppearanceSetting(
+    appearanceSetting?.isIconColor,
+    defaultAppearanceSetting.isIconColor
+  ),
+  isShowIcon: getBooleanAppearanceSetting(
+    appearanceSetting?.isShowIcon,
+    defaultAppearanceSetting.isShowIcon
+  ),
+  isSimpleShowRemark: getBooleanAppearanceSetting(
+    appearanceSetting?.isSimpleShowRemark,
+    defaultAppearanceSetting.isSimpleShowRemark
+  ),
+  isEditorCommon: getBooleanAppearanceSetting(
+    appearanceSetting?.isEditorCommon,
+    defaultAppearanceSetting.isEditorCommon
+  ),
+  isSimpleReicon: getBooleanAppearanceSetting(
+    appearanceSetting?.isSimpleReicon,
+    defaultAppearanceSetting.isSimpleReicon
+  ),
+  isSubItemMenuFold: getBooleanAppearanceSetting(
+    appearanceSetting?.isSubItemMenuFold,
+    defaultAppearanceSetting.isSubItemMenuFold
+  ),
+  showFloatingRefreshButton: getBooleanAppearanceSetting(
+    appearanceSetting?.showFloatingRefreshButton,
+    defaultAppearanceSetting.showFloatingRefreshButton
+  ),
+  showFloatingAddButton: getBooleanAppearanceSetting(
+    appearanceSetting?.showFloatingAddButton,
+    defaultAppearanceSetting.showFloatingAddButton
+  ),
+  createItemPosition:
+    appearanceSetting?.createItemPosition ?? defaultAppearanceSetting.createItemPosition,
+  displayPreviewInWebPage: getBooleanAppearanceSetting(
+    appearanceSetting?.displayPreviewInWebPage,
+    defaultAppearanceSetting.displayPreviewInWebPage
+  ),
+  invalidShareFakeNode: getBooleanAppearanceSetting(
+    appearanceSetting?.invalidShareFakeNode,
+    defaultAppearanceSetting.invalidShareFakeNode
+  ),
+  istabBar: getBooleanAppearanceSetting(
+    appearanceSetting?.istabBar,
+    defaultAppearanceSetting.istabBar
+  ),
+  istabBar2: getBooleanAppearanceSetting(
+    appearanceSetting?.istabBar2,
+    defaultAppearanceSetting.istabBar2
+  ),
+  subProgressStyle:
+    appearanceSetting?.subProgressStyle ?? defaultAppearanceSetting.subProgressStyle,
+  listPageViewMode:
+    appearanceSetting?.listPageViewMode ?? defaultAppearanceSetting.listPageViewMode,
+});
+
 export const useSettingsStore = defineStore("settingsStore", {
   state: (): SettingsStoreState => {
     return {
@@ -32,26 +131,7 @@ export const useSettingsStore = defineStore("settingsStore", {
         dark: "dark",
         light: "light",
       },
-      appearanceSetting: {
-        isSimpleMode: false,
-        isLeftRight: false,
-        isDefaultIcon: false,
-        isIconColor: false,
-        isShowIcon: true,
-        isSimpleShowRemark: false,
-        isEditorCommon: true,
-        isSimpleReicon: false,
-        isSubItemMenuFold: true,
-        showFloatingRefreshButton: false,
-        showFloatingAddButton: false,
-        createItemPosition: "bottom",
-        displayPreviewInWebPage: true,
-        invalidShareFakeNode: false,
-        istabBar: false,
-        istabBar2: false,
-        subProgressStyle: "hidden",
-        listPageViewMode: undefined,
-      },
+      appearanceSetting: { ...defaultAppearanceSetting },
       gistUpload: "base64",
       avatarUrl: "",
       artifactStore: "",
@@ -84,23 +164,7 @@ export const useSettingsStore = defineStore("settingsStore", {
         this.theme.dark = res.data.data.theme?.dark ?? "dark";
         this.theme.light = res.data.data.theme?.light ?? "light";
 
-        this.appearanceSetting.isSimpleMode = res.data.data.appearanceSetting?.isSimpleMode ?? "";
-        this.appearanceSetting.isLeftRight = res.data.data.appearanceSetting?.isLeftRight ?? "";
-        this.appearanceSetting.isDefaultIcon = res.data.data.appearanceSetting?.isDefaultIcon ?? "";
-        this.appearanceSetting.isIconColor = res.data.data.appearanceSetting?.isIconColor ?? "";
-        this.appearanceSetting.isShowIcon = res.data.data.appearanceSetting?.isShowIcon ?? true;
-        this.appearanceSetting.isSimpleShowRemark = res.data.data.appearanceSetting?.isSimpleShowRemark ?? "";
-        this.appearanceSetting.isEditorCommon = res.data.data.appearanceSetting?.isEditorCommon ?? true;
-        this.appearanceSetting.isSimpleReicon = res.data.data.appearanceSetting?.isSimpleReicon ?? "";
-        this.appearanceSetting.isSubItemMenuFold = res.data.data.appearanceSetting?.isSubItemMenuFold ?? true;
-        this.appearanceSetting.showFloatingRefreshButton = res.data.data.appearanceSetting?.showFloatingRefreshButton ?? "";
-        this.appearanceSetting.showFloatingAddButton = res.data.data.appearanceSetting?.showFloatingAddButton ?? false;
-        this.appearanceSetting.createItemPosition = res.data.data.appearanceSetting?.createItemPosition ?? "bottom";
-        this.appearanceSetting.invalidShareFakeNode = res.data.data.appearanceSetting?.invalidShareFakeNode ?? false;
-        this.appearanceSetting.istabBar = res.data.data.appearanceSetting?.istabBar ?? "";
-        this.appearanceSetting.istabBar2 = res.data.data.appearanceSetting?.istabBar2 ?? "";
-        this.appearanceSetting.subProgressStyle = res.data.data.appearanceSetting?.subProgressStyle ?? "hidden";
-        this.appearanceSetting.listPageViewMode = res.data.data.appearanceSetting?.listPageViewMode;
+        this.appearanceSetting = normalizeAppearanceSetting(res.data.data.appearanceSetting);
         this.gistUpload = res.data.data?.gistUpload ?? "base64";
       } else {
         showNotify({
@@ -210,16 +274,26 @@ export const useSettingsStore = defineStore("settingsStore", {
     async changeAppearanceSetting(data: SettingsPostData) {
       Toast.loading("保存外观设置中...", { cover: true, id: "theme__loading" });
       const { showNotify } = useAppNotifyStore();
-      const res = await settingsApi.setSettings(data);
-      if (res?.data?.status === "success" && res?.data?.data) {
-        this.appearanceSetting = res.data.data.appearanceSetting;
-      } else {
+      try {
+        const res = await settingsApi.setSettings(data);
+        if (res?.data?.status === "success" && res?.data?.data) {
+          this.appearanceSetting = normalizeAppearanceSetting(res.data.data.appearanceSetting);
+          return true;
+        }
         showNotify({
           title: `保存外观设置失败`,
           type: "danger",
         });
+        return false;
+      } catch (error) {
+        showNotify({
+          title: `保存外观设置失败`,
+          type: "danger",
+        });
+        return false;
+      } finally {
+        Toast.hide("theme__loading");
       }
-      Toast.hide("theme__loading");
     },
   },
 });

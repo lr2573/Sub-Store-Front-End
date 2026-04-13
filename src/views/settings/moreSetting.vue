@@ -418,125 +418,65 @@
     }
     changeAppearanceSetting({ appearanceSetting: data });
   };
-  const setSimpleMode = (isSimpleMode: boolean) => {
-    // globalStore.setSimpleMode(isSimpleMode);
-    const data = {
-      ...appearanceSetting.value,
-      isSimpleMode: isSimpleMode
+  const updateAppearanceToggle = async (
+    key: keyof typeof appearanceSetting.value,
+    value: boolean,
+    stateRef: { value: boolean }
+  ) => {
+    const previousValue = stateRef.value;
+    stateRef.value = value;
+    const success = await changeAppearanceSetting({
+      appearanceSetting: {
+        ...appearanceSetting.value,
+        [key]: value,
+      },
+    });
+    if (!success) {
+      stateRef.value = previousValue;
     }
-    changeAppearanceSetting({ appearanceSetting: data });
   };
 
-  const setLeftRight = (isLeftRight: boolean) => {
-    // globalStore.setLeftRight(isLeftRight);
-    const data = {
-      ...appearanceSetting.value,
-      isLeftRight: isLeftRight
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setSimpleMode = (isSimpleMode: boolean) =>
+    updateAppearanceToggle("isSimpleMode", isSimpleMode, SimpleSwitch);
 
-  const setIsDefaultIcon = (isDefaultIcon: boolean) => {
-    // globalStore.setIsDefaultIcon(isDefaultIcon);
-    const data = {
-      ...appearanceSetting.value,
-      isDefaultIcon: isDefaultIcon
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setLeftRight = (isLeftRight: boolean) =>
+    updateAppearanceToggle("isLeftRight", isLeftRight, LeftRight);
 
-  const setIsShowIcon = (isShowIcon: boolean) => {
-    // globalStore.setIsDefaultIcon(isDefaultIcon);
-    const data = {
-      ...appearanceSetting.value,
-      isShowIcon: isShowIcon
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setIsDefaultIcon = (isDefaultIcon: boolean) =>
+    updateAppearanceToggle("isDefaultIcon", isDefaultIcon, awIsDefaultIcon);
 
-  const setIsSubItemMenuFold = (isSubItemMenuFold: boolean) => {
-    // globalStore.setIsDefaultIcon(isDefaultIcon);
-    const data = {
-      ...appearanceSetting.value,
-      isSubItemMenuFold: isSubItemMenuFold
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setIsShowIcon = (isShowIcon: boolean) =>
+    updateAppearanceToggle("isShowIcon", isShowIcon, awIsShowIcon);
 
-  const setEditorCommon = (isEditorCommon: boolean) => {
-    // globalStore.setEditorCommon(isEditorCommon);
-    const data = {
-      ...appearanceSetting.value,
-      isEditorCommon: isEditorCommon
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setIsSubItemMenuFold = (isSubItemMenuFold: boolean) =>
+    updateAppearanceToggle("isSubItemMenuFold", isSubItemMenuFold, awIsSubItemMenuFold);
 
-  const setSimpleReicon = (isSimpleReicon: boolean) => {
-    // globalStore.setSimpleReicon(isSimpleReicon);
-    const data = {
-      ...appearanceSetting.value,
-      isSimpleReicon: isSimpleReicon
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setEditorCommon = (isEditorCommon: boolean) =>
+    updateAppearanceToggle("isEditorCommon", isEditorCommon, awEditorCommon);
 
-  const setSimpleShowRemark = (isSimpleShowRemark: boolean) => {
-    // globalStore.setSimpleReicon(isSimpleReicon);
-    const data = {
-      ...appearanceSetting.value,
-      isSimpleShowRemark: isSimpleShowRemark
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setSimpleReicon = (isSimpleReicon: boolean) =>
+    updateAppearanceToggle("isSimpleReicon", isSimpleReicon, awSimpleReicon);
 
-  const setShowFloatingRefreshButton = (showFloatingRefreshButton: boolean) => {
-    // globalStore.setShowFloatingRefreshButton(showFloatingRefreshButton);
-    const data = {
-      ...appearanceSetting.value,
-      showFloatingRefreshButton: showFloatingRefreshButton
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setSimpleShowRemark = (isSimpleShowRemark: boolean) =>
+    updateAppearanceToggle("isSimpleShowRemark", isSimpleShowRemark, awSimpleShowRemark);
 
-  const setShowFloatingAddButton = (showFloatingAddButton: boolean) => {
-    const data = {
-      ...appearanceSetting.value,
-      showFloatingAddButton: showFloatingAddButton
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setShowFloatingRefreshButton = (showFloatingRefreshButton: boolean) =>
+    updateAppearanceToggle("showFloatingRefreshButton", showFloatingRefreshButton, awShowFloatingRefreshButton);
 
-  const setDisplayPreviewInWebPage = (displayPreviewInWebPage: boolean) => {
-    const data = {
-      ...appearanceSetting.value,
-      displayPreviewInWebPage: displayPreviewInWebPage
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
-  const setInvalidShareFakeNode = (invalidShareFakeNode: boolean) => {
-    const data = {
-      ...appearanceSetting.value,
-      invalidShareFakeNode: invalidShareFakeNode
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
-  const settabBar = (istabBar: boolean) => {
-    // globalStore.settabBar(istabBar);
-    const data = {
-      ...appearanceSetting.value,
-      istabBar: istabBar
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
-  const settabBar2 = (istabBar2: boolean) => {
-    // globalStore.settabBar2(istabBar2);
-    const data = {
-      ...appearanceSetting.value,
-      istabBar2: istabBar2
-    }
-    changeAppearanceSetting({ appearanceSetting: data });
-  };
+  const setShowFloatingAddButton = (showFloatingAddButton: boolean) =>
+    updateAppearanceToggle("showFloatingAddButton", showFloatingAddButton, awShowFloatingAddButton);
+
+  const setDisplayPreviewInWebPage = (displayPreviewInWebPage: boolean) =>
+    updateAppearanceToggle("displayPreviewInWebPage", displayPreviewInWebPage, awDisplayPreviewInWebPage);
+
+  const setInvalidShareFakeNode = (isInvalidShareFakeNode: boolean) =>
+    updateAppearanceToggle("invalidShareFakeNode", isInvalidShareFakeNode, invalidShareFakeNode);
+
+  const settabBar = (istabBar: boolean) =>
+    updateAppearanceToggle("istabBar", istabBar, awtabBar);
+
+  const settabBar2 = (istabBar2: boolean) =>
+    updateAppearanceToggle("istabBar2", istabBar2, awtabBar2);
 
   
   

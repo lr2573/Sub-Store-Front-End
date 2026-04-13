@@ -44,6 +44,7 @@
             data-1p-ignore
             @blur="customerBlurValidate('name')"
             v-model.trim="form.name"
+            :aria-label="$t(`editorPage.subConfig.basic.name.label`)"
             :placeholder="$t(`editorPage.subConfig.basic.name.placeholder`)"
             type="text"
           />
@@ -57,6 +58,7 @@
             class="nut-input-text"
             data-1p-ignore
             v-model.trim="form.displayName"
+            :aria-label="$t(`editorPage.subConfig.basic.displayName.label`)"
             :placeholder="
               $t(`editorPage.subConfig.basic.displayName.placeholder`)
             "
@@ -69,6 +71,7 @@
           prop="remark"
         >
           <nut-textarea
+            ref="remarkInputRef"
             class="nut-input-text"
             :border="false"
             v-model="form.remark"
@@ -88,6 +91,7 @@
           prop="tag"
         >
           <nut-input
+            ref="tagInputRef"
             class="nut-input-text"
             v-model.trim="form.tag"
             :border="false"
@@ -105,6 +109,7 @@
           prop="icon"
         >
           <nut-input
+              ref="iconInputRef"
               :border="false"
               class="nut-input-text"
               v-model.trim="form.icon"
@@ -200,6 +205,7 @@
               </button>
             </template>
             <nut-textarea
+              ref="urlInputRef"
               class="textarea-wrapper"
               @blur="customerBlurValidate('url')"
               @change="strTrim('url')"
@@ -272,6 +278,7 @@
             v-if="form.source === 'remote'"
           >
             <nut-input
+              ref="uaInputRef"
               :border="false"
               class="nut-input-text"
               v-model.trim="form.ua"
@@ -289,6 +296,7 @@
             prop="subUserinfo"
           >
             <nut-input
+              ref="subUserinfoInputRef"
               :border="false"
               class="nut-input-text"
               v-model.trim="form.subUserinfo"
@@ -307,6 +315,7 @@
             prop="proxy"
           >
             <nut-input
+              ref="proxyInputRef"
               :border="false"
               class="nut-input-text"
               v-model.trim="form.proxy"
@@ -370,6 +379,7 @@
             prop="subscriptionTags"
           >
             <nut-input
+              ref="subscriptionTagsInputRef"
               :border="false"
               class="nut-input-text"
               v-model.trim="form.subscriptionTags"
@@ -479,6 +489,7 @@
               prop="subUserinfo"
             >
               <nut-input
+                ref="subUserinfoInputRef"
                 :border="false"
                 class="nut-input-text"
                 v-model.trim="form.subUserinfo"
@@ -496,6 +507,7 @@
               prop="proxy"
             >
               <nut-input
+                ref="proxyInputRef"
                 :border="false"
                 class="nut-input-text"
                 v-model.trim="form.proxy"
@@ -606,6 +618,7 @@
     @setIcon="setIcon">
   </icon-popup>
   <tag-popup
+    v-if="tagPopupVisible"
     v-model:visible="tagPopupVisible"
     ref="tagPopupRef"
     :currentTag="currentTag"
@@ -648,12 +661,14 @@ import {
   toRaw,
   watchEffect,
   watch,
+  watchPostEffect,
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import cmView from "@/views/editCode/cmView.vue";
 import { useCodeStore } from "@/store/codeStore";
 import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
+import { syncInnerInputA11y } from "@/hooks/useA11y";
 const cmStore = useCodeStore();
 const isDis = ref(true)
 const { t } = useI18n();
@@ -722,7 +737,15 @@ const rewriteGithubUrl = (url?: string | null) => {
   const tag = ref('all');
   const tagPopupVisible = ref(false);
   const tagType = ref('tag'); // 标签tag | 关联订阅标签linkTag
-  const tagPopupRef = ref(null);
+const tagPopupRef = ref(null);
+const remarkInputRef = ref<any>(null);
+const tagInputRef = ref<any>(null);
+const iconInputRef = ref<any>(null);
+const urlInputRef = ref<any>(null);
+const uaInputRef = ref<any>(null);
+const subUserinfoInputRef = ref<any>(null);
+const proxyInputRef = ref<any>(null);
+const subscriptionTagsInputRef = ref<any>(null);
   const currentTag = computed(() => {
     if (tagType.value === 'linkTag') {
       return form.subscriptionTags
@@ -1070,6 +1093,33 @@ const userAgentPlaceholder = computed(() => {
   return passThroughUAOn.value
     ? t(`editorPage.subConfig.basic.ua.placeholderDisabled`)
     : t(`editorPage.subConfig.basic.ua.placeholder`);
+});
+
+watchPostEffect(() => {
+  syncInnerInputA11y(remarkInputRef.value, {
+    label: t(`editorPage.subConfig.basic.remark.label`),
+  });
+  syncInnerInputA11y(tagInputRef.value, {
+    label: t(`editorPage.subConfig.basic.tag.label`),
+  });
+  syncInnerInputA11y(iconInputRef.value, {
+    label: t(`editorPage.subConfig.basic.icon.label`),
+  });
+  syncInnerInputA11y(urlInputRef.value, {
+    label: t(`editorPage.subConfig.basic.url.label`),
+  });
+  syncInnerInputA11y(uaInputRef.value, {
+    label: t(`editorPage.subConfig.basic.ua.label`),
+  });
+  syncInnerInputA11y(subUserinfoInputRef.value, {
+    label: t(`editorPage.subConfig.basic.subUserinfo.label`),
+  });
+  syncInnerInputA11y(proxyInputRef.value, {
+    label: t(`editorPage.subConfig.basic.proxy.label`),
+  });
+  syncInnerInputA11y(subscriptionTagsInputRef.value, {
+    label: t(`editorPage.subConfig.basic.subscriptionTags.label`),
+  });
 });
 
 const handlePassThroughUAChange = (val) => {

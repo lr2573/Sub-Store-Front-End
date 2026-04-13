@@ -130,6 +130,7 @@
               type="button"
               class="title-toggle"
               :aria-expanded="isGitHubConfigEditing"
+              aria-controls="github-config-panel"
               @click="isGitHubConfigEditing ? exitEditMode('github') : toggleEditMode('github')"
             >
               {{ $t(`myPage.githubConfig`) }}
@@ -167,7 +168,7 @@
             <nut-icon v-else class="right-icon" name="right"></nut-icon>
           </div>
         </div>
-        <div class="config-input-wrapper" v-if="isGitHubConfigEditing">
+        <div id="github-config-panel" class="config-input-wrapper" v-if="isGitHubConfigEditing">
           <nut-input
             ref="githubUserInputRef"
             class="input"
@@ -246,6 +247,7 @@
               type="button"
               class="title-toggle"
               :aria-expanded="isRequestConfigEditing"
+              aria-controls="request-config-panel"
               @click="isRequestConfigEditing ? exitEditMode('request') : toggleEditMode('request')"
             >
               {{ $t(`myPage.requestConfig`) }}
@@ -283,7 +285,7 @@
              <nut-icon v-else class="right-icon" name="right"></nut-icon>
           </div>
         </div>
-        <div class="config-input-wrapper" v-if="isRequestConfigEditing">
+        <div id="request-config-panel" class="config-input-wrapper" v-if="isRequestConfigEditing">
           <div class="input-with-help">
             <nut-input
               ref="defaultProxyInputRef"
@@ -359,6 +361,7 @@
               type="button"
               class="title-toggle"
               :aria-expanded="isCacheConfigEditing"
+              aria-controls="cache-config-panel"
               @click="isCacheConfigEditing ? exitEditMode('cache') : toggleEditMode('cache')"
             >
               {{ $t(`myPage.cacheConfig`) }}
@@ -396,7 +399,7 @@
             <nut-icon v-else class="right-icon" name="right"></nut-icon>
           </div>
         </div>
-        <div class="config-input-wrapper" v-if="isCacheConfigEditing">
+        <div id="cache-config-panel" class="config-input-wrapper" v-if="isCacheConfigEditing">
         
           <div class="input-with-help">
             <nut-input
@@ -495,6 +498,7 @@
               type="button"
               class="title-toggle"
               :aria-expanded="isFrontEndConfigEditing"
+              aria-controls="frontend-config-panel"
               @click="isFrontEndConfigEditing ? exitEditMode('frontEnd') : toggleEditMode('frontEnd')"
             >
               {{ $t(`myPage.frontEndConfig`) }}
@@ -532,7 +536,7 @@
             <nut-icon v-else class="right-icon" name="right"></nut-icon>
           </div>
         </div>
-        <div class="config-input-wrapper" v-if="isFrontEndConfigEditing">
+        <div id="frontend-config-panel" class="config-input-wrapper" v-if="isFrontEndConfigEditing">
         
           <div class="input-with-help">
             <nut-input

@@ -1,5 +1,6 @@
 <template>
   <nut-popup
+    v-if="visible"
     v-model:visible="visible"
     pop-class="magic-path-popup"
     position="center"
@@ -91,7 +92,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, nextTick, watch, watchEffect } from 'vue';
+import { ref, computed, nextTick, watch, watchEffect, watchPostEffect, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { syncInnerInputA11y } from '@/hooks/useA11y';
 import { useHostAPI } from '@/hooks/useHostAPI';
@@ -123,6 +124,7 @@ const magicPath = ref('');
 const error = ref('');
 const loading = ref(false);
 const magicPathInputRef = ref();
+let popupObserver: MutationObserver | null = null;
 
 // 输入类型：'path'(仅路径), 'host'(主机+路径), 'full'(完整URL)
 const inputType = ref('path');
@@ -131,7 +133,7 @@ const parsedPath = ref('');
 const previewUrl = ref('');
 const currentOrigin = ref(window.location.origin);
 
-const updateMagicPathInputA11y = async () => {
+const updateMagicPathInputA11y = async (attempt = 0) => {
   if (!visible.value) {
     return;
   }
@@ -140,6 +142,40 @@ const updateMagicPathInputA11y = async () => {
   syncInnerInputA11y(magicPathInputRef.value, {
     label: t('magicPath.placeholder'),
     invalid: !!error.value,
+  });
+
+  const host = magicPathInputRef.value?.$el ?? magicPathInputRef.value;
+  const input =
+    host?.querySelector?.('input, textarea') ??
+    document.querySelector('.magic-path-popup .magic-path-input input, .magic-path-popup .magic-path-input textarea');
+  if (input) {
+    input.setAttribute('aria-label', t('magicPath.placeholder'));
+    input.setAttribute('aria-invalid', String(!!error.value));
+  }
+  if (input?.getAttribute?.('aria-label')) {
+    return;
+  }
+
+  if (attempt < 5) {
+    window.setTimeout(() => {
+      updateMagicPathInputA11y(attempt + 1);
+    }, 120);
+  }
+};
+
+const bindPopupObserver = () => {
+  popupObserver?.disconnect();
+  const popup = document.querySelector('.magic-path-popup');
+  if (!popup) {
+    return;
+  }
+  popupObserver = new MutationObserver(() => {
+    updateMagicPathInputA11y();
+  });
+  popupObserver.observe(popup, {
+    childList: true,
+    subtree: true,
+    attributes: true,
   });
 };
 
@@ -290,11 +326,14 @@ const validateInput = () => {
 // 当对话框关闭时重置状态，当对话框打开时检查URL参数错误和API值
 watch(visible, (newValue) => {
   if (!newValue) {
+    popupObserver?.disconnect();
+    popupObserver = null;
     magicPath.value = '';
     error.value = '';
     // 清除sessionStorage中的状态
     sessionStorage.removeItem('showMagicPathDialog');
   } else if (newValue) {
+    bindPopupObserver();
     // 如果对话框打开
     if (props.urlApiValue) {
       // 如果有URL参数指定的API地址，自动填入输入框
@@ -334,6 +373,15 @@ watch(
   },
   { immediate: true },
 );
+
+watchPostEffect(() => {
+  updateMagicPathInputA11y();
+});
+
+onBeforeUnmount(() => {
+  popupObserver?.disconnect();
+  popupObserver = null;
+});
 
 watchEffect(() => {
   const input = magicPath.value.trim();

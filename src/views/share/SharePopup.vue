@@ -329,6 +329,7 @@
       </div>
     </div>
     <TagPopup
+      v-if="tagPopupVisible"
       v-model:visible="tagPopupVisible"
       :currentTag="currentTag"
       type="share"
