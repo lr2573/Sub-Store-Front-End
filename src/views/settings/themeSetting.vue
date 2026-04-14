@@ -24,36 +24,47 @@
       :title="$t(`themeSettingPage.themeSettingTitle`)"
     >
     <!--  -->
-      <nut-cell
-        class="cell-item"
-        :title="$t(`themeSettingPage.dark`)"
-        :desc="themeDes.darkDes"
+      <button
+        type="button"
+        class="cell-item cell-action-button"
+        :aria-label="`${$t(`themeSettingPage.dark`)} ${themeDes.darkDes}`"
         @click="openPicker('dark')"
-        >
-         <template v-slot:link>
-          <nut-icon name="rect-right"></nut-icon>
-        </template></nut-cell>
+      >
+        <span class="cell-action-main">
+          <span class="cell-action-title">{{ $t(`themeSettingPage.dark`) }}</span>
+          <span class="cell-action-desc">{{ themeDes.darkDes }}</span>
+        </span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
       
 
 
-      <nut-cell
-        class="cell-item"
-        :title="$t(`themeSettingPage.light`)"
-        :desc="themeDes.lightDes"
+      <button
+        type="button"
+        class="cell-item cell-action-button"
+        :aria-label="`${$t(`themeSettingPage.light`)} ${themeDes.lightDes}`"
         @click="openPicker('light')"
-      ><template v-slot:link>
-          <nut-icon name="rect-right"></nut-icon>
-        </template>
-      </nut-cell>
+      >
+        <span class="cell-action-main">
+          <span class="cell-action-title">{{ $t(`themeSettingPage.light`) }}</span>
+          <span class="cell-action-desc">{{ themeDes.lightDes }}</span>
+        </span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
     </nut-cell-group>
-    <nut-cell
+    <button
       v-else
-      class="cell-item"
-      :title="$t(`themeSettingPage.themeSettingTitle`)"
-      :desc="themeDes.nameDes"
+      type="button"
+      class="cell-item cell-action-button"
+      :aria-label="`${$t(`themeSettingPage.themeSettingTitle`)} ${themeDes.nameDes}`"
       @click="openPicker('name')"
-      is-link
-    />
+    >
+      <span class="cell-action-main">
+        <span class="cell-action-title">{{ $t(`themeSettingPage.themeSettingTitle`) }}</span>
+        <span class="cell-action-desc">{{ themeDes.nameDes }}</span>
+      </span>
+      <nut-icon name="rect-right"></nut-icon>
+    </button>
   </div>
 
   <nut-picker
@@ -159,6 +170,30 @@
       align-items: center;
 
       :deep(.nut-cell__value) {
+        font-weight: normal;
+        color: var(--lowest-text-color);
+      }
+    }
+
+    .cell-action-button {
+      width: 100%;
+      border: 0;
+      text-align: left;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 14px 16px;
+
+      .cell-action-main {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .cell-action-title {
+        color: var(--primary-text-color);
+      }
+
+      .cell-action-desc {
         font-weight: normal;
         color: var(--lowest-text-color);
       }

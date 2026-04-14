@@ -171,97 +171,94 @@
     </div>
     <!-- 加入判断 开启拖动不显示 -->
     <template v-if="appearanceSetting.isLeftRight" #left>
-      <!-- Copy -->
-        <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('duplicate'))"
-          :title="getItemActionLabel(getA11yText('duplicate'))"
-          @click="onClickCopyConfig"
-        >
-          <font-awesome-icon icon="fa-solid fa-paste" />
-        </button>
-      </div>
-        <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <!-- <a
-          :href="`${host}/api/wholeFile/${encodeURIComponent(name)}?raw=1`"
-          target="_blank"
-        > -->
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--success"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('export'))"
-          :title="getItemActionLabel(getA11yText('export'))"
-          @click="onClickExportFile(name)"
-        >
-          <font-awesome-icon icon="fa-solid fa-file-export" />
-        </button>
-      </div>
-      <!-- preview -->
-      <!-- <div class="sub-item-swipe-btn-wrapper">
-        <nut-button shape="square" type="success" class="sub-item-swipe-btn" @click="onClickPreview">
-          <font-awesome-icon icon="fa-solid fa-eye" />
-        </nut-button>
-      </div> -->
-      <!-- del -->
-      <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('delete'))"
-          :title="getItemActionLabel(getA11yText('delete'))"
-          @click="onClickDelete"
-        >
-          <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </button>
+      <div
+        :id="swipeActionsId"
+        class="sub-item-swipe-actions"
+        :aria-hidden="!swipeIsOpen"
+        :inert="!swipeIsOpen"
+      >
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--primary"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('duplicate'))"
+            :title="getItemActionLabel(getA11yText('duplicate'))"
+            @click="onClickCopyConfig"
+          >
+            <font-awesome-icon icon="fa-solid fa-paste" />
+          </button>
+        </div>
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--success"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('export'))"
+            :title="getItemActionLabel(getA11yText('export'))"
+            @click="onClickExportFile(name)"
+          >
+            <font-awesome-icon icon="fa-solid fa-file-export" />
+          </button>
+        </div>
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--danger"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('delete'))"
+            :title="getItemActionLabel(getA11yText('delete'))"
+            @click="onClickDelete"
+          >
+            <font-awesome-icon icon="fa-solid fa-trash-can" />
+          </button>
+        </div>
       </div>
     </template>
 
     <template v-else #right>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('duplicate'))"
-          :title="getItemActionLabel(getA11yText('duplicate'))"
-          @click="onClickCopyConfig"
-        >
-          <font-awesome-icon icon="fa-solid fa-paste" />
-        </button>
-      </div>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--success"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('export'))"
-          :title="getItemActionLabel(getA11yText('export'))"
-          @click="onClickExportFile(name)"
-        >
-          <font-awesome-icon icon="fa-solid fa-file-export" />
-        </button>
-      </div>
-      <!-- <div class="sub-item-swipe-btn-wrapper">
-        <nut-button shape="square" type="success" class="sub-item-swipe-btn" @click="onClickPreview">
-          <font-awesome-icon icon="fa-solid fa-eye" />
-        </nut-button>
-      </div> -->
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('delete'))"
-          :title="getItemActionLabel(getA11yText('delete'))"
-          @click="onClickDelete"
-        >
-          <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </button>
+      <div
+        :id="swipeActionsId"
+        class="sub-item-swipe-actions"
+        :aria-hidden="!swipeIsOpen"
+        :inert="!swipeIsOpen"
+      >
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--primary"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('duplicate'))"
+            :title="getItemActionLabel(getA11yText('duplicate'))"
+            @click="onClickCopyConfig"
+          >
+            <font-awesome-icon icon="fa-solid fa-paste" />
+          </button>
+        </div>
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--success"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('export'))"
+            :title="getItemActionLabel(getA11yText('export'))"
+            @click="onClickExportFile(name)"
+          >
+            <font-awesome-icon icon="fa-solid fa-file-export" />
+          </button>
+        </div>
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--danger"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('delete'))"
+            :title="getItemActionLabel(getA11yText('delete'))"
+            @click="onClickDelete"
+          >
+            <font-awesome-icon icon="fa-solid fa-trash-can" />
+          </button>
+        </div>
       </div>
     </template>
   </nut-swipe>
@@ -770,12 +767,15 @@
         }
       }
 
-      .sub-item-actions {
-        position: relative;
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-      }
+        .sub-item-actions {
+          position: relative;
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+        }
+        .sub-item-swipe-actions {
+          display: flex;
+        }
 
       .sub-item-detail {
         display: -webkit-box;

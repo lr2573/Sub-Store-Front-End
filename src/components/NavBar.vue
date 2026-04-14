@@ -110,7 +110,6 @@
   </div>
   <!-- lock-scroll  -->
   <nut-popup
-    v-if="showLangSwitchPopup"
     pop-class="nav-bar-lang-switch-popup"
     position="top"
     v-model:visible="showLangSwitchPopup"
@@ -123,6 +122,8 @@
       class="nav-language-switch-popup"
       role="radiogroup"
       :aria-label="t(`navBar.langSwitcher.cellTitle`)"
+      :aria-hidden="showLangSwitchPopup ? 'false' : 'true'"
+      :inert="!showLangSwitchPopup"
     >
       <div class="nav-language-switch-heading">
         {{ $t(`navBar.langSwitcher.cellTitle`) }}

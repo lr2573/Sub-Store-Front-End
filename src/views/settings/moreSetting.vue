@@ -127,9 +127,18 @@
 
 
 
-      <nut-cell class="cell-item" :title="$t(`moreSettingPage.subProgress.title`)" :desc="subProgressStyleName"
-        @click="()=>{showSubProgressPicker=true}" is-link>
-      </nut-cell>
+      <button
+        type="button"
+        class="cell-item setting-action-row"
+        :aria-label="`${$t(`moreSettingPage.subProgress.title`)} ${subProgressStyleName}`"
+        @click="showSubProgressPicker = true"
+      >
+        <span class="setting-action-content">
+          <span>{{ $t(`moreSettingPage.subProgress.title`) }}</span>
+          <small>{{ subProgressStyleName }}</small>
+        </span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
       <nut-picker v-model="subProgressStyleValue" v-model:visible="showSubProgressPicker" :columns="[
         { text: $t(`moreSettingPage.subProgress.hidden`), value: 'hidden' },
         { text: $t(`moreSettingPage.subProgress.background`), value: 'background' }
@@ -191,9 +200,18 @@
     </nut-cell-group>
 
     <nut-cell-group>
-      <nut-cell class="cell-item" :title="$t(`moreSettingPage.createItemPosition.title`)" :desc="createItemPositionName"
-        @click="()=>{showCreateItemPositionPicker=true}" is-link>
-      </nut-cell>
+      <button
+        type="button"
+        class="cell-item setting-action-row"
+        :aria-label="`${$t(`moreSettingPage.createItemPosition.title`)} ${createItemPositionName}`"
+        @click="showCreateItemPositionPicker = true"
+      >
+        <span class="setting-action-content">
+          <span>{{ $t(`moreSettingPage.createItemPosition.title`) }}</span>
+          <small>{{ createItemPositionName }}</small>
+        </span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
       <nut-picker v-model="createItemPositionValue" v-model:visible="showCreateItemPositionPicker" :columns="[
         { text: $t(`moreSettingPage.createItemPosition.top`), value: 'top' },
         { text: $t(`moreSettingPage.createItemPosition.bottom`), value: 'bottom' }
@@ -265,9 +283,18 @@
       </nut-cell>
     </nut-cell-group>
     <nut-cell-group>
-      <nut-cell class="cell-item" :title="$t(`moreSettingPage.gistUpload.title`)" :desc="gistUploadName"
-        @click="()=>{showGistUploadPicker=true}" is-link>
-      </nut-cell>
+      <button
+        type="button"
+        class="cell-item setting-action-row"
+        :aria-label="`${$t(`moreSettingPage.gistUpload.title`)} ${gistUploadName}`"
+        @click="showGistUploadPicker = true"
+      >
+        <span class="setting-action-content">
+          <span>{{ $t(`moreSettingPage.gistUpload.title`) }}</span>
+          <small>{{ gistUploadName }}</small>
+        </span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
       <nut-picker v-model="gistUploadValue" v-model:visible="showGistUploadPicker" :columns="[
         { text: $t(`moreSettingPage.gistUpload.base64`), value: 'base64' },
         { text: $t(`moreSettingPage.gistUpload.plaintext`), value: 'plaintext' }
@@ -294,26 +321,67 @@
       </nut-cell>
 
       <template v-if="theme.auto">
-        <nut-cell class="cell-item" :title="$t(`themeSettingPage.dark`)" :desc="themeDes.darkDes"
-          @click="openPicker('dark')" is-link>
-        </nut-cell>
+        <button
+          type="button"
+          class="cell-item setting-action-row"
+          :aria-label="`${$t(`themeSettingPage.dark`)} ${themeDes.darkDes}`"
+          @click="openPicker('dark')"
+        >
+          <span class="setting-action-content">
+            <span>{{ $t(`themeSettingPage.dark`) }}</span>
+            <small>{{ themeDes.darkDes }}</small>
+          </span>
+          <nut-icon name="rect-right"></nut-icon>
+        </button>
 
-        <nut-cell class="cell-item" :title="$t(`themeSettingPage.light`)" :desc="themeDes.lightDes"
-          @click="openPicker('light')" is-link>
-        </nut-cell>
+        <button
+          type="button"
+          class="cell-item setting-action-row"
+          :aria-label="`${$t(`themeSettingPage.light`)} ${themeDes.lightDes}`"
+          @click="openPicker('light')"
+        >
+          <span class="setting-action-content">
+            <span>{{ $t(`themeSettingPage.light`) }}</span>
+            <small>{{ themeDes.lightDes }}</small>
+          </span>
+          <nut-icon name="rect-right"></nut-icon>
+        </button>
       </template>
 
-      <nut-cell v-else class="cell-item" :title="$t(`themeSettingPage.themeSettingTitle`)" :desc="themeDes.nameDes"
-        @click="openPicker('name')" is-link />
+      <button
+        v-else
+        type="button"
+        class="cell-item setting-action-row"
+        :aria-label="`${$t(`themeSettingPage.themeSettingTitle`)} ${themeDes.nameDes}`"
+        @click="openPicker('name')"
+      >
+        <span class="setting-action-content">
+          <span>{{ $t(`themeSettingPage.themeSettingTitle`) }}</span>
+          <small>{{ themeDes.nameDes }}</small>
+        </span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
     </nut-cell-group>
     <nut-picker v-model="selectedValue" v-model:visible="showThemePicker" :columns="pickerColumn"
       :title="$t(`themeSettingPage.themePicker.title`)" :cancel-text="$t(`themeSettingPage.themePicker.cancel`)"
       :ok-text="$t(`themeSettingPage.themePicker.confirm`)" @confirm="confirm" />
     <nut-cell-group>
-      <nut-cell :title="$t(`moreSettingPage.clearFrontEndData.label`)" class="change-themes"
-        @click.stop="clearFrontEndData" is-link></nut-cell>
-      <nut-cell :title="$t(`moreSettingPage.clearData.label`)" class="change-themes" @click.stop="clearData"
-        is-link></nut-cell>
+      <button
+        type="button"
+        class="change-themes setting-action-row"
+        @click.stop="clearFrontEndData"
+      >
+        <span>{{ $t(`moreSettingPage.clearFrontEndData.label`) }}</span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
+      <button
+        type="button"
+        class="change-themes setting-action-row"
+        @click.stop="clearData"
+      >
+        <span>{{ $t(`moreSettingPage.clearData.label`) }}</span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
     </nut-cell-group>
 
   </div>
@@ -931,6 +999,34 @@
       // color: var(--comment-text-color);
       box-shadow: none;
       font-weight: bold;
+    }
+
+    .setting-action-row {
+      width: 100%;
+      border: 0;
+      background: var(--card-color);
+      color: var(--primary-text-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+
+      :deep(.nut-icon) {
+        color: var(--comment-text-color);
+      }
+    }
+
+    .setting-action-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+
+      small {
+        color: var(--lowest-text-color);
+        font-weight: normal;
+      }
     }
   }
 

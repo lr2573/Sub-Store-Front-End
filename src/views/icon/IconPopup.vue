@@ -116,14 +116,14 @@
                 <p>{{ $t(`iconCollectionPage.loadFailedDesc`) }}</p>
               </template>
             </AccessibleEmpty>
-            <nut-button
-              icon="refresh"
-              type="primary"
-              class="icon-retry-btn"
+            <button
+              type="button"
+              class="icon-retry-btn popup-action-button popup-action-button--primary"
               @click="refreshIcons"
             >
+              <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
               {{ $t(`iconCollectionPage.retryBtn`) }}
-            </nut-button>
+            </button>
           </div>
         </div>
         <div v-else-if="iconData.length" class="icon-list">
@@ -606,6 +606,27 @@ defineExpose({ show, hide, close });
   }
   .icon-retry-btn {
     margin-top: 8px;
+  }
+
+  .popup-action-button {
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+
+    &--primary {
+      background-image: linear-gradient(
+        to bottom right,
+        var(--primary-color),
+        var(--primary-color-end)
+      );
+      color: #fff;
+    }
   }
   .icon-list {
     display: flex;

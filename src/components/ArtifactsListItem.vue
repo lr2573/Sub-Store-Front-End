@@ -201,80 +201,94 @@
     </div>
 
     <template v-if="appearanceSetting.isLeftRight" #left>
-        <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
-          :title="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
-          @click="onClickSync"
-        >
-          <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
-        </button>
-      </div>
-        <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--warning"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('edit'))"
-          :title="getItemActionLabel(getA11yText('edit'))"
-          @click="onClickEdit"
-        >
-          <font-awesome-icon icon="fa-solid fa-pen-nib" />
-        </button>
-      </div>
-      <div :id="swipeActionsId" class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('delete'))"
-          :title="getItemActionLabel(getA11yText('delete'))"
-          @click="onClickDelete"
-        >
-          <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </button>
+      <div
+        :id="swipeActionsId"
+        class="sub-item-swipe-actions"
+        :aria-hidden="!swipeIsOpen"
+        :inert="!swipeIsOpen"
+      >
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--primary"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
+            :title="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
+            @click="onClickSync"
+          >
+            <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
+          </button>
+        </div>
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--warning"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('edit'))"
+            :title="getItemActionLabel(getA11yText('edit'))"
+            @click="onClickEdit"
+          >
+            <font-awesome-icon icon="fa-solid fa-pen-nib" />
+          </button>
+        </div>
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--danger"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('delete'))"
+            :title="getItemActionLabel(getA11yText('delete'))"
+            @click="onClickDelete"
+          >
+            <font-awesome-icon icon="fa-solid fa-trash-can" />
+          </button>
+        </div>
       </div>
     </template>
 
     <template v-else #right>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--primary"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
-          :title="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
-          @click="onClickSync"
-        >
-          <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
-        </button>
-      </div>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--warning"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('edit'))"
-          :title="getItemActionLabel(getA11yText('edit'))"
-          @click="onClickEdit"
-        >
-          <font-awesome-icon icon="fa-solid fa-pen-nib" />
-        </button>
-      </div>
-      <div class="sub-item-swipe-btn-wrapper" :aria-hidden="!swipeIsOpen" :inert="!swipeIsOpen">
-        <button
-          type="button"
-          class="sub-item-swipe-btn sub-item-swipe-btn--danger"
-          :disabled="!swipeIsOpen"
-          :aria-label="getItemActionLabel(getA11yText('delete'))"
-          :title="getItemActionLabel(getA11yText('delete'))"
-          @click="onClickDelete"
-        >
-          <font-awesome-icon icon="fa-solid fa-trash-can" />
-        </button>
+      <div
+        :id="swipeActionsId"
+        class="sub-item-swipe-actions"
+        :aria-hidden="!swipeIsOpen"
+        :inert="!swipeIsOpen"
+      >
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--primary"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
+            :title="getItemActionLabel(t(`navBar.pagesTitle.sync`))"
+            @click="onClickSync"
+          >
+            <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
+          </button>
+        </div>
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--warning"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('edit'))"
+            :title="getItemActionLabel(getA11yText('edit'))"
+            @click="onClickEdit"
+          >
+            <font-awesome-icon icon="fa-solid fa-pen-nib" />
+          </button>
+        </div>
+        <div class="sub-item-swipe-btn-wrapper">
+          <button
+            type="button"
+            class="sub-item-swipe-btn sub-item-swipe-btn--danger"
+            :disabled="!swipeIsOpen"
+            :aria-label="getItemActionLabel(getA11yText('delete'))"
+            :title="getItemActionLabel(getA11yText('delete'))"
+            @click="onClickDelete"
+          >
+            <font-awesome-icon icon="fa-solid fa-trash-can" />
+          </button>
+        </div>
       </div>
     </template>
   </nut-swipe>
@@ -780,6 +794,9 @@ watch(isSyncOpen, async () => {
         display: inline-flex;
         align-items: center;
         flex-shrink: 0;
+      }
+      .sub-item-swipe-actions {
+        display: flex;
       }
     }
 

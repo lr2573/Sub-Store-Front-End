@@ -600,6 +600,8 @@ import {
   ref,
   shallowRef,
   toRaw,
+  onMounted,
+  onBeforeUnmount,
   watchEffect,
   watch,
   watchPostEffect,
@@ -1121,6 +1123,20 @@ const handleEditGlobalClick = () => {
     }
   }
 };
+
+const handleEditGlobalEscape = (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
+    handleEditGlobalClick();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener("keydown", handleEditGlobalEscape);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleEditGlobalEscape);
+});
 </script>
 
 <style lang="scss" scoped>

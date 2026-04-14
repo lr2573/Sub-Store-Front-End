@@ -26,13 +26,11 @@
           <p class="add-sub-panel-title">{{ $t(`filePage.addFileTitle`) }}</p>
           <p class="add-sub-panel-title or">{{ $t(`specificWord.or`) }}</p>
           <input type="file" ref="fileInput" accept="application/json,text/json,.json" @change="fileChange" style="display: none">
-          <nut-button
-            class="upload-btn"
-            plain
-            type="primary"
-            size="small"
+          <button
+            type="button"
+            class="upload-btn popup-action-button popup-action-button--secondary"
             :disabled="restoreIsLoading"
-            :loading="restoreIsLoading"
+            :aria-busy="restoreIsLoading ? 'true' : 'false'"
             @click="upload()"
           >
             <font-awesome-icon
@@ -40,7 +38,7 @@
               v-if="!uploadIsLoading"
             />
             {{ $t(`subPage.import.label`) }}
-          </nut-button>
+          </button>
           <button
             type="button"
             class="import-tips-button icon-button-reset"
@@ -183,9 +181,13 @@
         </template>
       </AccessibleEmpty>
       <!-- <router-link to="/edit/files/UNTITLED" class="router-link"> -->
-        <nut-button type="primary" @click="addSubBtnIsVisible = true">
+        <button
+          type="button"
+          class="page-action-button page-action-button--primary"
+          @click="addSubBtnIsVisible = true"
+        >
           {{ $t(`filePage.emptySub.btn`) }}
-        </nut-button>
+        </button>
       <!-- </router-link> -->
     </div>
 
@@ -207,9 +209,14 @@
           </p>
         </template>
       </AccessibleEmpty>
-      <nut-button icon="refresh" type="primary" @click="refresh">
+      <button
+        type="button"
+        class="page-action-button page-action-button--primary"
+        @click="refresh"
+      >
+        <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
         {{ $t(`subPage.loadFailed.btn`) }}
-      </nut-button>
+      </button>
       <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
@@ -521,18 +528,36 @@ const filteredFiles = useFilteredDraggableList(files, shouldShowElement);
 </script>
 
 <style lang="scss" scoped>
-  .title-btn {
-    display: flex;
+.title-btn {
+  display: flex;
     justify-content: center;
     align-items: center;
     margin-bottom: 12px;
     .nut-icon {
       color: var(--comment-text-color);
     }
-    .import-tips-button {
-      margin-left: 4px;
+  .import-tips-button {
+    margin-left: 4px;
+  }
+  .popup-action-button {
+    min-height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   }
+}
 .drag-btn-wrapper {
   position: relative;
   z-index: 999;
@@ -661,6 +686,28 @@ const filteredFiles = useFilteredDraggableList(files, shouldShowElement);
 
     span {
       margin-right: 4px;
+    }
+  }
+
+  .page-action-button {
+    margin-top: 16px;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+
+    &--primary {
+      background-image: linear-gradient(
+        to bottom right,
+        var(--primary-color),
+        var(--primary-color-end)
+      );
+      color: #fff;
     }
   }
 }

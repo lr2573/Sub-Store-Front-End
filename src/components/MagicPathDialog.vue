@@ -65,21 +65,22 @@
       </div>
 
       <div class="buttons">
-        <nut-button
-          type="primary"
-          block
-          :loading="loading"
+        <button
+          type="button"
+          class="magic-path-action-button magic-path-action-button--primary"
+          :disabled="loading"
+          :aria-busy="loading ? 'true' : 'false'"
           @click="handleSubmit"
         >
           {{ $t('magicPath.connect') }}
-        </nut-button>
-        <nut-button
-          plain
-          block
+        </button>
+        <button
+          type="button"
+          class="magic-path-action-button magic-path-action-button--secondary"
           @click="handleSkip"
         >
           {{ $t('magicPath.skip') }}
-        </nut-button>
+        </button>
       </div>
 
       <div class="info">
@@ -599,6 +600,37 @@ watchEffect(() => {
     flex-direction: column;
     gap: 10px;
     margin-bottom: 16px;
+  }
+
+  .magic-path-action-button {
+    width: 100%;
+    min-height: 40px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &--primary {
+      background-image: linear-gradient(
+        to bottom right,
+        var(--primary-color),
+        var(--primary-color-end)
+      );
+      color: #fff;
+    }
+
+    &--secondary {
+      background: transparent;
+      border-color: var(--divider-color);
+      color: var(--primary-text-color);
+    }
   }
 
   .info {

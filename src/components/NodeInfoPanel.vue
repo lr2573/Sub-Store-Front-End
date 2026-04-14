@@ -38,14 +38,14 @@
               <h3>{{ $t('comparePage.nodeInfo.ipApi.loadFailed') }}</h3>
             </template>
           </AccessibleEmpty>
-          <nut-button
-            icon="refresh"
-            type="primary"
-            class="ip-api-retry-btn"
+          <button
+            type="button"
+            class="ip-api-retry-btn panel-action-button"
             @click="retryLoadIpApi"
           >
+            <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
             {{ $t('comparePage.nodeInfo.ipApi.retry') }}
-          </nut-button>
+          </button>
         </div>
         <div v-else class="ip-api-state ip-api-loading">
           <strong class="node-name">{{ props.nodeInfo.name }}</strong>
@@ -191,6 +191,24 @@
 
   .ip-api-retry-btn {
     margin-top: 8px;
+  }
+
+  .panel-action-button {
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background-image: linear-gradient(
+      to bottom right,
+      var(--primary-color),
+      var(--primary-color-end)
+    );
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
   }
 
   .input-wrapper {
