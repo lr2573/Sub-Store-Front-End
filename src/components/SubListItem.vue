@@ -390,19 +390,28 @@
       maxWidth: '92vw',
       maxHeight: '85vh',
       overflowY: 'auto',
-      padding: '20px 12px 0 12px',
+      padding: '20px 12px 16px 12px',
       backgroundColor: 'var(--popup-color)',
     }"
     :lock-scroll="true"
     :safe-area-inset-bottom="true"
-    close-icon="close-little"
     z-index="1100"
     :close-on-click-overlay="true"
-    closeable
     round
     @close="closePreviewPanel"
   >
-    <div class="preview-popup-title">{{ t("subPage.previewTitle") }}</div>
+    <div class="preview-popup-header">
+      <div class="preview-popup-title">{{ t("subPage.previewTitle") }}</div>
+      <button
+        type="button"
+        class="preview-popup-close"
+        :aria-label="t('subPage.panel.tips.cancel')"
+        :title="t('subPage.panel.tips.cancel')"
+        @click="closePreviewPanel"
+      >
+        <nut-icon name="close-little" aria-hidden="true"></nut-icon>
+      </button>
+    </div>
     <PreviewPanel
       :name="name"
       :display-name="displayName"
@@ -420,7 +429,7 @@
 
 <script lang="ts" setup>
 import { Dialog, Toast } from "@nutui/nutui";
-import { useClipboard } from "@vueuse/core";
+import { useClipboard, useEventListener } from "@vueuse/core";
 import dayjs from "dayjs";
 import { storeToRefs } from "pinia";
 import { computed, ref, toRaw } from "vue";
@@ -965,6 +974,12 @@ const openPreviewPanel = () => {
 const closePreviewPanel = () => {
   previewPanelVisible.value = false;
 };
+
+useEventListener(window, "keydown", (event) => {
+  if (event.key === "Escape" && previewPanelVisible.value) {
+    closePreviewPanel();
+  }
+});
 const shareBtnVisible = computed(() => {
   return env.value?.feature?.share;
 });
@@ -1402,12 +1417,45 @@ const onClickRefresh = async () => {
   }
 }
 
+.preview-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 12px;
+}
+
 .preview-popup-title {
   text-align: center;
   font-size: 18px;
   font-weight: bold;
   color: var(--second-text-color);
-  margin-bottom: 12px;
+}
+
+.preview-popup-close {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--comment-text-color);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--hover-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
 }
 
 .desc-about {
