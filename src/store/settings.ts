@@ -9,6 +9,30 @@ import { defineStore } from "pinia";
 
 const settingsApi = useSettingsApi();
 const { t } = i18n.global;
+const LIST_PAGE_VIEW_MODE_STORAGE_KEY = "appearanceSetting.listPageViewMode";
+const NARROW_MODE_LIST_PAGE_VIEW_MODE_STORAGE_KEY = "appearanceSetting.listPageViewModeInWideScreenNarrowMode";
+const WIDE_SCREEN_NARROW_MODE_STORAGE_KEY = "appearanceSetting.useNarrowModeOnWideScreen";
+
+const getCachedListPageViewMode = (storageKey: string): ListPageViewMode | undefined => {
+  const cachedMode = localStorage.getItem(storageKey);
+  if (cachedMode === "single-column" || cachedMode === "dual-column") {
+    return cachedMode;
+  }
+
+  return undefined;
+};
+
+const syncCachedListPageViewMode = (storageKey: string, mode?: ListPageViewMode) => {
+  if (mode) {
+    localStorage.setItem(storageKey, mode);
+  } else {
+    localStorage.removeItem(storageKey);
+  }
+};
+
+const getCachedWideScreenNarrowMode = () => {
+  return localStorage.getItem(WIDE_SCREEN_NARROW_MODE_STORAGE_KEY) === "1";
+};
 
 const defaultAppearanceSetting: SettingsStoreState["appearanceSetting"] = {
   isSimpleMode: false,
@@ -29,6 +53,10 @@ const defaultAppearanceSetting: SettingsStoreState["appearanceSetting"] = {
   istabBar2: false,
   subProgressStyle: "hidden",
   listPageViewMode: undefined,
+  listPageViewModeInWideScreenNarrowMode: getCachedListPageViewMode(
+    NARROW_MODE_LIST_PAGE_VIEW_MODE_STORAGE_KEY,
+  ),
+  useNarrowModeOnWideScreen: getCachedWideScreenNarrowMode(),
 };
 
 const getBooleanAppearanceSetting = (
@@ -107,6 +135,13 @@ const normalizeAppearanceSetting = (
     appearanceSetting?.subProgressStyle ?? defaultAppearanceSetting.subProgressStyle,
   listPageViewMode:
     appearanceSetting?.listPageViewMode ?? defaultAppearanceSetting.listPageViewMode,
+  listPageViewModeInWideScreenNarrowMode:
+    appearanceSetting?.listPageViewModeInWideScreenNarrowMode
+    ?? defaultAppearanceSetting.listPageViewModeInWideScreenNarrowMode,
+  useNarrowModeOnWideScreen: getBooleanAppearanceSetting(
+    appearanceSetting?.useNarrowModeOnWideScreen,
+    defaultAppearanceSetting.useNarrowModeOnWideScreen
+  ),
 });
 
 export const useSettingsStore = defineStore("settingsStore", {
@@ -141,6 +176,26 @@ export const useSettingsStore = defineStore("settingsStore", {
   },
   getters: {},
   actions: {
+    applyAppearanceSetting(appearanceSetting?: SettingsPostData["appearanceSetting"]) {
+      const normalizedAppearanceSetting = normalizeAppearanceSetting(appearanceSetting);
+
+      this.appearanceSetting = normalizedAppearanceSetting;
+
+      syncCachedListPageViewMode(
+        LIST_PAGE_VIEW_MODE_STORAGE_KEY,
+        normalizedAppearanceSetting.listPageViewMode,
+      );
+      syncCachedListPageViewMode(
+        NARROW_MODE_LIST_PAGE_VIEW_MODE_STORAGE_KEY,
+        normalizedAppearanceSetting.listPageViewModeInWideScreenNarrowMode,
+      );
+
+      if (normalizedAppearanceSetting.useNarrowModeOnWideScreen) {
+        localStorage.setItem(WIDE_SCREEN_NARROW_MODE_STORAGE_KEY, "1");
+      } else {
+        localStorage.removeItem(WIDE_SCREEN_NARROW_MODE_STORAGE_KEY);
+      }
+    },
     async fetchSettings() {
       const { showNotify } = useAppNotifyStore();
       const res = await settingsApi.getSettings();
@@ -164,7 +219,7 @@ export const useSettingsStore = defineStore("settingsStore", {
         this.theme.dark = res.data.data.theme?.dark ?? "dark";
         this.theme.light = res.data.data.theme?.light ?? "light";
 
-        this.appearanceSetting = normalizeAppearanceSetting(res.data.data.appearanceSetting);
+        this.applyAppearanceSetting(res.data.data.appearanceSetting);
         this.gistUpload = res.data.data?.gistUpload ?? "base64";
       } else {
         showNotify({
@@ -277,7 +332,7 @@ export const useSettingsStore = defineStore("settingsStore", {
       try {
         const res = await settingsApi.setSettings(data);
         if (res?.data?.status === "success" && res?.data?.data) {
-          this.appearanceSetting = normalizeAppearanceSetting(res.data.data.appearanceSetting);
+          this.applyAppearanceSetting(res.data.data.appearanceSetting);
           return true;
         }
         showNotify({

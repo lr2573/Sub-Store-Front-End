@@ -305,7 +305,6 @@
 </template>
 
 <script lang="ts" setup>
-// import { useMousePicker } from '@/hooks/useMousePicker';
 import i18nFile from '@/locales/zh';
 import { Dialog, Toast } from '@nutui/nutui';
 import { ref, inject, reactive, watch, nextTick, computed } from 'vue';
@@ -348,8 +347,6 @@ if (sourceType === 'file') {
   items = items.filter(item => ['Script Operator'].includes(item.value));
 }
 const columns = ref(items);
-// useMousePicker();
-
 if(isCollapsed.value) {
   collapsedElements.value = list.map((item) => item.id);
 } else {

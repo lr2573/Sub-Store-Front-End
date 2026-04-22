@@ -64,6 +64,11 @@ export default {
       switchToSingle: '切换为单列',
       switchToDual: '切换为双列',
       disabledInSelectionMode: '多选模式下固定为单列',
+      disabledInNarrowNavigationMode: '窄屏导航模式下固定为单列',
+    },
+    navigationMode: {
+      switchToNarrow: '切换为窄屏导航',
+      switchToWide: '切换为宽屏导航',
     },
     pagesTitle: {
       sub: '订阅管理',
@@ -76,6 +81,7 @@ export default {
       syncEditor: '同步编辑',
       preview: '预览',
       shareManage: '分享管理',
+      shareEditor: '分享编辑',
       archive: '已归档',
       themeSetting: '主题设置',
       moreSetting: '更多设置',
@@ -130,7 +136,7 @@ export default {
     },
     url: {
       label: '链接',
-      placeholder: '支持换行混写三种格式: 1. 完整远程链接 2. 类似 /api/file/name 的内部文件调用路径 3. 本地文件的绝对路径. 支持参数: noCache 不使用缓存; insecure 不验证服务器证书; headers 自定义请求头(单行 JSON 字符串). 例: http://a.com#noCache&insecure',
+      placeholder: '支持换行混写三种格式: 1. 完整远程链接 2. 类似 /api/file/name 的内部文件调用路径 3. 本地文件的绝对路径. 支持参数: noCache 不使用缓存; cacheTtl: 缓存时长(秒); insecure 不验证服务器证书; headers 自定义请求头(单行 JSON 字符串). 例: http://a.com#noCache&insecure',
       isEmpty: '链接不能为空',
       isIllegal: '链接格式非法',
     },
@@ -148,10 +154,16 @@ export default {
       remote: '远程',
     },
     ignoreFailedRemoteFile: {
-      label: '忽略失败的远程文件',
-      quiet: '启用(无通知)',
-      disabled: '禁用',
-      enabled : '启用(有通知)'
+      label: '远程文件失败处理',
+      disabled: '严格报错',
+      disabledDesc: '远程文件失败时，立即报错并通知。',
+      disabledNote: '失败即报错并通知',
+      enabled : '失败通知',
+      enabledDesc: '远程文件失败时，跳过失败项并通知。',
+      enabledNote: '失败跳过并通知',
+      quiet: '失败静默',
+      quietDesc: '远程文件失败时，跳过失败项且不通知。',
+      quietNote: '失败跳过且静默'
     },
     download: {
       label: '启用下载(文件名为显示名称)'
@@ -329,7 +341,7 @@ export default {
             fullScreenEditCancel: '取消全屏',
             label: '使用说明',
             title: '订阅链接',
-            content: '支持使用换行混写三种格式:\n1. 完整远程链接\n2. 类似 /api/file/name 的内部文件调用路径\n3. 本地文件的绝对路径\n\n支持以下参数\n\nheaders: 自定义请求头(单行 JSON 字符串)\ninsecure: 不验证服务器证书\ncacheKey: 设置乐观缓存的名称 开启后也可自行在持久化缓存中管理(适合经常拉取失败的订阅)\nvalidCheck: 过期或无剩余流量时报错\nflowUserAgent: 查询流量时使用的 User-Agent\nflowUrl: 自定义查询流量的 URL(优先响应体, 也支持响应头)\nnoFlow: 不查询流量\nhideExpire: 隐藏到期\nshowRemaining: 显示剩余流量而不是已用流量\nnoCache: 不使用缓存\nresetDay: 每月流量重置日\nstartDate: 订阅开始日期\ncycleDays: 订阅重置周期(单位: 天)\n\n例: http://a.com?token=1#cycleDays=31&startDate=2024-06-04\n或 http://a.com?token=1#resetDay=15',
+            content: '支持使用换行混写三种格式:\n1. 完整远程链接\n2. 类似 /api/file/name 的内部文件调用路径\n3. 本地文件的绝对路径\n\n支持以下参数\n\nheaders: 自定义请求头(单行 JSON 字符串)\ninsecure: 不验证服务器证书\ncacheKey: 设置乐观缓存的名称 开启后也可自行在持久化缓存中管理(适合经常拉取失败的订阅)\nvalidCheck: 过期或无剩余流量时报错\nflowUserAgent: 查询流量时使用的 User-Agent\nflowUrl: 自定义查询流量的 URL(优先响应体, 也支持响应头)\nnoFlow: 不查询流量\nhideExpire: 隐藏到期\nshowRemaining: 显示剩余流量而不是已用流量\nnoCache: 不使用缓存\ncacheTtl: 缓存时长(秒)\nheadersCacheTtl: 响应头缓存时长(秒)\nnoCache: 不使用缓存\nresetDay: 每月流量重置日\nstartDate: 订阅开始日期\ncycleDays: 订阅重置周期(单位: 天)\n\n例: http://a.com?token=1#cycleDays=31&startDate=2024-06-04\n或 http://a.com?token=1#resetDay=15',
           },
           isEmpty: '订阅链接不能为空',
           isIllegal: '订阅链接格式非法',
@@ -354,10 +366,22 @@ export default {
           label: '图标原色',
         },
         ignoreFailedRemoteSub: {
-          label: '忽略失败的远程订阅',
-          quiet: '启用(无通知)',
-          disabled: '禁用',
-          enabled : '启用(有通知)'
+          label: '订阅失败处理',
+          disabled: '严格报错',
+          disabledDesc: '订阅处理出错时，立即报错并通知。',
+          disabledNote: '出错即报错并通知',
+          enabled : '失败通知',
+          enabledDesc: '远程订阅失败时，跳过失败项并通知；其他错误仍报错。',
+          enabledNote: '远程失败跳过并通知',
+          quiet: '失败静默',
+          quietDesc: '远程订阅失败时，跳过失败项且不通知；其他错误仍报错。',
+          quietNote: '远程失败跳过且静默',
+          fallbackNotify: '兜底通知',
+          fallbackNotifyDesc: '订阅处理出现任何错误时，不报错，返回空结果并通知。',
+          fallbackNotifyNote: '任何错误都空结果并通知',
+          fallbackQuiet: '兜底静默',
+          fallbackQuietDesc: '订阅处理出现任何错误时，不报错，静默返回空结果。',
+          fallbackQuietNote: '任何错误都空结果且静默'
         },
         ua: {
           label: 'User-Agent',
@@ -366,7 +390,7 @@ export default {
         },
         subUserinfo: {
           label: '订阅流量信息',
-          placeholder: '填写值或链接(支持 noCache 等参数)',
+          placeholder: '值/链接(支持 noCache/headersCacheTtl 等参数)',
         },
         passThroughUA: {
           label: '透传请求的 User-Agent',
@@ -808,6 +832,11 @@ export default {
     createTimeLabel: "创建：",
     magicPathErrorNotify: "SUB_STORE_FRONTEND_BACKEND_PATH 必须以 / 开头，当前分享链接异常，请检查运行环境",
     createShare: {
+      expirationMode: {
+        label: "到期方式",
+        duration: "按时长",
+        datetime: "指定日期时间",
+      },
       expiresValue: {
         label: "有效期时长",
         placeholder: "请输入有效期时长",
@@ -817,9 +846,19 @@ export default {
       expiresUnit: {
         label: "有效期单位",
       },
+      exactDatetime: {
+        label: "到期日期时间",
+        placeholder: "请选择到期日期时间",
+        empty: "到期日期时间不可为空",
+        invalid: "请选择有效的到期日期时间",
+        confirm: "确定",
+        cancel: "取消",
+      },
       token: {
         label: "自定义 Token",
-        placeholder: "默认后端随机 Token"
+        placeholder: "默认后端随机 Token",
+        reserved: "自定义 Token 不能使用 UNTITLED",
+        isExist: "当前来源下该 Token 已存在",
       },
       remark: {
         label: "备注",
@@ -831,7 +870,7 @@ export default {
       },
       shareUrl: {
         label: "分享链接",
-        placeholder: "请点击按钮创建分享链接"
+        placeholder: "保存后会在这里显示分享链接"
       },
       unit: {
         day: "天",
@@ -840,9 +879,31 @@ export default {
         year: "年",
       },
       copyBtn: "复制链接",
-      updateBtn: "更新分享",
-      createBtn: "创建分享",
-      succeedNotify: "创建分享成功！",
+    },
+    editor: {
+      create: {
+        submit: "创建分享",
+        succeedNotify: "创建分享成功！",
+      },
+      edit: {
+        submit: "保存修改",
+        succeedNotify: "分享更新成功！",
+      },
+      loadFailed: {
+        title: "无法载入分享编辑页",
+        desc: "请检查分享或源对象是否仍然存在，然后重试。",
+        retry: "重新载入",
+        back: "返回分享列表",
+      },
+      datetimeBackendRequired: {
+        title: "当前后端暂不支持指定到期时间",
+        desc: "检测到后端版本为 {currentVersion}，需要升级到 {minVersion} 或更高版本后，才能保存指定到期日期时间。",
+      },
+      datetimeBackendCheckFailed: {
+        title: "暂时无法验证后端版本",
+        desc: "请检查当前后端连接是否正常，然后重试保存指定到期日期时间。",
+      },
+      failNotify: "更新分享失败",
     },
     copyShare: {
       succeedNotify: "复制分享链接成功",
@@ -851,13 +912,6 @@ export default {
       title: '你还没有创建分享',
       desc: '创建分享后开始使用',
       btn: '立即创建',
-    },
-    updateShare: {
-      failNotify: "更新分享失败",
-      title: "温馨提示",
-      tips: "更新分享后，原分享链接将失效，是否继续?",
-      confirm: "确认",
-      cancel: "取消",
     },
     deleteShare: {
       title: "温馨提示",

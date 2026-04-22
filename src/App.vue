@@ -2,7 +2,7 @@
   <!-- <GlobalNotify /> -->
   <a class="skip-link" href="#main-content">{{ a11yText.skipToContent }}</a>
   <NavBar />
-  <SideBar v-show="!route.path.startsWith('/preview')" />
+  <SideBar v-show="shouldShowSideBar && !route.path.startsWith('/preview')" />
   <RouteAnnouncer />
   <main
     id="main-content"
@@ -27,6 +27,7 @@ import NavBar from "@/components/NavBar.vue";
 import MagicPathDialog from "@/components/MagicPathDialog.vue";
 import RouteAnnouncer from "@/components/RouteAnnouncer.vue";
 import { useA11y } from "@/hooks/useA11y";
+import { useWideScreenNarrowMode } from "@/hooks/useWideScreenNarrowMode";
 import { useThemes } from "@/hooks/useThemes";
 import { useGlobalStore } from "@/store/global";
 import { useSubsStore } from "@/store/subs";
@@ -44,6 +45,7 @@ const route = useRoute();
 const router = useRouter();
 const { locale } = useI18n();
 const { a11yText } = useA11y();
+const { shouldShowSideBar } = useWideScreenNarrowMode();
 
 const { subs, flows } = storeToRefs(subsStore);
 

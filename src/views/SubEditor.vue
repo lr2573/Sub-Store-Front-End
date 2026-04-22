@@ -428,10 +428,17 @@
                 ></span>
               </button>
             </div>
-            <div class="subs-checkbox-wrapper">
+            <div
+              :class="[
+                'subs-checkbox-wrapper',
+                {
+                  'is-simple-mode': appearanceSetting.isSimpleMode,
+                  'is-dragging': isDragging,
+                },
+              ]"
+            >
               <draggable
-                :list="filteredSubsSelectList"
-                :sort="true"
+                v-model="displayedSubsSelectList"
                 item-key="0"
                 animation="300"
                 :scroll-sensitivity="200"
@@ -467,7 +474,7 @@
                       <nut-avatar
                         :class="{ 'sub-item-customer-icon': !element[4], 'icon': true  }"
                         v-if="element[2]"
-                        size="32"
+                        :size="chooserAvatarSize"
                         :url="rewriteGithubUrl(element[2])"
                         bg-color=""
                       ></nut-avatar>
@@ -523,46 +530,17 @@
         <nut-form-item
           :label="$t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.label`)"
           prop="ignoreFailedRemoteSub"
-          class="ignore-failed-wrapper"
         >
-          <div class="radio-wrapper">
-            <div
-              class="native-radio-group"
-              role="radiogroup"
-              :aria-label="$t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.label`)"
-            >
-              <button
-                type="button"
-                class="native-radio-button"
-                :class="{ current: form.ignoreFailedRemoteSub === 'disabled' }"
-                role="radio"
-                :aria-checked="form.ignoreFailedRemoteSub === 'disabled'"
-                @click="form.ignoreFailedRemoteSub = 'disabled'"
-              >
-                {{ $t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.disabled`) }}
-              </button>
-              <button
-                type="button"
-                class="native-radio-button"
-                :class="{ current: form.ignoreFailedRemoteSub === 'quiet' }"
-                role="radio"
-                :aria-checked="form.ignoreFailedRemoteSub === 'quiet'"
-                @click="form.ignoreFailedRemoteSub = 'quiet'"
-              >
-                {{ $t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.quiet`) }}
-              </button>
-              <button
-                type="button"
-                class="native-radio-button"
-                :class="{ current: form.ignoreFailedRemoteSub === 'enabled' }"
-                role="radio"
-                :aria-checked="form.ignoreFailedRemoteSub === 'enabled'"
-                @click="form.ignoreFailedRemoteSub = 'enabled'"
-              >
-                {{ $t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.enabled`) }}
-              </button>
-            </div>
-          </div>
+          <nut-input
+            :model-value="subFailureModeLabel"
+            :border="false"
+            class="nut-input-text failure-mode-input"
+            readonly
+            input-align="right"
+            right-icon="rect-right"
+            @click="openSubFailureModePicker"
+            @click-right-icon="openSubFailureModePicker"
+          />
         </nut-form-item>
       </nut-form>
     </div>
@@ -617,6 +595,15 @@
     v-model:visible="iconPopupVisible"
     @setIcon="setIcon">
   </icon-popup>
+  <DesktopPicker
+    v-model="selectedSubFailureMode"
+    v-model:visible="showSubFailureModePicker"
+    :columns="subFailureModeColumns"
+    :title="$t(`editorPage.subConfig.basic.ignoreFailedRemoteSub.label`)"
+    :cancel-text="$t(`editorPage.subConfig.sourceNamePicker.cancel`)"
+    :ok-text="$t(`editorPage.subConfig.sourceNamePicker.confirm`)"
+    @confirm="handleSubFailureModeConfirm"
+  />
   <tag-popup
     v-if="tagPopupVisible"
     v-model:visible="tagPopupVisible"
@@ -650,6 +637,7 @@ import Regex from "@/views/editor/components/Regex.vue";
 import Script from "@/views/editor/components/Script.vue";
 import IconPopup from "@/views/icon/IconPopup.vue";
 import TagPopup from "@/components/TagPopup.vue";
+import DesktopPicker from "@/components/DesktopPicker.vue";
 import { Dialog, Toast } from "@nutui/nutui";
 import { storeToRefs } from "pinia";
 import {
@@ -673,7 +661,7 @@ import { createGithubProxyUrlRewriter } from "@/utils/githubProxy";
 import { syncInnerInputA11y } from "@/hooks/useA11y";
 const cmStore = useCodeStore();
 const isDis = ref(true)
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const subsApi = useSubsApi();
@@ -699,12 +687,17 @@ const githubUrlRewriter = computed(() => {
 const rewriteGithubUrl = (url?: string | null) => {
   return githubUrlRewriter.value(url);
 };
+const chooserAvatarSize = computed(() => {
+  return appearanceSetting.value.isSimpleMode ? "28" : "32";
+});
+
+type SubSelectRow = [string, string, string | undefined, string[] | undefined, boolean];
 
   const sub = computed(() => subsStore.getOneSub(configName));
   const collection = computed(() => subsStore.getOneCollection(configName));
 
   
-  const subsSelectList = computed(() => {
+  const subsSelectList = computed<SubSelectRow[]>(() => {
     return subsStore.subs.map(item => {
       return [
         item.name,
@@ -766,15 +759,80 @@ const subscriptionTagsInputRef = ref<any>(null);
       form.tag = tag;      
     }
   };
-  const selectedSubs = computed(() => {
-    const subscriptions = form.subscriptions || [];
-    if(!Array.isArray(subscriptions) || subscriptions.length === 0) return `: ${t(`editorPage.subConfig.basic.subscriptions.empty`)}`
+const selectedSubs = computed(() => {
+  const subscriptions = form.subscriptions || [];
+  if(!Array.isArray(subscriptions) || subscriptions.length === 0) return `: ${t(`editorPage.subConfig.basic.subscriptions.empty`)}`
     return `: ${subscriptions.map((name) => {
       const sub = subsStore.getOneSub(name);
       if(!sub) form.subscriptions = form.subscriptions.filter((n) => n !== name);
       return sub?.displayName || sub?.["display-name"] || sub?.name || `${name}(🚫)`;
     }).join(', ')}`
   });
+  const subFailureModeOptions = computed(() => {
+    const prefix = "editorPage.subConfig.basic.ignoreFailedRemoteSub";
+    return [
+      {
+        value: "disabled",
+        label: t(`${prefix}.disabled`),
+        note: t(`${prefix}.disabledNote`),
+      },
+      {
+        value: "enabled",
+        label: t(`${prefix}.enabled`),
+        note: t(`${prefix}.enabledNote`),
+      },
+      {
+        value: "quiet",
+        label: t(`${prefix}.quiet`),
+        note: t(`${prefix}.quietNote`),
+      },
+      {
+        value: "fallbackNotify",
+        label: t(`${prefix}.fallbackNotify`),
+        note: t(`${prefix}.fallbackNotifyNote`),
+      },
+      {
+        value: "fallbackQuiet",
+        label: t(`${prefix}.fallbackQuiet`),
+        note: t(`${prefix}.fallbackQuietNote`),
+      },
+    ];
+  });
+  const formatFailureModePickerText = (label: string, note?: string) => {
+    if (!note) return label;
+    return locale.value.startsWith("zh")
+      ? `${label}（${note}）`
+      : `${label} (${note})`;
+  };
+  const subFailureModeValue = computed(() => {
+    return form.ignoreFailedRemoteSub === false || form.ignoreFailedRemoteSub == null
+      ? "disabled"
+      : form.ignoreFailedRemoteSub;
+  });
+  const subFailureModeColumns = computed(() => {
+    return subFailureModeOptions.value.map((option) => ({
+      text: formatFailureModePickerText(option.label, option.note),
+      value: option.value,
+    }));
+  });
+  const subFailureModeLabel = computed(() => {
+    return subFailureModeOptions.value.find(
+      (option) => option.value === subFailureModeValue.value
+    )?.label || "";
+  });
+  const showSubFailureModePicker = ref(false);
+  const selectedSubFailureMode = ref<string[]>([]);
+  const openSubFailureModePicker = () => {
+    selectedSubFailureMode.value = [subFailureModeValue.value];
+    showSubFailureModePicker.value = true;
+  };
+  const handleSubFailureModeConfirm = ({ selectedValue }) => {
+    const nextValue =
+      selectedValue[0] ?? subFailureModeColumns.value[0]?.value ?? "disabled";
+    selectedSubFailureMode.value = [nextValue];
+    form.ignoreFailedRemoteSub = nextValue;
+    showSubFailureModePicker.value = false;
+  };
   const compareTableIsVisible = ref(false);
   usePopupRoute(compareTableIsVisible);
   const compareData = ref();
@@ -1033,9 +1091,9 @@ const fetchCompareData = async () => {
         }
       }
     });
-    if (configName !== "UNTITLED") {
-      await subsStore.fetchFlows(ref([data]).value);
-    }
+    // if (configName !== "UNTITLED") {
+    //   await subsStore.fetchFlows(ref([data]).value);
+    // }
     const type = editType === "collections" ? "collection" : "sub";
     const res = await subsApi.compareSub(type, data);
     if (res?.data?.status === "success") {
@@ -1368,17 +1426,140 @@ const urlValidator = (val: string): Promise<boolean> => {
     if(tag.value === 'untagged') return !Array.isArray(element) || element.length === 0
     return element.includes(tag.value)
   };
-  const isSubscriptionSelected = (name: string) => {
-    return (form.subscriptions || []).includes(name);
+  const ensureSubscriptions = (): string[] => {
+    if (!Array.isArray(form.subscriptions)) {
+      form.subscriptions = [];
+    }
+    return form.subscriptions;
   };
-  const toggleSubscription = (name: string) => {
-    form.subscriptions = form.subscriptions || [];
-    const index = form.subscriptions.indexOf(name);
-    if (index >= 0) {
-      form.subscriptions.splice(index, 1);
+  const hasSameSubscriptions = (left: string[], right: string[]) => {
+    return left.length === right.length && left.every((name, index) => name === right[index]);
+  };
+  const skipNextDisplayedListSync = ref(false);
+  const replaceSubscriptions = (
+    nextSubscriptions: string[],
+    options?: { preserveDisplayedOrder?: boolean },
+  ) => {
+    const subscriptions = ensureSubscriptions();
+
+    if (hasSameSubscriptions(subscriptions, nextSubscriptions)) {
       return;
     }
-    form.subscriptions.push(name);
+
+    if (options?.preserveDisplayedOrder) {
+      skipNextDisplayedListSync.value = true;
+    }
+
+    subscriptions.splice(0, subscriptions.length, ...nextSubscriptions);
+  };
+  const syncSubscriptionsFromRows = (rows: SubSelectRow[]) => {
+    const selectedSet = new Set(ensureSubscriptions());
+    const nextSubscriptions = rows
+      .filter(([name]) => selectedSet.has(name))
+      .map(([name]) => name);
+
+    replaceSubscriptions(nextSubscriptions, { preserveDisplayedOrder: true });
+  };
+  const selectedSubscriptions = computed(() => {
+    return Array.isArray(form.subscriptions) ? form.subscriptions : [];
+  });
+  const isRowVisibleByName = (name: string) => {
+    const row = subsSelectList.value.find((item) => item[0] === name);
+    return row ? shouldShowElement(row[3]) : false;
+  };
+  const orderedSubsSelectList = computed<SubSelectRow[]>(() => {
+    const selectedRows = selectedSubscriptions.value
+      .map(name => subsSelectList.value.find(item => item[0] === name))
+      .filter((item): item is SubSelectRow => Boolean(item));
+    const selectedSet = new Set(selectedRows.map(([name]) => name));
+
+    return [
+      ...selectedRows,
+      ...subsSelectList.value.filter(([name]) => !selectedSet.has(name)),
+    ];
+  });
+  const getCurrentVisibleRows = () => {
+    if (displayedSubsSelectList.value.length > 0) {
+      return displayedSubsSelectList.value;
+    }
+
+    return orderedSubsSelectList.value.filter((item) => shouldShowElement(item[3]));
+  };
+  const visibleSelectedSubscriptions = computed<string[]>({
+    get: () => {
+      return selectedSubscriptions.value.filter((name) => isRowVisibleByName(name));
+    },
+    set: (visibleSelectedNames) => {
+      const subscriptions = ensureSubscriptions();
+      const visibleRowOrder = getCurrentVisibleRows().map(([name]) => name);
+      const visibleSet = new Set(visibleRowOrder);
+      const visibleSelectedSet = new Set(visibleSelectedNames);
+      const visibleSelectedRowOrder = visibleRowOrder.filter((name) => visibleSelectedSet.has(name));
+      const nextSubscriptions = subscriptions.filter((name) => {
+        return !visibleSet.has(name) || visibleSelectedSet.has(name);
+      });
+      const findExistingIndex = (name: string) => nextSubscriptions.indexOf(name);
+
+      visibleSelectedRowOrder.forEach((name, index) => {
+        if (findExistingIndex(name) > -1) return;
+
+        const nextVisibleAnchor = visibleSelectedRowOrder
+          .slice(index + 1)
+          .find((candidate) => findExistingIndex(candidate) > -1);
+
+        if (nextVisibleAnchor) {
+          nextSubscriptions.splice(findExistingIndex(nextVisibleAnchor), 0, name);
+          return;
+        }
+
+        const previousVisibleAnchor = visibleSelectedRowOrder
+          .slice(0, index)
+          .reverse()
+          .find((candidate) => findExistingIndex(candidate) > -1);
+
+        if (previousVisibleAnchor) {
+          nextSubscriptions.splice(findExistingIndex(previousVisibleAnchor) + 1, 0, name);
+          return;
+        }
+
+        nextSubscriptions.push(name);
+      });
+
+      replaceSubscriptions(nextSubscriptions, { preserveDisplayedOrder: true });
+    },
+  });
+  const mergeVisibleOrder = <T>(
+    source: T[],
+    reorderedVisibleItems: T[],
+    shouldInclude: (item: T) => boolean,
+  ) => {
+    let visibleIndex = 0;
+
+    return source.map((item) => {
+      if (!shouldInclude(item)) {
+        return item;
+      }
+
+      const reorderedItem = reorderedVisibleItems[visibleIndex];
+      visibleIndex += 1;
+      return reorderedItem ?? item;
+    });
+  };
+  const isSubscriptionSelected = (name: string) => {
+    return selectedSubscriptions.value.includes(name);
+  };
+  const toggleSubscription = (name: string) => {
+    const subscriptions = ensureSubscriptions();
+
+    if (subscriptions.includes(name)) {
+      replaceSubscriptions(
+        subscriptions.filter((item) => item !== name),
+        { preserveDisplayedOrder: true },
+      );
+      return;
+    }
+
+    replaceSubscriptions([...subscriptions, name], { preserveDisplayedOrder: true });
   };
   const subCheckboxIndeterminate = ref(true);
   const subCheckbox = ref(true);
@@ -1386,67 +1567,26 @@ const urlValidator = (val: string): Promise<boolean> => {
   //   console.log(`${!v} -> ${v}`)
   // };
   const subCheckboxClick = () => {
-    // 确保 form.subscriptions 存在
-    if (!form.subscriptions) {
-      form.subscriptions = [];
-    }
-    // const selected = toRaw(form.subscriptions) || []
-    const group = subsSelectList.value.filter(item => shouldShowElement(item[3])).map(item => item[0]) || []
+    const group = getCurrentVisibleRows().map(([name]) => name);
     if (subCheckboxIndeterminate.value) {
       console.log(`半选, 应变为全选`)  
-      for (let i = 0; i < group.length; i++) {
-        const index = form.subscriptions.indexOf(group[i])
-        if (index === -1) {
-          form.subscriptions.push(group[i])
-        }
-      }
+      visibleSelectedSubscriptions.value = group;
     } else if (!subCheckbox.value) {
       console.log(`全选, 应变为不选`)
-      // 用遍历与 form.subscriptions.slice 的方式, 去掉 form.subscriptions 中所有被 group 包含的元素
-      for (let i = 0; i < group.length; i++) {
-        const index = form.subscriptions.indexOf(group[i])
-        if (index > -1) {
-          form.subscriptions.splice(index, 1)
-        }
-      }
+      visibleSelectedSubscriptions.value = [];
       // subCheckbox.value = !subCheckbox.value
     } else {
       console.log(`不选, 应变为全选`)
-      for (let i = 0; i < group.length; i++) {
-        const index = form.subscriptions.indexOf(group[i])
-        if (index === -1) {
-          form.subscriptions.push(group[i])
-        }
-      }
+      visibleSelectedSubscriptions.value = group;
       // subCheckbox.value = !subCheckbox.value
     }
     subCheckboxIndeterminate.value = false
   };
-  const filteredSubsSelectList = ref([]);
-
-  const updateFilteredSubsList = () => {
-    if (!subsSelectList.value?.length) {
-      filteredSubsSelectList.value = [];
-      return;
-    }
-    
-    form.subscriptions = form.subscriptions || [];
-    
-    // 当选中"全部"标签时，将已选中的订阅提到最前面；否则保持原顺序
-    filteredSubsSelectList.value = tag.value === 'all'
-      ? [
-          // 已选中的（按选中顺序）
-          ...form.subscriptions.map(name => subsSelectList.value.find(item => item[0] === name)).filter(Boolean),
-          // 未选中的
-          ...subsSelectList.value.filter(item => !form.subscriptions.includes(item[0]))
-        ]
-      : [...subsSelectList.value];
-  };
-  // 监听 tag、subsSelectList 和 subsStore.subs 的变化时更新列表
-  watch([tag, subsSelectList, () => subsStore.subs], () => {
-    updateFilteredSubsList();
-  }, { immediate: true, deep: true });
+  const displayedSubsSelectList = ref<SubSelectRow[]>([]);
   const isDragging = ref(false);
+  const syncDisplayedSubsSelectList = () => {
+    displayedSubsSelectList.value = orderedSubsSelectList.value.filter((item) => shouldShowElement(item[3]));
+  };
 
   const onStartDrag = () => {
     console.log("开始拖拽");
@@ -1455,38 +1595,29 @@ const urlValidator = (val: string): Promise<boolean> => {
 
   const onEndDrag = () => {
     console.log("结束拖拽");
+    const mergedRows = mergeVisibleOrder(
+      orderedSubsSelectList.value,
+      displayedSubsSelectList.value,
+      (item) => shouldShowElement(item[3]),
+    );
     isDragging.value = false;
-  
-    // 获取当前过滤视图中可见的订阅顺序
-    const visibleOrder = filteredSubsSelectList.value
-      .filter(item => shouldShowElement(item[3]))
-      .map(item => item[0]);
-    
-    const newSubscriptions = [];
-    
-    // 确保 form.subscriptions 存在
-    if (!form.subscriptions) {
-      form.subscriptions = [];
-    }
-    
-    // 先按新顺序添加当前过滤列表中已选中的订阅
-    visibleOrder.forEach(name => {
-      if (form.subscriptions.includes(name)) {
-        newSubscriptions.push(name);
-      }
-    });
-    
-    // 添加不在当前过滤列表中但已选中的订阅（保持原有顺序）
-    form.subscriptions.forEach(name => {
-      if (!visibleOrder.includes(name)) {
-        newSubscriptions.push(name);
-      }
-    });
-    form.subscriptions.splice(0, form.subscriptions.length, ...newSubscriptions);
-    console.log("更新后的 form.subscriptions:", form.subscriptions);
+    syncSubscriptionsFromRows(mergedRows);
+    syncDisplayedSubsSelectList();
   };
-  watch([tag, form.subscriptions, subsSelectList], () => {
-    const selected = toRaw(form.subscriptions || []) || []
+  watch([tag, subsSelectList], () => {
+    if (isDragging.value) return;
+    syncDisplayedSubsSelectList();
+  }, { immediate: true });
+  watch(selectedSubscriptions, () => {
+    if (isDragging.value) return;
+    if (skipNextDisplayedListSync.value) {
+      skipNextDisplayedListSync.value = false;
+      return;
+    }
+    syncDisplayedSubsSelectList();
+  }, { deep: true });
+  watch([tag, selectedSubscriptions, subsSelectList], () => {
+    const selected = toRaw(selectedSubscriptions.value) || []
     const group = subsSelectList.value.filter(item => shouldShowElement(item[3])).map(item => item[0]) || []
     // 1. group 中不包含 selected 中的任何元素, subCheckbox 为 false, subCheckboxIndeterminate 为 false
     // 2. group 中包含 selected 中的任意元素, subCheckbox 为 true, subCheckboxIndeterminate 为 true
@@ -1504,7 +1635,7 @@ const urlValidator = (val: string): Promise<boolean> => {
       subCheckbox.value = false
       subCheckboxIndeterminate.value = false
     }
-  }, { immediate: true });
+  }, { immediate: true, deep: true });
   // const subCheckboxIndeterminate = computed(() => {
   //   const selected = toRaw(form.subscriptions)
   //   const currentGroup = subsSelectList.value.filter(item => shouldShowElement(item[3])).map(item => item[0])
@@ -1761,6 +1892,16 @@ onBeforeUnmount(() => {
   }
 }
 
+.failure-mode-input {
+  cursor: pointer;
+
+  :deep(.nut-input-value),
+  :deep(.nut-input-inner),
+  :deep(.nut-input-right-icon) {
+    cursor: pointer;
+  }
+}
+
 .include-subs-wrapper {
   flex-direction: column;
 
@@ -1858,6 +1999,54 @@ onBeforeUnmount(() => {
 
   .subs-checkbox-wrapper {
     flex-direction: row-reverse;
+
+    &.is-dragging {
+      .subs-checkbox,
+      .sub-img-wrapper,
+      .sub-img-wrapper * {
+        -webkit-user-select: none;
+        user-select: none;
+      }
+    }
+
+    &.is-simple-mode {
+      .subs-checkbox {
+        padding: 10px 0 0 0;
+
+        &:not(:last-child) {
+          padding: 10px 0;
+        }
+
+        .sub-img-wrapper {
+          font-size: 13px;
+
+          .icon {
+            margin-right: 6px;
+          }
+
+          .sub-item {
+            margin: -3px 0 0 -3px;
+
+            .name {
+              margin: 3px 0 0 3px;
+            }
+
+            .tag {
+              margin: 3px 0 0 3px;
+            }
+          }
+
+          .sub-item-customer-icon {
+            margin-right: 8px;
+          }
+
+          .drag-handle {
+            font-size: 14px;
+            padding: 6px;
+          }
+        }
+      }
+    }
 
     .subs-checkbox {
       display: flex;

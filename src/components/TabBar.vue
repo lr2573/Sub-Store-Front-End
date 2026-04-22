@@ -1,5 +1,5 @@
 <template>
-  <div class="tab-bar-wrapper">
+  <div class="tab-bar-wrapper" :class="{ 'is-wide-screen-visible': isWideScreenNarrowModeActive }">
     <nut-tabbar
       :aria-label="$t('tabBar.sub')"
       unactive-color=""
@@ -25,6 +25,7 @@
 </template>
 
 <script lang="ts" setup>
+  import { useWideScreenNarrowMode } from '@/hooks/useWideScreenNarrowMode';
   import { useGlobalStore } from '@/store/global';
   import { useSettingsStore } from '@/store/settings';
   import { storeToRefs } from 'pinia';
@@ -34,6 +35,7 @@
   const route = useRoute();
   const routeList = ['/subs', '/files', '/sync', '/my'];
   const activeTab = ref(routeList.indexOf(route.path));
+  const { isWideScreenNarrowModeActive } = useWideScreenNarrowMode();
 
 
 
@@ -67,6 +69,12 @@
 
     @media screen and (min-width: 768px) {
       display: none !important;
+    }
+
+    &.is-wide-screen-visible {
+      @media screen and (min-width: 768px) {
+        display: block !important;
+      }
     }
 
     .tabbar {

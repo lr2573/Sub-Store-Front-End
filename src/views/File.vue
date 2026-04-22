@@ -226,12 +226,6 @@
         <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
       </a>
     </div>
-    <SharePopup
-      v-if="sharePopupVisible"
-      v-model:visible="sharePopupVisible"
-      :data="shareData"
-      action="add"
-    />
   </div>
 </template>
 
@@ -239,7 +233,6 @@
 import { storeToRefs } from "pinia";
 import { ref, toRaw, onMounted, computed, watch } from "vue";
 import draggable from "vuedraggable";
-import SharePopup from "./share/SharePopup.vue";
 
 import { useAppNotifyStore } from "@/store/appNotify";
 import { Dialog, Toast } from '@nutui/nutui';
@@ -261,6 +254,7 @@ import { useFilteredDraggableList } from "@/hooks/useFilteredDraggableList";
 import { useListViewMode } from "@/hooks/useListViewMode";
 import { useTagBarHeight } from "@/hooks/useTagBarHeight";
 import { isMobile } from "@/utils/isMobile";
+import { getShareCreatePath } from "@/utils/share";
 
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -426,16 +420,8 @@ const handleDragEnd = (dataValue: any) => {
   swipeDisabled.value = false;
 };
 
-const shareData = ref(null);
-const sharePopupVisible = ref(false);
-const handleShare = (element, type) => {
-  console.log("share", element);
-  shareData.value = {
-    displayName: element.displayName || "",
-    name: element.name,
-    type: type as "file",
-  };
-  sharePopupVisible.value = true;
+const handleShare = (element) => {
+  router.push(getShareCreatePath("file", element.name));
 };
 const upload = async() => {
   try {

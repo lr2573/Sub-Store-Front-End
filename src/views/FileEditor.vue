@@ -458,46 +458,17 @@
             <nut-form-item
               :label="$t(`filePage.ignoreFailedRemoteFile.label`)"
               prop="ignoreFailedRemoteFile"
-              class="ignore-failed-wrapper"
             >
-              <div class="radio-wrapper">
-                <div
-                  class="native-radio-group"
-                  role="radiogroup"
-                  :aria-label="$t(`filePage.ignoreFailedRemoteFile.label`)"
-                >
-                  <button
-                    type="button"
-                    class="native-radio-button"
-                    :class="{ current: form.ignoreFailedRemoteFile === 'disabled' }"
-                    role="radio"
-                    :aria-checked="form.ignoreFailedRemoteFile === 'disabled'"
-                    @click="form.ignoreFailedRemoteFile = 'disabled'"
-                  >
-                    {{ $t(`filePage.ignoreFailedRemoteFile.disabled`) }}
-                  </button>
-                  <button
-                    type="button"
-                    class="native-radio-button"
-                    :class="{ current: form.ignoreFailedRemoteFile === 'quiet' }"
-                    role="radio"
-                    :aria-checked="form.ignoreFailedRemoteFile === 'quiet'"
-                    @click="form.ignoreFailedRemoteFile = 'quiet'"
-                  >
-                    {{ $t(`filePage.ignoreFailedRemoteFile.quiet`) }}
-                  </button>
-                  <button
-                    type="button"
-                    class="native-radio-button"
-                    :class="{ current: form.ignoreFailedRemoteFile === 'enabled' }"
-                    role="radio"
-                    :aria-checked="form.ignoreFailedRemoteFile === 'enabled'"
-                    @click="form.ignoreFailedRemoteFile = 'enabled'"
-                  >
-                    {{ $t(`filePage.ignoreFailedRemoteFile.enabled`) }}
-                  </button>
-                </div>
-              </div>
+              <nut-input
+                :model-value="fileFailureModeLabel"
+                :border="false"
+                class="nut-input-text failure-mode-input"
+                readonly
+                input-align="right"
+                right-icon="rect-right"
+                @click="openFileFailureModePicker"
+                @click-right-icon="openFileFailureModePicker"
+              />
             </nut-form-item>
           </template>
         </nut-form>
@@ -548,7 +519,7 @@
   <icon-popup v-if="iconPopupVisible" v-model:visible="iconPopupVisible" @setIcon="setIcon">
   </icon-popup>
   <!-- 订阅名称 -->
-  <nut-picker
+  <DesktopPicker
     :key="sourceNameColumns.length"
     v-model="selectSourceName"
     v-model:visible="showSourceNamePicker"
@@ -561,7 +532,16 @@
     <button v-if="!sourceNameColumns.length" type="button" class="empty-tips icon-button-reset" @click="goAddSub">
       <p>{{ t(`editorPage.subConfig.sourceNamePicker.emptyTips`) }}</p>
     </button>
-  </nut-picker>
+  </DesktopPicker>
+  <DesktopPicker
+    v-model="selectedFileFailureMode"
+    v-model:visible="showFileFailureModePicker"
+    :columns="fileFailureModeColumns"
+    :title="$t(`filePage.ignoreFailedRemoteFile.label`)"
+    :cancel-text="$t(`editorPage.subConfig.sourceNamePicker.cancel`)"
+    :ok-text="$t(`editorPage.subConfig.sourceNamePicker.confirm`)"
+    @confirm="handleFileFailureModeConfirm"
+  />
   <tag-popup
     v-if="tagPopupVisible"
     v-model:visible="tagPopupVisible"
@@ -590,6 +570,7 @@ import Script from "@/views/editor/components/Script.vue";
 import TagPopup from "@/components/TagPopup.vue";
 import IconPopup from "@/views/icon/IconPopup.vue";
 import FilePreview from "@/views/FilePreview.vue";
+import DesktopPicker from "@/components/DesktopPicker.vue";
 import { initStores } from "@/utils/initApp";
 import { Dialog, Toast } from "@nutui/nutui";
 import { storeToRefs } from "pinia";
@@ -616,7 +597,7 @@ import { syncInnerInputA11y } from "@/hooks/useA11y";
 
 const cmStore = useCodeStore();
 const isDis = ref(true);
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const subsApi = useSubsApi();
@@ -678,6 +659,61 @@ const proxyInputRef = ref<any>(null);
 const currentTag = computed(() => {
   return form.tag
 })
+const fileFailureModeOptions = computed(() => {
+  const prefix = "filePage.ignoreFailedRemoteFile";
+  return [
+    {
+      value: "disabled",
+      label: t(`${prefix}.disabled`),
+      note: t(`${prefix}.disabledNote`),
+    },
+    {
+      value: "enabled",
+      label: t(`${prefix}.enabled`),
+      note: t(`${prefix}.enabledNote`),
+    },
+    {
+      value: "quiet",
+      label: t(`${prefix}.quiet`),
+      note: t(`${prefix}.quietNote`),
+    },
+  ];
+});
+const formatFailureModePickerText = (label: string, note?: string) => {
+  if (!note) return label;
+  return locale.value.startsWith("zh")
+    ? `${label}（${note}）`
+    : `${label} (${note})`;
+};
+const fileFailureModeValue = computed(() => {
+  return form.ignoreFailedRemoteFile === false || form.ignoreFailedRemoteFile == null
+    ? "disabled"
+    : form.ignoreFailedRemoteFile;
+});
+const fileFailureModeColumns = computed(() => {
+  return fileFailureModeOptions.value.map((option) => ({
+    text: formatFailureModePickerText(option.label, option.note),
+    value: option.value,
+  }));
+});
+const fileFailureModeLabel = computed(() => {
+  return fileFailureModeOptions.value.find(
+    (option) => option.value === fileFailureModeValue.value
+  )?.label || "";
+});
+const showFileFailureModePicker = ref(false);
+const selectedFileFailureMode = ref<string[]>([]);
+const openFileFailureModePicker = () => {
+  selectedFileFailureMode.value = [fileFailureModeValue.value];
+  showFileFailureModePicker.value = true;
+};
+const handleFileFailureModeConfirm = ({ selectedValue }) => {
+  const nextValue =
+    selectedValue[0] ?? fileFailureModeColumns.value[0]?.value ?? "disabled";
+  selectedFileFailureMode.value = [nextValue];
+  form.ignoreFailedRemoteFile = nextValue;
+  showFileFailureModePicker.value = false;
+};
 const showTagPopup = (type:string) => {
   tagType.value = type || 'tag'
   tagPopupVisible.value = true
@@ -1339,6 +1375,16 @@ onBeforeUnmount(() => {
 
   .native-switch__track.active .native-switch__thumb {
     transform: translateX(20px);
+  }
+}
+
+.failure-mode-input {
+  cursor: pointer;
+
+  :deep(.nut-input-value),
+  :deep(.nut-input-inner),
+  :deep(.nut-input-right-icon) {
+    cursor: pointer;
   }
 }
 

@@ -2,6 +2,7 @@ import { storeToRefs } from "pinia";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
+import { useWideScreenNarrowMode } from "@/hooks/useWideScreenNarrowMode";
 import { useListPageViewStore } from "@/store/listPageView";
 import { useSettingsStore } from "@/store/settings";
 import { SIDEBAR_EXPANDED_BREAKPOINT, useSystemStore } from "@/store/system";
@@ -13,6 +14,7 @@ export const useListViewMode = () => {
   const listPageViewStore = useListPageViewStore();
   const settingsStore = useSettingsStore();
   const systemStore = useSystemStore();
+  const { isWideScreenNarrowModeActive } = useWideScreenNarrowMode();
 
   const { singleColumnLockRoutePath } = storeToRefs(listPageViewStore);
   const { appearanceSetting } = storeToRefs(settingsStore);
@@ -21,17 +23,24 @@ export const useListViewMode = () => {
   const supportsListViewMode = computed(() => Boolean(route.meta?.supportsListViewMode));
   const isWideListViewport = computed(() => screenWidth.value >= LIST_VIEW_MODE_BREAKPOINT);
   const showListViewToggle = computed(() => supportsListViewMode.value && isWideListViewport.value);
-  const isListViewModeLocked = computed(() => {
+  const isListViewModeLockedBySelection = computed(() => {
     return showListViewToggle.value && singleColumnLockRoutePath.value === route.path;
+  });
+  const isListViewModeLocked = computed(() => {
+    return isListViewModeLockedBySelection.value;
   });
   const canToggleListView = computed(() => showListViewToggle.value && !isListViewModeLocked.value);
 
   const storedListViewMode = computed<ListPageViewMode | undefined>(() => {
+    if (isWideScreenNarrowModeActive.value) {
+      return appearanceSetting.value.listPageViewModeInWideScreenNarrowMode ?? appearanceSetting.value.listPageViewMode;
+    }
+
     return appearanceSetting.value.listPageViewMode;
   });
 
   const effectiveListViewMode = computed<ListPageViewMode>(() => {
-    if (!supportsListViewMode.value || !isWideListViewport.value || isListViewModeLocked.value) {
+    if (!supportsListViewMode.value || !isWideListViewport.value || isListViewModeLockedBySelection.value) {
       return "single-column";
     }
 
@@ -48,10 +57,15 @@ export const useListViewMode = () => {
     }
 
     await settingsStore.changeAppearanceSetting({
-      appearanceSetting: {
-        ...appearanceSetting.value,
-        listPageViewMode: mode,
-      },
+      appearanceSetting: isWideScreenNarrowModeActive.value
+        ? {
+            ...appearanceSetting.value,
+            listPageViewModeInWideScreenNarrowMode: mode,
+          }
+        : {
+            ...appearanceSetting.value,
+            listPageViewMode: mode,
+          },
     });
   };
 
@@ -67,6 +81,7 @@ export const useListViewMode = () => {
     supportsListViewMode,
     isWideListViewport,
     showListViewToggle,
+    isListViewModeLockedBySelection,
     isListViewModeLocked,
     canToggleListView,
     storedListViewMode,

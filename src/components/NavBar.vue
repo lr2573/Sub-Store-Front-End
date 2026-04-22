@@ -27,13 +27,14 @@
             <button
               v-if="!isNeedBack && !appearanceSetting.showFloatingRefreshButton"
               type="button"
-              class="icon-button-reset nav-icon-button icon fa-arrow-rotate-right"
+              class="icon-button-reset nav-icon-button navBar-left-icon navBar-left-icon--refresh"
               :aria-label="a11yText.refresh"
               :title="a11yText.refresh"
               @click.stop="refresh"
             >
               <font-awesome-icon
                 aria-hidden="true"
+                class="icon fa-arrow-rotate-right"
                 icon="fa-solid fa-arrow-rotate-right"
               />
             </button>
@@ -43,12 +44,16 @@
                 !appearanceSetting.showFloatingAddButton
               "
               type="button"
-              class="icon-button-reset nav-icon-button icon fa-plus"
+              class="icon-button-reset nav-icon-button navBar-left-icon navBar-left-icon--add"
               :aria-label="a11yText.add"
               :title="a11yText.add"
               @click.stop="add(route)"
             >
-              <font-awesome-icon aria-hidden="true" icon="fa-solid fa-plus" />
+              <font-awesome-icon
+                aria-hidden="true"
+                class="icon fa-plus"
+                icon="fa-solid fa-plus"
+              />
             </button>
           </div>
         </template>
@@ -75,6 +80,20 @@
             @click.stop="setSimpleMode(true)"
           >
             <font-awesome-icon aria-hidden="true" icon="fa-solid fa-toggle-off" />
+          </button>
+          <button
+            v-if="showWideScreenNarrowModeToggle"
+            type="button"
+            class="icon-button-reset nav-icon-button navBar-right-icon fa-navigation-mode"
+            :aria-label="wideScreenNarrowModeToggleTitle"
+            :title="wideScreenNarrowModeToggleTitle"
+            :aria-pressed="isWideScreenNarrowModeActive ? 'true' : 'false'"
+            @click.stop="handleWideScreenNarrowModeToggle"
+          >
+            <font-awesome-icon
+              aria-hidden="true"
+              :icon="isWideScreenNarrowModeActive ? 'fa-solid fa-mobile-screen-button' : 'fa-solid fa-desktop'"
+            />
           </button>
           <button
             v-if="showListViewToggle"
@@ -154,12 +173,13 @@
 import { computed, nextTick, onMounted, ref, watch, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import { useWideScreenNarrowMode } from "@/hooks/useWideScreenNarrowMode";
 import { useGlobalStore } from "@/store/global";
 import { useListViewMode } from "@/hooks/useListViewMode";
 import { useSystemStore } from "@/store/system";
 import { useSettingsStore } from '@/store/settings';
 import { storeToRefs } from "pinia";
-import { Toast, Dialog } from "@nutui/nutui";
+import { Dialog } from "@nutui/nutui";
 import { initStores } from "@/utils/initApp";
 import { useMethodStore } from '@/store/methodStore';
 import { useAppNotifyStore } from "@/store/appNotify";
@@ -184,10 +204,16 @@ const { changeAppearanceSetting } = settingsStore;
 const { appearanceSetting } = storeToRefs(settingsStore);
 const {
   effectiveListViewMode,
+  isListViewModeLockedBySelection,
   isListViewModeLocked,
   showListViewToggle,
   toggleListViewMode,
 } = useListViewMode();
+const {
+  isWideScreenNarrowModeActive,
+  showWideScreenNarrowModeToggle,
+  toggleWideScreenNarrowMode,
+} = useWideScreenNarrowMode();
 // 从systemStore获取状态
 const { isPWA, isLandscape, isSmall } = storeToRefs(systemStore);
 
@@ -280,7 +306,7 @@ const setSimpleMode = (isSimpleMode: boolean) => {
 };
 
 const listViewModeToggleTitle = computed(() => {
-  if (isListViewModeLocked.value) {
+  if (isListViewModeLockedBySelection.value) {
     return t("navBar.listView.disabledInSelectionMode");
   }
 
@@ -289,12 +315,26 @@ const listViewModeToggleTitle = computed(() => {
     : t("navBar.listView.switchToDual");
 });
 
+const wideScreenNarrowModeToggleTitle = computed(() => {
+  return isWideScreenNarrowModeActive.value
+    ? t("navBar.navigationMode.switchToWide")
+    : t("navBar.navigationMode.switchToNarrow");
+});
+
+const wideScreenNarrowModeToggleRight = computed(() => {
+  return showListViewToggle.value ? "141px" : "99px";
+});
+
 const handleListViewModeToggle = async () => {
   if (isListViewModeLocked.value) {
     return;
   }
 
   await toggleListViewMode();
+};
+
+const handleWideScreenNarrowModeToggle = async () => {
+  await toggleWideScreenNarrowMode();
 };
 
 const refresh = async () => {
@@ -386,6 +426,7 @@ const refresh = async () => {
         padding-bottom: 15px;
         padding-left: 10px;
         color: var(--icon-nav-bar-right);
+        cursor: pointer;
       }
       .nav-leading-button {
         display: inline-flex;
@@ -393,27 +434,46 @@ const refresh = async () => {
         justify-content: center;
       }
       .icon-group {
-        .icon {
-          &:first-child:last-child {
-            left: 15px;
+        .navBar-left-icon {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 32px;
+          padding-top: v-bind(navBartop);
+          padding-right: 0;
+          padding-bottom: 0;
+          padding-left: 8px;
+          border: 0;
+          margin: 0;
+          background: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          color: var(--icon-nav-bar-right);
+          cursor: pointer;
+
+          .icon {
+            pointer-events: none;
+          }
+        }
+
+        .navBar-left-icon--refresh {
+          left: 7px;
+        }
+
+        .navBar-left-icon--add {
+          left: 37px;
+
+          &:only-child {
+            left: 7px;
           }
         }
       }
       .fa-plus {
-        padding-top: v-bind(navBartop);
-        color: var(--icon-nav-bar-right);
-        position: absolute;
-        left: 45px;
-        top: 50%;
-        transform: translateY(-50%);
+        color: currentColor;
       }
       .fa-arrow-rotate-right {
-        padding-top: v-bind(navBartop);
-        color: var(--icon-nav-bar-right);
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
+        color: currentColor;
       }
       .fa-lg {
         position: absolute;
@@ -426,6 +486,13 @@ const refresh = async () => {
       .fa-toggle {
         position: absolute;
         right: 58px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .fa-navigation-mode {
+        position: absolute;
+        right: v-bind(wideScreenNarrowModeToggleRight);
         top: 50%;
         transform: translateY(-50%);
       }

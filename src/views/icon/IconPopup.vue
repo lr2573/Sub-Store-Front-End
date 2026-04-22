@@ -156,7 +156,7 @@
         </div>
       </div>
     </div>
-    <nut-picker
+    <DesktopPicker
       v-model="defaultIconCollectionValue"
       v-model:visible="showIconCollectionPicker"
       :columns="iconCollectionColumns"
@@ -165,11 +165,12 @@
       :ok-text="$t(`iconCollectionPage.collectionPicker.confirm`)"
       @confirm="handleConfirm"
       @cancel="handleCancel"
-    ></nut-picker>
+    ></DesktopPicker>
   </nut-popup>
 </template>
 
 <script setup lang="ts">
+import DesktopPicker from "@/components/DesktopPicker.vue";
 import { Toast } from "@nutui/nutui";
 import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";

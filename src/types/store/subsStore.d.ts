@@ -94,16 +94,33 @@ interface Share {
   displayName?: string | null;
   remark?: string | null;
   tag?: string[];
+  icon?: string | null;
+  isIconColor?: boolean | null;
   token?: string | null;
+  mode?: 'duration' | 'datetime' | null;
   expiresIn?: string | null;
+  expiresAt?: number | null;
   exp?: number | null;
   createdAt?: number | null;
 }
 
+interface SharePayload {
+  type: 'sub' | 'col' | 'file';
+  name: string;
+  displayName?: string | null;
+  remark?: string | null;
+  tag?: string[];
+  icon?: string | null;
+  isIconColor?: boolean | null;
+  token?: string | null;
+}
+
 interface ShareToken {
-  payload: Share;
+  payload: SharePayload;
   options?: {
-    expiresIn: number | string | undefined;
+    expiresIn?: number | string | undefined;
+    exp?: number | string | null | undefined;
+    mode?: 'duration' | 'datetime' | undefined;
   }
 }
 

@@ -36,6 +36,11 @@ export default {
       switchToSingle: "Switch to single column",
       switchToDual: "Switch to dual column",
       disabledInSelectionMode: "Multi-select uses single column only",
+      disabledInNarrowNavigationMode: "Single column only in narrow navigation mode",
+    },
+    navigationMode: {
+      switchToNarrow: "Switch to narrow navigation",
+      switchToWide: "Switch to wide navigation",
     },
     pagesTitle: {
       sub: "Subscription",
@@ -48,6 +53,7 @@ export default {
       syncEditor: "Sync Editor",
       preview: 'Preview',
       shareManage: "Share Manage",
+      shareEditor: "Share Editor",
       archive: "Archived",
       themeSetting: "Theme Setting",
       moreSetting: "More Setting",
@@ -104,7 +110,7 @@ export default {
     url: {
       label: "URL",
       placeholder:
-        'Supports mixing three types of formats with line breaks: 1. Full remote URL 2. Internal file reference like /api/file/name 3. Absolute path for local file. Supported parameters: noCache - do not use cache; insecure - do not verify the server certificate; headers - custom request headers (single-line JSON string). For example: http://a.com#noCache&insecure',
+        'Supports mixing three types of formats with line breaks: 1. Full remote URL 2. Internal file reference like /api/file/name 3. Absolute path for local file. Supported parameters: noCache - do not use cache;  cacheTtl - cache ttl (seconds); insecure - do not verify the server certificate; headers - custom request headers (single-line JSON string). For example: http://a.com#noCache&insecure',
       isEmpty: "URL cannot be empty",
       isIllegal: "Invalid URL",
     },
@@ -123,10 +129,16 @@ export default {
       remote: "Remote",
     },
     ignoreFailedRemoteFile: {
-      label: "Ignore failed remote file(s)",
-      quiet: 'Enabled (without notification)',
-      disabled: 'Disabled',
-      enabled : 'Enabled (with notification)'
+      label: "Remote File Failure Handling",
+      disabled: 'Strict Errors',
+      disabledDesc: 'Fail immediately and show a notification when a remote file request fails.',
+      disabledNote: 'fail + notify',
+      enabled : 'Skip + Notify',
+      enabledDesc: 'Skip failed remote files and show a notification.',
+      enabledNote: 'skip failed files',
+      quiet: 'Skip Silently',
+      quietDesc: 'Skip failed remote files without showing a notification.',
+      quietNote: 'skip failed files'
     },
     download: {
       label: "Enable download (filename: display name)",
@@ -309,7 +321,7 @@ export default {
             label: "Usage",
             title: "Subscription URL(s)",
             content:
-              "Supports mixing three types of formats with line breaks:\n1. Full remote URL\n2. Internal file reference like /api/file/name 3.\nAbsolute path for local file\n\nSupported parameters:\n\nheaders: Custom request headers(single-line JSON string)\ninsecure: https requests will not verify the server certificate\ncacheKey: Setting the name of the optimistic cache. Its value can be managed in the persistent store(suitable for subscriptions that often fail to fetch).\n\nvalidCheck: error will be reported when expired or there is no remaining traffic\n\nflowUserAgent: the User-Agent for fetching subscription usage info\n\nflowUrl: the URL for fetching subscription usage info(using the content of the response body or response headers)\n\nshowRemaining: show remaining traffic instead of usage\n\nnoFlow: do not query for flow\n\nhideExpire: hide expiration time\n\nnoCache: do not use cache\n\nresetDay: the day when monthly data usage resets\n\nstartDate: subscription start date\n\ncycleDays: reset cycle (in days).\n\nFor example: http://a.com?token=1#cycleDays=31&startDate=2024-06-04 \nor http://a.com?token=1#resetDay=15",
+              "Supports mixing three types of formats with line breaks:\n1. Full remote URL\n2. Internal file reference like /api/file/name 3.\nAbsolute path for local file\n\nSupported parameters:\n\nheaders: Custom request headers(single-line JSON string)\ninsecure: https requests will not verify the server certificate\ncacheKey: Setting the name of the optimistic cache. Its value can be managed in the persistent store(suitable for subscriptions that often fail to fetch).\n\nvalidCheck: error will be reported when expired or there is no remaining traffic\n\nflowUserAgent: the User-Agent for fetching subscription usage info\n\nflowUrl: the URL for fetching subscription usage info(using the content of the response body or response headers)\n\nshowRemaining: show remaining traffic instead of usage\n\nnoFlow: do not query for flow\n\nhideExpire: hide expiration time\n\nnoCache: do not use cache\n\ncacheTtl: cache ttl (seconds)\n\nheadersCacheTtl: headers cache ttl (seconds)\n\nresetDay: the day when monthly data usage resets\n\nstartDate: subscription start date\n\ncycleDays: reset cycle (in days).\n\nFor example: http://a.com?token=1#cycleDays=31&startDate=2024-06-04 \nor http://a.com?token=1#resetDay=15",
           },
           isEmpty: "URL cannot be empty",
           isIllegal: "Invalid URL",
@@ -336,10 +348,22 @@ export default {
           label: 'Custom Icon Use Original Color',
         },
         ignoreFailedRemoteSub: {
-          label: "Ignore failed remote subscription(s)",
-          quiet: 'Enabled (without notification)',
-          disabled: 'Disabled',
-          enabled : 'Enabled (with notification)'
+          label: "Sub Failure Handling",
+          disabled: 'Strict Errors',
+          disabledDesc: 'Fail immediately and show a notification when subscription processing errors occur.',
+          disabledNote: 'fail and notify',
+          enabled : 'Skip Remote + Notify',
+          enabledDesc: 'Skip failed remote subscriptions and show a notification; other errors still fail.',
+          enabledNote: 'other errors still fail',
+          quiet: 'Skip Remote Silently',
+          quietDesc: 'Skip failed remote subscriptions without showing a notification; other errors still fail.',
+          quietNote: 'other errors still fail',
+          fallbackNotify: 'Empty on Error + Notify',
+          fallbackNotifyDesc: 'If subscription processing hits any error, return an empty result and show a notification.',
+          fallbackNotifyNote: 'return empty result',
+          fallbackQuiet: 'Empty on Error Silently',
+          fallbackQuietDesc: 'If subscription processing hits any error, return an empty result without showing a notification.',
+          fallbackQuietNote: 'return empty result'
         },
         ua: {
           label: "User-Agent",
@@ -348,7 +372,7 @@ export default {
         },
         subUserinfo: {
           label: "Subscription-Userinfo",
-          placeholder: "Value or URL(supports noCache etc.)",
+          placeholder: "Value/URL(supports noCache/headersCacheTtl etc.)",
         },
         passThroughUA: {
           label: 'Pass Through Request User-Agent',
@@ -818,6 +842,11 @@ export default {
     createTimeLabel: "Created: ",
     magicPathErrorNotify: "SUB_STORE_FRONTEND_BACKEND_PATH should start with /, please check the configuration!",
     createShare: {
+      expirationMode: {
+        label: "Expiration Mode",
+        duration: "Duration",
+        datetime: "Exact DateTime",
+      },
       expiresValue: {
         label: "Valid for",
         placeholder: "Enter valid for",
@@ -827,21 +856,31 @@ export default {
       expiresUnit: {
         label: "Validity unit",
       },
+      exactDatetime: {
+        label: "Expiration DateTime",
+        placeholder: "Select an expiration date and time",
+        empty: "Expiration date and time cannot be empty",
+        invalid: "Please enter a valid expiration date and time",
+        confirm: "Confirm",
+        cancel: "Cancel",
+      },
       token: {
         label: "Custom Token",
-        placeholder: "default random Token"
+        placeholder: "default random Token",
+        reserved: "Custom token cannot be UNTITLED",
+        isExist: "This token already exists for the selected source",
       },
       remark: {
         label: "Remarks",
         placeholder: "The remarks",
       },
       displayName: {
-        label: "显示名称",
-        placeholder: "输入展示的名称",
+        label: "Display Name",
+        placeholder: "Enter the name shown to others",
       },
       shareUrl: {
         label: "Share Link",
-        placeholder: "Share Link",
+        placeholder: "The share link will appear here after you save.",
       },
       unit: {
         day: "Day",
@@ -850,9 +889,31 @@ export default {
         year: "Year",
       },
       copyBtn: "Copy Link",
-      updateBtn: "Update",
-      createBtn: "Create",
-      succeedNotify: "Create share successfully!",
+    },
+    editor: {
+      create: {
+        submit: "Create Share",
+        succeedNotify: "Share created successfully!",
+      },
+      edit: {
+        submit: "Save Changes",
+        succeedNotify: "Share updated successfully!",
+      },
+      loadFailed: {
+        title: "This share page could not be loaded",
+        desc: "Check whether the share or its source item still exists, then try again.",
+        retry: "Retry",
+        back: "Back to Shares",
+      },
+      datetimeBackendRequired: {
+        title: "This backend does not support exact expiration yet",
+        desc: "The current backend version is {currentVersion}. Upgrade to {minVersion} or later before saving an exact expiration date and time.",
+      },
+      datetimeBackendCheckFailed: {
+        title: "Unable to verify backend version right now",
+        desc: "Check the current backend connection and try saving the exact expiration date and time again.",
+      },
+      failNotify: "Update share failed",
     },
     copyShare: {
       succeedNotify: "Copy share link successfully!",
@@ -862,13 +923,6 @@ export default {
       desc: "Create and share, then start using.",
       emptyTips: "Please go to the Subs, Files Management page to add the share",
       btn: "Create Now",
-    },
-    updateShare: {
-      failNotify: "Update share failed",
-      title: "Update Share",
-      tips: "After updating the share, the original share link will not work, should I continue?",
-      confirm: "Confirm",
-      cancel: "Cancel",
     },
     deleteShare: {
       title: "Delete Share",
