@@ -1,0 +1,8 @@
+name: sub-store-front-end
+
+services:
+  web:
+    image: ghcr.io/lr2573/sub-store-front-end:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${SUB_STORE_PORT:-4173}:80"
