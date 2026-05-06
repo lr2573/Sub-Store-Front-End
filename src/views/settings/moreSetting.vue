@@ -162,22 +162,41 @@
           </button>
         </template>
       </nut-cell>
-      <nut-cell :title="$t(`moreSettingPage.isEditorCommon`)" class="cell-item">
-        <template v-slot:link>
-          <button
-            type="button"
-            class="native-switch-button"
-            role="switch"
-            :aria-checked="awEditorCommon"
-            :aria-label="$t(`moreSettingPage.isEditorCommon`)"
-            @click="setEditorCommon(!awEditorCommon)"
-          >
-            <span class="native-switch-track" :class="{ active: awEditorCommon }">
-              <span class="native-switch-thumb"></span>
-            </span>
-          </button>
-        </template>
-      </nut-cell>
+      <button
+        type="button"
+        class="cell-item setting-action-row"
+        :aria-label="`${$t(`moreSettingPage.editorCommon.title`)} ${editorCommonDisplayModeName}`"
+        @click="showEditorCommonDisplayModePicker = true"
+      >
+        <span class="setting-action-content">
+          <span>{{ $t(`moreSettingPage.editorCommon.title`) }}</span>
+          <small>{{ editorCommonDisplayModeName }}</small>
+        </span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
+      <DesktopPicker v-model="editorCommonDisplayModeValue" v-model:visible="showEditorCommonDisplayModePicker" :columns="[
+        { text: $t(`moreSettingPage.editorDisplayMode.expanded`), value: 'expanded' },
+        { text: $t(`moreSettingPage.editorDisplayMode.collapsed`), value: 'collapsed' },
+        { text: $t(`moreSettingPage.editorDisplayMode.hidden`), value: 'hidden' }
+      ]" :title="$t(`moreSettingPage.editorCommon.title`)" @confirm="editorCommonDisplayModeConfirm">
+      </DesktopPicker>
+      <button
+        type="button"
+        class="cell-item setting-action-row"
+        :aria-label="`${$t(`moreSettingPage.manualSubscriptions.title`)} ${manualSubscriptionsDisplayModeName}`"
+        @click="showManualSubscriptionsDisplayModePicker = true"
+      >
+        <span class="setting-action-content">
+          <span>{{ $t(`moreSettingPage.manualSubscriptions.title`) }}</span>
+          <small>{{ manualSubscriptionsDisplayModeName }}</small>
+        </span>
+        <nut-icon name="rect-right"></nut-icon>
+      </button>
+      <DesktopPicker v-model="manualSubscriptionsDisplayModeValue" v-model:visible="showManualSubscriptionsDisplayModePicker" :columns="[
+        { text: $t(`moreSettingPage.editorDisplayMode.expanded`), value: 'expanded' },
+        { text: $t(`moreSettingPage.editorDisplayMode.collapsed`), value: 'collapsed' }
+      ]" :title="$t(`moreSettingPage.manualSubscriptions.title`)" @confirm="manualSubscriptionsDisplayModeConfirm">
+      </DesktopPicker>
     </nut-cell-group>
 
     <nut-cell-group v-if="shareBtnVisible">
@@ -431,7 +450,6 @@
   const awIsDefaultIcon = ref(false);
   const awIsShowIcon = ref(true);
   const awIsSubItemMenuFold = ref(true);
-  const awEditorCommon = ref(false);
   const awSimpleReicon = ref(true);
   const awSimpleShowRemark = ref(false);
   const awShowFloatingRefreshButton = ref(false);
@@ -445,6 +463,8 @@
   const isInit = ref(false);
   const subProgressStyleValue = ref(['hidden']);
   const gistUploadValue = ref(['base64']);
+  const editorCommonDisplayModeValue = ref<EditorCommonDisplayMode[]>(['collapsed']);
+  const manualSubscriptionsDisplayModeValue = ref<EditorSectionFoldMode[]>(['collapsed']);
 
   const pickerType = ref('');
   const autoSwitch = ref(false);
@@ -452,6 +472,8 @@
   // const isEditLoading = ref(false);
   const showSubProgressPicker = ref(false);
   const showCreateItemPositionPicker = ref(false);
+  const showEditorCommonDisplayModePicker = ref(false);
+  const showManualSubscriptionsDisplayModePicker = ref(false);
   const shareBtnVisible = computed(() => {
     return env.value?.feature?.share;
   });
@@ -504,6 +526,29 @@
     }
   };
 
+  const editorCommonDisplayModeName = computed(() => {
+    return t(`moreSettingPage.editorDisplayMode.${editorCommonDisplayModeValue.value[0] || 'collapsed'}`);
+  });
+  const editorCommonDisplayModeConfirm = ({ selectedValue }) => {
+    const editorCommonDisplayMode = selectedValue[0] || 'collapsed';
+    const data = {
+      ...appearanceSetting.value,
+      editorCommonDisplayMode,
+      isEditorCommon: editorCommonDisplayMode !== 'hidden',
+    }
+    changeAppearanceSetting({ appearanceSetting: data });
+  };
+  const manualSubscriptionsDisplayModeName = computed(() => {
+    return t(`moreSettingPage.editorDisplayMode.${manualSubscriptionsDisplayModeValue.value[0] || 'collapsed'}`);
+  });
+  const manualSubscriptionsDisplayModeConfirm = ({ selectedValue }) => {
+    const data = {
+      ...appearanceSetting.value,
+      manualSubscriptionsDisplayMode: selectedValue[0] || 'collapsed'
+    }
+    changeAppearanceSetting({ appearanceSetting: data });
+  };
+
   const setSimpleMode = (isSimpleMode: boolean) =>
     updateAppearanceToggle("isSimpleMode", isSimpleMode, SimpleSwitch);
 
@@ -518,9 +563,6 @@
 
   const setIsSubItemMenuFold = (isSubItemMenuFold: boolean) =>
     updateAppearanceToggle("isSubItemMenuFold", isSubItemMenuFold, awIsSubItemMenuFold);
-
-  const setEditorCommon = (isEditorCommon: boolean) =>
-    updateAppearanceToggle("isEditorCommon", isEditorCommon, awEditorCommon);
 
   const setSimpleReicon = (isSimpleReicon: boolean) =>
     updateAppearanceToggle("isSimpleReicon", isSimpleReicon, awSimpleReicon);
@@ -728,7 +770,6 @@
     awIsDefaultIcon.value = appearanceSetting.value.isDefaultIcon;
     awIsShowIcon.value = appearanceSetting.value.isShowIcon;
     awIsSubItemMenuFold.value = appearanceSetting.value.isSubItemMenuFold;
-    awEditorCommon.value = appearanceSetting.value.isEditorCommon;
     awSimpleReicon.value = appearanceSetting.value.isSimpleReicon;
     awSimpleShowRemark.value = appearanceSetting.value.isSimpleShowRemark;
     awShowFloatingRefreshButton.value = appearanceSetting.value.showFloatingRefreshButton;
@@ -740,6 +781,8 @@
     awtabBar2.value = appearanceSetting.value.istabBar2;
     subProgressStyleValue.value = [appearanceSetting.value.subProgressStyle];
     gistUploadValue.value = [gistUpload.value];
+    editorCommonDisplayModeValue.value = [appearanceSetting.value.editorCommonDisplayMode || 'collapsed'];
+    manualSubscriptionsDisplayModeValue.value = [appearanceSetting.value.manualSubscriptionsDisplayMode || 'collapsed'];
     // SimpleSwitch.value = isSimpleMode.value;
     // LeftRight.value = isLeftRight.value;
     // awIconColor.value = isIconColor.value;

@@ -1,10 +1,11 @@
 <template>
   <!-- isPWA 时候顶部边距 -->
   <div v-if="isPWA" class="pwa_top_padding" />
-  <div class="nav-bar-wrapper">
+  <div
+    class="nav-bar-wrapper"
+    :class="{ 'is-logs-overlay-open': isLogsOverlayOpen }"
+  >
     <nav :aria-label="a11yText.mainNavigation">
-      <!-- &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {{ navBarHeight }} {{ wh }}    {{ topHeight }}-->
-
       <nut-navbar
         @on-click-back="back"
         :title="currentTitle"
@@ -12,22 +13,28 @@
         @on-click-icon="onClickNavbarIcon"
       >
         <template #left>
+          <div v-if="isLogsOverlayOpen" class="nav-leading-placeholder" aria-hidden="true" />
           <button
-            v-if="isNeedBack"
+            v-else-if="isNeedBack"
             type="button"
             class="icon-button-reset nav-icon-button nav-leading-button"
             :aria-label="a11yText.back"
             :title="a11yText.back"
             @click.stop="back"
           >
-            <span class="icon-back" aria-hidden="true"></span>
+            <font-awesome-icon
+              aria-hidden="true"
+              class="icon-back-icon"
+              icon="fa-solid fa-arrow-left"
+            />
           </button>
-          <span v-else class="icon-null nav-leading-button" aria-hidden="true"></span>
-          <div class="icon-group">
+          <span v-else class="icon-null nav-leading-button nav-leading-spacer" aria-hidden="true"></span>
+          <div v-if="!isLogsOverlayOpen" class="icon-group">
             <button
-              v-if="!isNeedBack && !appearanceSetting.showFloatingRefreshButton"
+              v-if="showRefreshButton"
               type="button"
               class="icon-button-reset nav-icon-button navBar-left-icon navBar-left-icon--refresh"
+              :style="{ left: navLeftButtonLeft.refresh }"
               :aria-label="a11yText.refresh"
               :title="a11yText.refresh"
               @click.stop="refresh"
@@ -39,12 +46,10 @@
               />
             </button>
             <button
-              v-if="
-                ['/subs', '/sync', '/files'].includes(route.path) &&
-                !appearanceSetting.showFloatingAddButton
-              "
+              v-if="showAddButton"
               type="button"
               class="icon-button-reset nav-icon-button navBar-left-icon navBar-left-icon--add"
+              :style="{ left: navLeftButtonLeft.add }"
               :aria-label="a11yText.add"
               :title="a11yText.add"
               @click.stop="add(route)"
@@ -55,74 +60,135 @@
                 icon="fa-solid fa-plus"
               />
             </button>
+            <button
+              v-if="showSearchButton"
+              type="button"
+              class="icon-button-reset nav-icon-button navBar-left-icon navBar-left-icon--search"
+              :class="{ 'is-active': isListSearchActive || listSearchStore.hasQuery }"
+              :style="{ left: navLeftButtonLeft.search }"
+              :aria-label="t('navBar.listSearch.open')"
+              :title="t('navBar.listSearch.open')"
+              :aria-pressed="isListSearchActive ? 'true' : 'false'"
+              @click.stop="openListSearch"
+            >
+              <font-awesome-icon
+                aria-hidden="true"
+                class="icon"
+                icon="fa-solid fa-magnifying-glass"
+              />
+            </button>
+          </div>
+          <div
+            v-if="isListSearchActive"
+            class="nav-search-field"
+            @click.stop
+          >
+            <input
+              ref="searchInputRef"
+              v-model="listSearchQuery"
+              class="nav-search-input"
+              type="search"
+              :placeholder="t('navBar.listSearch.placeholder')"
+              :aria-label="t('navBar.listSearch.placeholder')"
+              @keydown.esc.stop.prevent="closeListSearch"
+            />
+            <button
+              type="button"
+              class="nav-search-clear"
+              :aria-label="listSearchQuery ? t('navBar.listSearch.clear') : t('navBar.listSearch.close')"
+              :title="listSearchQuery ? t('navBar.listSearch.clear') : t('navBar.listSearch.close')"
+              @click.stop="handleSearchCloseButton"
+            >
+              <font-awesome-icon aria-hidden="true" icon="fa-solid fa-circle-xmark" />
+            </button>
           </div>
         </template>
 
         <template #right>
-          <button
-            v-if="appearanceSetting.isSimpleMode"
-            type="button"
-            class="icon-button-reset nav-icon-button navBar-right-icon fa-toggle"
-            :aria-label="a11yText.disableSimpleMode"
-            :title="a11yText.disableSimpleMode"
-            aria-pressed="true"
-            @click.stop="setSimpleMode(false)"
-          >
-            <font-awesome-icon aria-hidden="true" icon="fa-solid fa-toggle-on " />
-          </button>
-          <button
-            v-else
-            type="button"
-            class="icon-button-reset nav-icon-button navBar-right-icon fa-toggle"
-            :aria-label="a11yText.enableSimpleMode"
-            :title="a11yText.enableSimpleMode"
-            aria-pressed="false"
-            @click.stop="setSimpleMode(true)"
-          >
-            <font-awesome-icon aria-hidden="true" icon="fa-solid fa-toggle-off" />
-          </button>
-          <button
-            v-if="showWideScreenNarrowModeToggle"
-            type="button"
-            class="icon-button-reset nav-icon-button navBar-right-icon fa-navigation-mode"
-            :aria-label="wideScreenNarrowModeToggleTitle"
-            :title="wideScreenNarrowModeToggleTitle"
-            :aria-pressed="isWideScreenNarrowModeActive ? 'true' : 'false'"
-            @click.stop="handleWideScreenNarrowModeToggle"
-          >
-            <font-awesome-icon
-              aria-hidden="true"
-              :icon="isWideScreenNarrowModeActive ? 'fa-solid fa-mobile-screen-button' : 'fa-solid fa-desktop'"
-            />
-          </button>
-          <button
-            v-if="showListViewToggle"
-            type="button"
-            class="icon-button-reset nav-icon-button navBar-right-icon fa-list-view"
-            :class="{ 'is-disabled': isListViewModeLocked }"
-            :title="effectiveListViewMode === 'dual-column' ? a11yText.switchToSingleColumn : a11yText.switchToDualColumn"
-            :aria-label="effectiveListViewMode === 'dual-column' ? a11yText.switchToSingleColumn : a11yText.switchToDualColumn"
-            :aria-disabled="isListViewModeLocked ? 'true' : 'false'"
-            :disabled="isListViewModeLocked"
-            @click.stop="handleListViewModeToggle"
-          >
-            <font-awesome-icon
-              aria-hidden="true"
-              :icon="effectiveListViewMode === 'dual-column' ? 'fa-solid fa-table-columns' : 'fa-solid fa-list'"
-            />
-          </button>
-          <button
-            type="button"
-            ref="langSwitchTriggerRef"
-            class="icon-button-reset nav-icon-button navBar-right-icon fa-lg"
-            :aria-label="a11yText.language"
-            :title="t('navBar.langSwitcher.cellTitle')"
-            :aria-expanded="showLangSwitchPopup ? 'true' : 'false'"
-            aria-controls="nav-language-popup"
-            @click.stop="showLangSwitchPopup = true"
-          >
-            <font-awesome-icon aria-hidden="true" icon="fa-solid fa-language" />
-          </button>
+          <template v-if="!isLogsOverlayOpen">
+            <button
+              type="button"
+              ref="langSwitchTriggerRef"
+              class="icon-button-reset nav-icon-button navBar-right-button"
+              :style="{ right: navRightButtonRight.language }"
+              :aria-label="a11yText.language"
+              :title="t('navBar.langSwitcher.cellTitle')"
+              :aria-expanded="showLangSwitchPopup ? 'true' : 'false'"
+              aria-controls="nav-language-popup"
+              @click.stop="showLangSwitchPopup = true"
+            >
+              <font-awesome-icon
+                aria-hidden="true"
+                class="navBar-right-icon"
+                icon="fa-solid fa-language"
+              />
+            </button>
+            <button
+              type="button"
+              class="icon-button-reset nav-icon-button navBar-right-button"
+              :style="{ right: navRightButtonRight.simple }"
+              :aria-label="simpleModeToggleTitle"
+              :title="simpleModeToggleTitle"
+              :aria-pressed="appearanceSetting.isSimpleMode ? 'true' : 'false'"
+              @click.stop="setSimpleMode(!appearanceSetting.isSimpleMode)"
+            >
+              <font-awesome-icon
+                aria-hidden="true"
+                class="navBar-right-icon navBar-right-icon--simple"
+                :icon="appearanceSetting.isSimpleMode ? 'fa-solid fa-toggle-on' : 'fa-solid fa-toggle-off'"
+              />
+            </button>
+            <button
+              v-if="showWideScreenNarrowModeToggle"
+              type="button"
+              class="icon-button-reset nav-icon-button navBar-right-button"
+              :style="{ right: navRightButtonRight.navigation }"
+              :aria-label="wideScreenNarrowModeToggleTitle"
+              :title="wideScreenNarrowModeToggleTitle"
+              :aria-pressed="isWideScreenNarrowModeActive ? 'true' : 'false'"
+              @click.stop="handleWideScreenNarrowModeToggle"
+            >
+              <font-awesome-icon
+                aria-hidden="true"
+                class="navBar-right-icon"
+                :icon="isWideScreenNarrowModeActive ? 'fa-solid fa-mobile-screen-button' : 'fa-solid fa-desktop'"
+              />
+            </button>
+            <button
+              v-if="showListViewToggle"
+              type="button"
+              class="icon-button-reset nav-icon-button navBar-right-button"
+              :style="{ right: navRightButtonRight.list }"
+              :class="{ 'is-disabled': isListViewModeLocked }"
+              :aria-label="listViewModeToggleTitle"
+              :title="listViewModeToggleTitle"
+              :aria-pressed="effectiveListViewMode === 'dual-column' ? 'true' : 'false'"
+              :aria-disabled="isListViewModeLocked ? 'true' : 'false'"
+              :disabled="isListViewModeLocked"
+              @click.stop="handleListViewModeToggle"
+            >
+              <font-awesome-icon
+                aria-hidden="true"
+                class="navBar-right-icon"
+                :icon="effectiveListViewMode === 'dual-column' ? 'fa-solid fa-table-columns' : 'fa-solid fa-list'"
+              />
+            </button>
+            <button
+              v-if="showLogsButton"
+              type="button"
+              class="icon-button-reset nav-icon-button navBar-right-button"
+              :style="{ right: navRightButtonRight.logs }"
+              :aria-label="t('logsPage.floating.open')"
+              :title="t('logsPage.floating.open')"
+              @click.stop="openLogsOverlay"
+            >
+              <font-awesome-icon
+                aria-hidden="true"
+                class="navBar-right-icon"
+                icon="fa-solid fa-file-lines"
+              />
+            </button>
+          </template>
         </template>
       </nut-navbar>
     </nav>
@@ -154,13 +220,14 @@
         class="nav-language-option"
         :class="{ selected: lang === locale }"
         role="radio"
-        :aria-checked="lang === locale"
+        :aria-checked="lang === locale ? 'true' : 'false'"
         :ref="(el) => setLangOptionRef(lang, el)"
         @click="changeLang(lang)"
       >
         <span>{{ $t(`navBar.langSwitcher.${lang}`) }}</span>
         <font-awesome-icon
           v-if="lang === locale"
+          aria-hidden="true"
           class="fa-lg"
           icon="fa-solid fa-check"
         />
@@ -170,20 +237,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref, watch, watchEffect } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useWideScreenNarrowMode } from "@/hooks/useWideScreenNarrowMode";
-import { useGlobalStore } from "@/store/global";
 import { useListViewMode } from "@/hooks/useListViewMode";
 import { useSystemStore } from "@/store/system";
 import { useSettingsStore } from '@/store/settings';
+import { useLogsOverlayStore } from "@/store/logsOverlay";
 import { storeToRefs } from "pinia";
 import { Dialog } from "@nutui/nutui";
 import { initStores } from "@/utils/initApp";
 import { useMethodStore } from '@/store/methodStore';
 import { useAppNotifyStore } from "@/store/appNotify";
+import { useListSearchStore } from "@/store/listSearch";
 import { useA11y } from "@/hooks/useA11y";
+import { LOGS_PATH } from "@/utils/popupHistory";
 import i18n from "@/locales";
 
 const { t:i18n_global } = i18n.global;
@@ -192,16 +261,18 @@ const { t, locale } = useI18n();
 const { a11yText } = useA11y();
 const router = useRouter();
 const route = useRoute();
-const methodStore = useMethodStore()
-const globalStore = useGlobalStore();
+const methodStore = useMethodStore();
 const systemStore = useSystemStore();
+const logsOverlayStore = useLogsOverlayStore();
+const settingsStore = useSettingsStore();
+const listSearchStore = useListSearchStore();
 const showLangSwitchPopup = ref(false);
 const langList = ["zh", "en"];
 const langSwitchTriggerRef = ref<HTMLButtonElement | null>(null);
 const langOptionRefs = ref<Record<string, HTMLButtonElement | null>>({});
-const settingsStore = useSettingsStore();
 const { changeAppearanceSetting } = settingsStore;
 const { appearanceSetting } = storeToRefs(settingsStore);
+const { isOpen: isLogsOverlayOpen } = storeToRefs(logsOverlayStore);
 const {
   effectiveListViewMode,
   isListViewModeLockedBySelection,
@@ -214,44 +285,157 @@ const {
   showWideScreenNarrowModeToggle,
   toggleWideScreenNarrowMode,
 } = useWideScreenNarrowMode();
-// 从systemStore获取状态
-const { isPWA, isLandscape, isSmall } = storeToRefs(systemStore);
+const { isPWA } = storeToRefs(systemStore);
 
 onMounted(() => {
   systemStore.initSystemState();
 });
 
-// 使用systemStore中的计算属性
-const { navBarHeight, navBartop, navBartopRight, pwaTopPadding: Pwa_top } = storeToRefs(systemStore);
+const { navBarHeight, navBartop, pwaTopPadding: Pwa_top } = storeToRefs(systemStore);
+const searchInputRef = ref<HTMLInputElement | null>(null);
+
+const navActionOffset = computed(() => {
+  const navBarHeightNum = Number.parseFloat(navBarHeight.value || "56");
+  const navBarTopNum = Number.parseFloat(navBartop.value || "0");
+  return `${(navBarHeightNum + navBarTopNum) / 2}px`;
+});
 
 const isNeedBack = computed(() => {
   return route.meta.needNavBack ?? false;
 });
 
 const currentTitle = computed(() => {
+  if (isLogsOverlayOpen.value) {
+    return t("navBar.pagesTitle.logs");
+  }
+
+  if (isListSearchActive.value) {
+    return "";
+  }
+
   const metaTitle = route.meta.title;
   return metaTitle ? t(`navBar.pagesTitle.${metaTitle}`) : undefined;
 });
+
 const currentTitleWhetherAsk = computed(() => {
+  if (isLogsOverlayOpen.value || isListSearchActive.value) return "";
+
   const ownAsk = ["sync"];
   const metaTitle = route.meta.title;
   return ownAsk.includes(metaTitle) ? "ask" : "";
 });
+
+const showLogsButton = computed(() => route.path !== LOGS_PATH);
+
+const showRefreshButton = computed(() => {
+  return !isNeedBack.value && !appearanceSetting.value.showFloatingRefreshButton;
+});
+
+const showAddButton = computed(() => {
+  return ["/subs", "/sync", "/files"].includes(route.path)
+    && !appearanceSetting.value.showFloatingAddButton;
+});
+
+const showSearchButton = computed(() => {
+  return Boolean(route.meta.supportsListSearch) && !isLogsOverlayOpen.value;
+});
+
+const isListSearchActive = computed(() => {
+  return showSearchButton.value
+    && listSearchStore.isSearchOpen
+    && listSearchStore.activeRoutePath === route.path;
+});
+
+const listSearchQuery = computed({
+  get: () => listSearchStore.query,
+  set: (value: string) => {
+    listSearchStore.setQuery(value);
+  },
+});
+
+const navLeftButtonLeft = computed<Record<string, string>>(() => {
+  if (isNeedBack.value) {
+    if (route.path === "/shares") {
+      return {
+        search: appearanceSetting.value.showFloatingAddButton ? "80px" : "114px",
+      };
+    }
+
+    if (route.path === "/archives") {
+      return {
+        search: "80px",
+      };
+    }
+
+    return {
+      search: "42px",
+    };
+  }
+
+  const buttons: string[] = [];
+  if (showRefreshButton.value) {
+    buttons.push("refresh");
+  }
+  if (showAddButton.value) {
+    buttons.push("add");
+  }
+  if (showSearchButton.value) {
+    buttons.push("search");
+  }
+
+  return buttons.reduce((acc, key, index) => {
+    acc[key] = `${7 + index * 30}px`;
+    return acc;
+  }, {} as Record<string, string>);
+});
+
+watch(
+  () => route.path,
+  () => {
+    listSearchStore.syncRoute(route.path, Boolean(route.meta.supportsListSearch));
+  },
+  { immediate: true },
+);
+
+const focusSearchInput = async () => {
+  await nextTick();
+  searchInputRef.value?.focus();
+};
+
+const openListSearch = async () => {
+  listSearchStore.open(route.path);
+  await focusSearchInput();
+};
+
+const closeListSearch = () => {
+  listSearchStore.close();
+};
+
+const handleSearchCloseButton = async () => {
+  if (listSearchQuery.value) {
+    listSearchStore.setQuery("");
+    await focusSearchInput();
+    return;
+  }
+
+  closeListSearch();
+};
+
 const onClickNavbarIcon = () => {
   const metaTitle = route.meta.title;
   const content =
     t(`navBar.pagesTitle.askWhat.${metaTitle}.content`) || "";
   const title = t(`navBar.pagesTitle.askWhat.${metaTitle}.title`) || "";
-    Dialog({
-      title: title,
-      content: content,
-      popClass: 'auto-dialog',
-      textAlign: 'left',
-      okText: 'OK',
-      noCancelBtn: true,
-      closeOnPopstate: true,
-      lockScroll: false,
-    });
+  Dialog({
+    title: title,
+    content: content,
+    popClass: 'auto-dialog',
+    textAlign: 'left',
+    okText: 'OK',
+    noCancelBtn: true,
+    closeOnPopstate: true,
+    lockScroll: false,
+  });
 };
 
 const changeLang = (type: string) => {
@@ -284,6 +468,11 @@ const add = (route: any) => {
 };
 
 const back = () => {
+  if (isLogsOverlayOpen.value) {
+    logsOverlayStore.close();
+    return;
+  }
+
   if (isNeedBack.value) {
     try {
       if (router.options.history.state.back) {
@@ -296,13 +485,13 @@ const back = () => {
     }
   }
 };
+
 const setSimpleMode = (isSimpleMode: boolean) => {
-  // globalStore.setSimpleMode(isSimpleMode);
   const data = {
     ...appearanceSetting.value,
-    isSimpleMode: isSimpleMode
-  }
-  changeAppearanceSetting({ appearanceSetting: data })
+    isSimpleMode: isSimpleMode,
+  };
+  changeAppearanceSetting({ appearanceSetting: data });
 };
 
 const listViewModeToggleTitle = computed(() => {
@@ -321,8 +510,32 @@ const wideScreenNarrowModeToggleTitle = computed(() => {
     : t("navBar.navigationMode.switchToNarrow");
 });
 
-const wideScreenNarrowModeToggleRight = computed(() => {
-  return showListViewToggle.value ? "141px" : "99px";
+const simpleModeToggleTitle = computed(() => {
+  return appearanceSetting.value.isSimpleMode
+    ? t("navBar.simpleMode.switchToNormal")
+    : t("navBar.simpleMode.switchToSimple");
+});
+
+const NAV_BAR_RIGHT_BUTTON_BASE_RIGHT = 15;
+const NAV_BAR_RIGHT_BUTTON_GAP = 34;
+
+const navRightButtonRight = computed<Record<string, string>>(() => {
+  const buttons: string[] = ["language"];
+  if (showLogsButton.value) {
+    buttons.push("logs");
+  }
+  buttons.push("simple");
+  if (showWideScreenNarrowModeToggle.value) {
+    buttons.push("navigation");
+  }
+  if (showListViewToggle.value) {
+    buttons.push("list");
+  }
+
+  return buttons.reduce((acc, key, index) => {
+    acc[key] = `${NAV_BAR_RIGHT_BUTTON_BASE_RIGHT + index * NAV_BAR_RIGHT_BUTTON_GAP}px`;
+    return acc;
+  }, {} as Record<string, string>);
 });
 
 const handleListViewModeToggle = async () => {
@@ -335,6 +548,10 @@ const handleListViewModeToggle = async () => {
 
 const handleWideScreenNarrowModeToggle = async () => {
   await toggleWideScreenNarrowMode();
+};
+
+const openLogsOverlay = () => {
+  logsOverlayStore.open();
 };
 
 const refresh = async () => {
@@ -374,6 +591,10 @@ const refresh = async () => {
   z-index: 20;
   @include centered-fixed-container;
 
+  &.is-logs-overlay-open {
+    z-index: 1004;
+  }
+
   .nav-icon-button {
     cursor: pointer;
     min-width: 28px;
@@ -395,10 +616,15 @@ const refresh = async () => {
         overflow: hidden;
       }
       .nut-navbar__title {
-        min-width: 53%;
-        margin: 0 auto;
-        position: relative;
-        left: -7px;
+        position: absolute;
+        left: 50%;
+        top: v-bind(navBartop);
+        bottom: 0;
+        transform: translateX(-50%);
+        width: 53%;
+        max-width: calc(100% - 160px);
+        min-width: 0;
+        margin: 0;
         text-align: center;
         display: flex;
         justify-content: center;
@@ -408,7 +634,6 @@ const refresh = async () => {
           min-width: 20px;
           font-size: 18px;
           font-weight: 600;
-          // line-height: 100%;
           color: var(--primary-text-color);
           display: nowrap;
           -webkit-box-orient: vertical;
@@ -420,19 +645,58 @@ const refresh = async () => {
           margin-left: 5px;
         }
       }
-      .navBar-right-icon {
-        padding-top: v-bind(navBartopRight);
-        padding-right: 4px;
-        padding-bottom: 15px;
-        padding-left: 10px;
+
+      .navBar-right-button {
+        position: absolute;
+        top: v-bind(navActionOffset);
+        width: 32px;
+        height: 32px;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+        border: 0;
+        background: transparent;
         color: var(--icon-nav-bar-right);
         cursor: pointer;
-      }
-      .nav-leading-button {
+        pointer-events: auto;
+        transform: translateY(-50%);
         display: inline-flex;
         align-items: center;
         justify-content: center;
+
+        &:disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+
+        &:focus {
+          outline: none;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+          border-radius: 6px;
+        }
+
+        .navBar-right-icon {
+          width: 14px;
+          height: 14px;
+          font-size: 14px;
+          line-height: 1;
+          color: currentColor;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+
+          :deep(svg) {
+            width: 14px;
+            height: 14px;
+            font-size: 14px;
+          }
+        }
       }
+
       .icon-group {
         .navBar-left-icon {
           position: absolute;
@@ -442,31 +706,125 @@ const refresh = async () => {
           padding-top: v-bind(navBartop);
           padding-right: 0;
           padding-bottom: 0;
-          padding-left: 8px;
+          padding-left: 0;
           border: 0;
           margin: 0;
           background: transparent;
           display: flex;
           align-items: center;
-          justify-content: flex-start;
+          justify-content: center;
           color: var(--icon-nav-bar-right);
           cursor: pointer;
+          z-index: 3;
+
+          &:focus {
+            outline: none;
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+            border-radius: 6px;
+          }
 
           .icon {
             pointer-events: none;
+            width: 14px;
+            height: 14px;
+            font-size: 14px;
+          }
+
+          &.is-active {
+            color: var(--primary-color);
           }
         }
 
-        .navBar-left-icon--refresh {
+        .navBar-left-icon--refresh,
+        .navBar-left-icon--add,
+        .navBar-left-icon--search {
           left: 7px;
         }
+      }
 
-        .navBar-left-icon--add {
-          left: 37px;
+      .nav-search-field {
+        position: absolute;
+        left: 50%;
+        top: v-bind(navBartop);
+        bottom: 0;
+        width: calc(100% - 220px);
+        max-width: 53%;
+        min-width: 96px;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        z-index: 4;
+      }
 
-          &:only-child {
-            left: 7px;
-          }
+      .nav-search-input {
+        width: 100%;
+        min-width: 0;
+        height: 32px;
+        box-sizing: border-box;
+        border: 1px solid var(--divider-color);
+        border-radius: var(--item-card-radios);
+        background: var(--card-color);
+        color: var(--primary-text-color);
+        padding: 0 30px 0 10px;
+        font-size: 14px;
+        line-height: 32px;
+        outline: none;
+
+        &::placeholder {
+          color: var(--comment-text-color);
+        }
+
+        &::-webkit-search-cancel-button,
+        &::-webkit-search-decoration {
+          -webkit-appearance: none;
+          appearance: none;
+          display: none;
+        }
+
+        &:focus {
+          border-color: var(--primary-color);
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
+      }
+
+      .nav-search-clear {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border: 0;
+        margin: 0;
+        background: transparent;
+        color: var(--comment-text-color);
+        transform: translateY(-50%);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        &:focus {
+          outline: none;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+          border-radius: 50%;
+        }
+
+        svg {
+          width: 13px;
+          height: 13px;
         }
       }
       .fa-plus {
@@ -475,39 +833,8 @@ const refresh = async () => {
       .fa-arrow-rotate-right {
         color: currentColor;
       }
-      .fa-lg {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-      }
-
-      .fa-toggle {
-        position: absolute;
-        right: 58px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
-      .fa-navigation-mode {
-        position: absolute;
-        right: v-bind(wideScreenNarrowModeToggleRight);
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
-      .fa-list-view {
-        position: absolute;
-        right: 99px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--icon-nav-bar-right);
-
-        &.is-disabled {
-          opacity: 0.35;
-          cursor: not-allowed;
-        }
+      .is-disabled {
+        opacity: 0.35;
       }
 
       button:disabled {
@@ -515,6 +842,61 @@ const refresh = async () => {
       }
     }
   }
+}
+
+.nav-leading-button {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 10px;
+  width: 32px;
+  padding: 0;
+  padding-top: v-bind(navBartop);
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  border: 0;
+  margin: 0;
+  background: transparent;
+  color: var(--icon-nav-bar-right);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+.nav-leading-spacer {
+  cursor: default;
+  pointer-events: none;
+}
+
+.nav-leading-placeholder {
+  width: 32px;
+  height: 32px;
+}
+
+.icon-back-icon {
+  font-size: 14px;
+  color: var(--icon-nav-bar-right);
+}
+
+.icon-null::before {
+  content: "\2003";
 }
 
 .nav-language-switch-popup {
@@ -553,14 +935,5 @@ const refresh = async () => {
     display: flex;
     align-items: center;
   }
-}
-
-.icon-back::before {
-  color: var(--icon-nav-bar-right);
-  content: "\e6c9";
-}
-
-.icon-null::before {
-  content: "\2003";
 }
 </style>

@@ -13,6 +13,10 @@ const LIST_PAGE_VIEW_MODE_STORAGE_KEY = "appearanceSetting.listPageViewMode";
 const NARROW_MODE_LIST_PAGE_VIEW_MODE_STORAGE_KEY = "appearanceSetting.listPageViewModeInWideScreenNarrowMode";
 const WIDE_SCREEN_NARROW_MODE_STORAGE_KEY = "appearanceSetting.useNarrowModeOnWideScreen";
 
+const normalizeSettingInputValue = (value: unknown) => {
+  return value === null || value === undefined ? "" : String(value);
+};
+
 const getCachedListPageViewMode = (storageKey: string): ListPageViewMode | undefined => {
   const cachedMode = localStorage.getItem(storageKey);
   if (cachedMode === "single-column" || cachedMode === "dual-column") {
@@ -35,13 +39,15 @@ const getCachedWideScreenNarrowMode = () => {
 };
 
 const defaultAppearanceSetting: SettingsStoreState["appearanceSetting"] = {
-  isSimpleMode: false,
+  isSimpleMode: true,
   isLeftRight: false,
   isDefaultIcon: false,
   isIconColor: false,
   isShowIcon: true,
   isSimpleShowRemark: false,
   isEditorCommon: true,
+  editorCommonDisplayMode: "collapsed",
+  manualSubscriptionsDisplayMode: "collapsed",
   isSimpleReicon: false,
   isSubItemMenuFold: true,
   showFloatingRefreshButton: false,
@@ -63,6 +69,38 @@ const getBooleanAppearanceSetting = (
   value: unknown,
   fallback: boolean
 ): boolean => (typeof value === "boolean" ? value : fallback);
+
+const isEditorCommonDisplayMode = (value: unknown): value is EditorCommonDisplayMode => {
+  return value === "expanded" || value === "collapsed" || value === "hidden";
+};
+
+const isEditorSectionFoldMode = (value: unknown): value is EditorSectionFoldMode => {
+  return value === "expanded" || value === "collapsed";
+};
+
+const normalizeEditorCommonDisplayMode = (
+  appearanceSetting?: SettingsPostData["appearanceSetting"],
+): EditorCommonDisplayMode => {
+  if (isEditorCommonDisplayMode(appearanceSetting?.editorCommonDisplayMode)) {
+    return appearanceSetting.editorCommonDisplayMode;
+  }
+
+  if (typeof appearanceSetting?.isEditorCommon === "boolean") {
+    return appearanceSetting.isEditorCommon ? "expanded" : "hidden";
+  }
+
+  return defaultAppearanceSetting.editorCommonDisplayMode;
+};
+
+const normalizeManualSubscriptionsDisplayMode = (
+  appearanceSetting?: SettingsPostData["appearanceSetting"],
+): EditorSectionFoldMode => {
+  if (isEditorSectionFoldMode(appearanceSetting?.manualSubscriptionsDisplayMode)) {
+    return appearanceSetting.manualSubscriptionsDisplayMode;
+  }
+
+  return defaultAppearanceSetting.manualSubscriptionsDisplayMode;
+};
 
 const normalizeAppearanceSetting = (
   appearanceSetting?: Partial<SettingsStoreState["appearanceSetting"]>
@@ -93,10 +131,9 @@ const normalizeAppearanceSetting = (
     appearanceSetting?.isSimpleShowRemark,
     defaultAppearanceSetting.isSimpleShowRemark
   ),
-  isEditorCommon: getBooleanAppearanceSetting(
-    appearanceSetting?.isEditorCommon,
-    defaultAppearanceSetting.isEditorCommon
-  ),
+  isEditorCommon: normalizeEditorCommonDisplayMode(appearanceSetting) !== "hidden",
+  editorCommonDisplayMode: normalizeEditorCommonDisplayMode(appearanceSetting),
+  manualSubscriptionsDisplayMode: normalizeManualSubscriptionsDisplayMode(appearanceSetting),
   isSimpleReicon: getBooleanAppearanceSetting(
     appearanceSetting?.isSimpleReicon,
     defaultAppearanceSetting.isSimpleReicon
@@ -153,12 +190,14 @@ export const useSettingsStore = defineStore("settingsStore", {
       githubProxyRegex: "",
       githubUser: "",
       defaultUserAgent: "",
+      defaultFlowUserAgent: "",
       defaultProxy: "",
       defaultTimeout: "",
       cacheThreshold: "",
       resourceCacheTtl: "",
       headersCacheTtl: "",
       scriptCacheTtl: "",
+      logsMaxCount: "",
       syncTime: 0,
       theme: {
         auto: true,
@@ -207,8 +246,13 @@ export const useSettingsStore = defineStore("settingsStore", {
         this.githubUser = res.data.data.githubUser || "";
         this.defaultProxy = res.data.data.defaultProxy || "";
         this.defaultUserAgent = res.data.data.defaultUserAgent || "";
+        this.defaultFlowUserAgent = res.data.data.defaultFlowUserAgent || "";
         this.defaultTimeout = res.data.data.defaultTimeout || "";
         this.cacheThreshold = res.data.data.cacheThreshold || "";
+        this.resourceCacheTtl = res.data.data.resourceCacheTtl || "";
+        this.headersCacheTtl = res.data.data.headersCacheTtl || "";
+        this.scriptCacheTtl = res.data.data.scriptCacheTtl || "";
+        this.logsMaxCount = normalizeSettingInputValue(res.data.data.logsMaxCount);
         this.syncTime = res.data.data.syncTime || 0;
         this.avatarUrl = res.data.data.avatarUrl || "";
         this.artifactStore = res.data.data.artifactStore || "";
@@ -239,11 +283,13 @@ export const useSettingsStore = defineStore("settingsStore", {
         this.githubUser = res.data.data.githubUser || "";
         this.defaultProxy = res.data.data.defaultProxy || "";
         this.defaultUserAgent = res.data.data.defaultUserAgent || "";
+        this.defaultFlowUserAgent = res.data.data.defaultFlowUserAgent || "";
         this.defaultTimeout = res.data.data.defaultTimeout || "";
         this.cacheThreshold = res.data.data.cacheThreshold || "";
         this.resourceCacheTtl = res.data.data.resourceCacheTtl || "";
         this.headersCacheTtl = res.data.data.headersCacheTtl || "";
         this.scriptCacheTtl = res.data.data.scriptCacheTtl || "";
+        this.logsMaxCount = normalizeSettingInputValue(res.data.data.logsMaxCount);
         this.avatarUrl = res.data.data.avatarUrl || "";
         this.artifactStore = res.data.data.artifactStore || "";
         this.artifactStoreStatus = res.data.data.artifactStoreStatus || "";
@@ -274,12 +320,18 @@ export const useSettingsStore = defineStore("settingsStore", {
         subProgressStyle,
         gistUpload,
       } = globalStore;
+      const hasLocalEditorCommonSetting = localStorage.getItem('iseditorCommon') !== null;
+      const editorCommonDisplayMode = hasLocalEditorCommonSetting
+        ? (isEditorCommon ? "expanded" : "hidden")
+        : "collapsed";
       const data = {
         isSimpleMode: isSimpleMode ?? false,
         isLeftRight: isLeftRight ?? false,
         isIconColor: isIconColor ?? false,
         isDefaultIcon: isDefaultIcon ?? false,
-        isEditorCommon: isEditorCommon ?? true,
+        isEditorCommon: editorCommonDisplayMode !== "hidden",
+        editorCommonDisplayMode,
+        manualSubscriptionsDisplayMode: "collapsed",
         isSimpleReicon: isSimpleReicon ?? false,
         showFloatingRefreshButton: showFloatingRefreshButton ?? false,
         istabBar: istabBar ?? false,
@@ -291,7 +343,7 @@ export const useSettingsStore = defineStore("settingsStore", {
       // 判断是否有本地持久化的外观设置
       const hasLocalAppearanceSetting = list.some((key) => {
         return localStorage.getItem(key) !== null
-      })
+      }) || hasLocalEditorCommonSetting;
       // 如果有本地持久化的外观设置，则将其同步到后端
       if (hasLocalAppearanceSetting) {
         await this.changeAppearanceSetting({ appearanceSetting: data });
@@ -306,6 +358,8 @@ export const useSettingsStore = defineStore("settingsStore", {
       globalStore.setIconColor(false);
       globalStore.setIsDefaultIcon(false);
       globalStore.setEditorCommon(false);
+      localStorage.removeItem('iseditorCommon');
+      globalStore.isEditorCommon = true;
       globalStore.setSimpleReicon(false);
       globalStore.setShowFloatingRefreshButton(false);
       globalStore.settabBar(false);

@@ -32,7 +32,7 @@
           class="api-list-button"
           :aria-pressed="currentName === ''"
           :title="$t(`apiSettingPage.apiList.defaultName`)"
-          @click="setCurrent('')"
+          @click="handleSwitchClick('')"
         >
           <div class="api-list-item">
             <div class="api-item-left">
@@ -55,11 +55,12 @@
       >
         <div class="api-list-item">
           <button
+            v-if="editingApiName !== api.name"
             type="button"
             class="api-list-button api-list-button--with-actions"
             :aria-pressed="currentName === api.name"
             :title="api.name"
-            @click="setCurrent(api.name)"
+            @click="handleSwitchClick(api.name)"
           >
             <div class="api-item-left">
               <h2>
@@ -71,25 +72,77 @@
               <p>{{ `${api.url.slice(0, 20)}******` }}</p>
             </div>
           </button>
+          <div
+            v-else
+            class="api-list-button api-list-button--with-actions api-list-button--static"
+          >
+            <div class="api-item-left">
+              <h2>
+                <input
+                  v-model="editApiNameInput"
+                  class="api-name-input"
+                  type="text"
+                  :aria-label="getApiActionLabel('edit', api.name)"
+                  :title="getApiActionLabel('edit', api.name)"
+                  @keyup.enter.stop="saveApiName(api)"
+                >
+                <nut-tag v-if="currentName === api.name" type="primary" plain>
+                  {{ $t(`apiSettingPage.apiList.currentTag`) }}
+                </nut-tag>
+              </h2>
+              <p>{{ `${api.url.slice(0, 20)}******` }}</p>
+            </div>
+          </div>
           <div class="api-item-right">
-            <button
-              type="button"
-              class="api-action-button icon-button-reset copy-icon"
-              :aria-label="getApiActionLabel('copy', api.name)"
-              :title="getApiActionLabel('copy', api.name)"
-              @click.stop="copyApi(api)"
-            >
-              <font-awesome-icon icon="fa-solid fa-clone" />
-            </button>
-            <button
-              type="button"
-              class="api-action-button icon-button-reset"
-              :aria-label="getApiActionLabel('delete', api.name)"
-              :title="getApiActionLabel('delete', api.name)"
-              @click.stop="deleteApi(api.name)"
-            >
-              <font-awesome-icon icon="fa-solid fa-xmark" />
-            </button>
+            <template v-if="editingApiName === api.name">
+              <button
+                type="button"
+                class="api-action-button icon-button-reset"
+                :aria-label="getApiActionLabel('save', api.name)"
+                :title="getApiActionLabel('save', api.name)"
+                @click.stop="saveApiName(api)"
+              >
+                <font-awesome-icon icon="fa-solid fa-floppy-disk" />
+              </button>
+              <button
+                type="button"
+                class="api-action-button icon-button-reset"
+                :aria-label="getApiActionLabel('cancel', api.name)"
+                :title="getApiActionLabel('cancel', api.name)"
+                @click.stop="cancelEditApiName"
+              >
+                <font-awesome-icon icon="fa-solid fa-ban" />
+              </button>
+            </template>
+            <template v-else>
+              <button
+                type="button"
+                class="api-action-button icon-button-reset copy-icon"
+                :aria-label="getApiActionLabel('copy', api.name)"
+                :title="getApiActionLabel('copy', api.name)"
+                @click.stop="copyApi(api)"
+              >
+                <font-awesome-icon icon="fa-solid fa-clone" />
+              </button>
+              <button
+                type="button"
+                class="api-action-button icon-button-reset"
+                :aria-label="getApiActionLabel('edit', api.name)"
+                :title="getApiActionLabel('edit', api.name)"
+                @click.stop="startEditApiName(api)"
+              >
+                <font-awesome-icon icon="fa-solid fa-pen-nib" />
+              </button>
+              <button
+                type="button"
+                class="api-action-button icon-button-reset"
+                :aria-label="getApiActionLabel('delete', api.name)"
+                :title="getApiActionLabel('delete', api.name)"
+                @click.stop="deleteApi(api.name)"
+              >
+                <font-awesome-icon icon="fa-solid fa-xmark" />
+              </button>
+            </template>
           </div>
         </div>
       </div>
@@ -172,7 +225,7 @@
       <p>
         4.
         <a
-          href="https://t.me/zhetengsha/1068"
+          href="https://t.me/zhetengsha/218"
           target="_blank"
           rel="noreferrer noopener"
         >{{ $t('magicPath.troubleshooting') }}</a>
@@ -206,7 +259,7 @@ const { getA11yText } = useA11y();
 const { icon, env, isEnvReady } = useBackend();
 const settingsStore = useSettingsStore();
 const { githubProxy, githubProxyRegex } = storeToRefs(settingsStore);
-const { defaultAPI, currentName, apis, setCurrent, addApi, deleteApi }
+const { defaultAPI, currentName, apis, setCurrent, addApi, editApiName: updateApiName, deleteApi }
     = useHostAPI();
 const githubUrlRewriter = computed(() => {
   return createGithubProxyUrlRewriter(githubProxy.value, githubProxyRegex.value);
@@ -219,8 +272,13 @@ const backendIcon = computed(() => {
 const addApiLabel = computed(() =>
   locale.value.startsWith('zh') ? '添加 API' : 'Add API',
 );
-const getApiActionLabel = (action: 'copy' | 'delete', name: string) => {
-  return `${getA11yText(action)} API ${name}`;
+const getApiActionLabel = (action: 'copy' | 'delete' | 'edit' | 'save' | 'cancel', name: string) => {
+  const actionText = action === 'save'
+    ? t(`apiSettingPage.apiList.saveName`)
+    : action === 'cancel'
+      ? t(`apiSettingPage.apiList.cancelEditName`)
+      : getA11yText(action);
+  return `${actionText} API ${name}`;
 };
 
 const addForm = ref<HostAPI>({
@@ -229,10 +287,13 @@ const addForm = ref<HostAPI>({
 });
 const addApiNameInputRef = ref();
 const addApiUrlInputRef = ref();
+const editingApiName = ref('');
+const editApiNameInput = ref('');
 
 
 const error = ref('');
 const checkingAPI = ref(false);
+const switchingAPI = ref(false);
 
 
 const inputType = ref('path');
@@ -252,6 +313,57 @@ const updateAddApiInputA11y = async () => {
     label: addApiUrlLabel.value,
     invalid: !!error.value,
   });
+};
+
+const copyApi = async (api: HostAPI) => {
+  const url = `${window.location.origin}?api=${encodeURIComponent(api.url)}`;
+  if (isSupported) {
+    await copy(url);
+  } else {
+    await copyFallback(url);
+  }
+  showNotify({ title: url });
+};
+
+const startEditApiName = (api: HostAPI) => {
+  editingApiName.value = api.name;
+  editApiNameInput.value = api.name;
+};
+
+const cancelEditApiName = () => {
+  editingApiName.value = '';
+  editApiNameInput.value = '';
+};
+
+const saveApiName = async (api: HostAPI) => {
+  const nextName = editApiNameInput.value.trim();
+
+  if (!nextName) {
+    showNotify({
+      title: t('apiSettingPage.addApi.errors.nameEmpty'),
+      type: 'danger',
+    });
+    return;
+  }
+
+  if (nextName === api.name) {
+    cancelEditApiName();
+    return;
+  }
+
+  if (apis.value.some(item => item.url !== api.url && item.name === nextName)) {
+    showNotify({
+      title: t('apiSettingPage.addApi.errors.nameDuplicate'),
+      type: 'danger',
+    });
+    return;
+  }
+
+  const result = await updateApiName({ name: nextName, url: api.url });
+  if (result) {
+    cancelEditApiName();
+    showNotify({ title: t('magicPath.success'), type: 'success' });
+  }
 };
 
 // 验证输入
@@ -324,76 +436,150 @@ const addApiHandler = async () => {
     });
     return;
   }
+  // 使用解析后的完整URL（host:port 类型会被 previewUrl 补全为 http://...）
+  const addFormUrl = previewUrl.value || (addForm.value.url && addForm.value.url.trim());
+  const addFormName = addForm.value.name && addForm.value.name.trim();
+  // 默认API地址
+  const defaultApiUrl = defaultAPI && defaultAPI.trim();
+  
+  // 如果输入的地址与默认API地址不同，且不为空，则进行重复检查
+  if (addFormUrl && addFormUrl !== defaultApiUrl) {
+    const existingApi = apis.value.find(api => api.url === addFormUrl);
+    // 如果存在相同地址的API，提示用户选择是切换还是覆盖
+    if (existingApi) {
+      Dialog({
+        title: t('apiSettingPage.addApi.duplicate.title'),
+        content: t('apiSettingPage.addApi.duplicate.content', { name: existingApi.name }),
+        onOk: async () => {
+          checkingAPI.value = true;
+          try {
+            const ok = await checkApiConnectivity(existingApi.url);
+            if (ok) {
+              setCurrent(existingApi.name);
+              await resetAddForm();
+              showNotify({ title: t('magicPath.success'), type: 'success' });
+            }
+          } finally {
+            checkingAPI.value = false;
+          }
+        },
+        onCancel: async () => {
+          await setApi({ name: addFormName, url: addFormUrl, isEditName: true });
+        },
+        popClass: "auto-dialog",
+        noCancelBtn: false,
+        okText: t('apiSettingPage.addApi.duplicate.confirm'),
+        cancelText: t('apiSettingPage.addApi.duplicate.cancel'),
+        closeOnClickOverlay: true,
+        lockScroll: false,
+      });
+      return;
+    }
+  }
+  // 如果没有重复，直接添加
+  await setApi({ name: addFormName, url: addFormUrl });
+};
 
+// 检查API连通性，成功返回 true，失败自动 showNotify 并返回 false
+const checkApiConnectivity = async (url: string): Promise<boolean> => {
+  try {
+    const res = await axios.get(`${url}/api/utils/env`);
+    if (res?.data?.status !== 'success') {
+      showNotify({ title: t('magicPath.errors.invalid'), type: 'danger' });
+      return false;
+    }
+    return true;
+  } catch (e) {
+    showNotify({ title: t('magicPath.errors.connection'), type: 'danger' });
+    return false;
+  }
+};
+
+// 切换前先检查连通性再调用 setCurrent（使用独立 switchingAPI 避免影响表单 loading 状态）
+const switchToApi = async (name: string) => {
+  if (switchingAPI.value) return;
+  if (name === currentName.value) return;
+
+  const rawUrl = name === ''
+    ? defaultAPI
+    : apis.value.find(api => api.name === name)?.url;
+  if (!rawUrl) {
+    setCurrent(name);
+    return;
+  }
+  // 补全协议头：纯 host:port 格式需要加 http://
+  const url = /^\d+\.\d+\.\d+\.\d+:\d+/.test(rawUrl) || /^localhost:\d+/.test(rawUrl)
+    ? `http://${rawUrl}`
+    : rawUrl;
+  switchingAPI.value = true;
+  Toast.loading(t('apiSettingPage.switchApi.loading'), {
+    cover: true,
+    id: 'switch-api-loading',
+    duration: 0
+  });
+  try {
+    const ok = await checkApiConnectivity(url);
+    if (ok) {
+      setCurrent(name);
+      showNotify({ title: t('magicPath.success'), type: 'success' });
+    }
+  } finally {
+    Toast.hide('switch-api-loading');
+    switchingAPI.value = false;
+  }
+};
+
+const handleSwitchClick = async (name: string) => {
+  if (switchingAPI.value) return;
+  await switchToApi(name);
+};
+
+const setApi = async ({ name = '', url = '', isEditName = false }) => {
+  // 开始检查后端API连接状态
   checkingAPI.value = true;
 
   try {
-
-    const apiUrl = previewUrl.value;
-
+    const apiUrl = url;
+    const apiName = name;
     if (!apiUrl) {
       error.value = t('magicPath.errors.empty');
       return;
     }
-
-
-    try {
-      const res = await axios.get(`${apiUrl}/api/utils/env`);
-      if (res?.data?.status !== 'success') {
-        error.value = t('magicPath.errors.invalid');
-        showNotify({
-          title: error.value,
-          type: 'danger'
-        });
-        return;
-      }
-
-
-      const result = await addApi({ name: addForm.value.name, url: apiUrl });
-
-      if (result) {
-        setCurrent(addForm.value.name);
-
-        showNotify({
-          title: t('magicPath.success'),
-          type: 'success'
-        });
-
-
-        addForm.value = {
-          name: '',
-          url: '',
-        };
-        error.value = '';
-      }
-    } catch (e) {
+    const ok = await checkApiConnectivity(apiUrl);
+    if (!ok) {
       error.value = t('magicPath.errors.connection');
-      showNotify({
-        title: t('magicPath.errors.connection'),
-        type: 'danger'
-      });
+      return;
+    }
+
+    let result = null;
+    if (isEditName) {
+      result = await updateApiName({ name: apiName, url: apiUrl });
+    } else {
+      // 已通过 checkApiConnectivity 验证，跳过 addApi 内部的重复检查
+      result = await addApi({ name: apiName, url: apiUrl }, true);
+    }
+    console.log('result', result);
+    if (result) {
+      setCurrent(apiName);
+      showNotify({ title: t('magicPath.success'), type: 'success' });
+      addForm.value = { name: '', url: '' };
+      error.value = '';
     }
   } catch (e) {
     error.value = t('magicPath.errors.unknown');
-    showNotify({
-      title: t('magicPath.errors.unknown'),
-      type: 'danger'
-    });
+    showNotify({ title: t('magicPath.errors.unknown'), type: 'danger' });
   } finally {
     checkingAPI.value = false;
   }
 };
 
-const copyApi = async (api: HostAPI) => {
-  const url = `${window.location.origin}?api=${encodeURIComponent(api.url)}`;
-  if (isSupported) {
-    await copy(url);
-  } else {
-    await copyFallback(url);
-  }
-  showNotify({ title: url });
+const resetAddForm = async () => {
+  addForm.value = {
+    name: '',
+    url: '',
+  };
+  error.value = '';
 };
-
 
 watchEffect(() => {
   const input = addForm.value.url.trim();
@@ -454,7 +640,7 @@ onMounted(() => {
 
   }
   Dialog({
-    title: '后端设置',
+    title: '后端管理',
     content: `请仔细阅读页面底部的说明\n\n该写的都写了`,
     onCancel: () => {
       localStorage.setItem('api-desc-read', '1')
@@ -540,6 +726,7 @@ watch(
         display: flex;
         flex-direction: column;
         gap: 4px;
+        flex: 1;
         min-width: 0;
 
         :deep(.nut-tag) {
@@ -557,6 +744,16 @@ watch(
           color: var(--second-text-color);
         }
 
+        .api-name-input {
+          width: 160px;
+          min-width: 0;
+          padding: 0;
+          background: transparent;
+          color: var(--second-text-color);
+          font-size: 16px;
+          font-weight: bold;
+        }
+
         > p {
           font-size: 12px;
           color: var(--comment-text-color);
@@ -567,11 +764,23 @@ watch(
       .api-item-right {
         display: flex;
         align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
         font-size: 20px;
         color: var(--comment-text-color);
 
         .api-action-button {
+          width: 28px;
+          height: 28px;
+          padding: 0;
+          border-radius: 6px;
           color: inherit;
+
+          &:hover,
+          &:focus-visible {
+            background: var(--card-color);
+            color: var(--primary-color);
+          }
         }
 
         .copy-icon {
@@ -722,5 +931,6 @@ watch(
         color: var(--primary-color);
       }
     }
+
   }
 </style>

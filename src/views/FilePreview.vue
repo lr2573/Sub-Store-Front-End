@@ -5,7 +5,7 @@
       :class="{ 'compare-page-wrapper-overlay': !url }"
       :style="{ height: url ? 'calc(100vh - 80px)' : '100vh' }"
     >
-      <header class="compare-page-header">
+      <header class="compare-page-header" :class="{ 'preview-popup-header': !url }">
         <template v-if="url">
           <h1>
             <button
@@ -15,8 +15,8 @@
               :title="copyUrlLabel"
               @click="copyUrl"
             >
-              <font-awesome-icon class="copy" icon="fa-solid fa-clone" />
-              <span class="titleText">Click to copy for external use:</span>
+              <font-awesome-icon class="copy" icon="fa-solid fa-clone" aria-hidden="true" />
+              <span class="titleText">{{ copyUrlHint }}</span>
             </button>
             <span class="displayName">
               <a class="url" :href="url" target="_blank" rel="noreferrer noopener">{{ url }}</a>
@@ -24,15 +24,16 @@
           </h1>
         </template>
         <template v-else>
-          <h1>
-            <font-awesome-icon icon="fa-solid fa-eye" />
-            <span class="title">{{ $t(`comparePage.title`) }}</span>
-            <span class="displayName">
-              <font-awesome-icon icon="fa-solid fa-angles-right" />
-              <span class="displayNameText">{{ displayName }}</span>
-            </span>
-          </h1>
-          <div class="btn-groups">
+          <div class="btn-groups preview-leading">
+            <button
+              type="button"
+              class="btn close"
+              :aria-label="closeLabel"
+              :title="closeLabel"
+              @click="clickClose"
+            >
+              <font-awesome-icon icon="fa-solid fa-xmark" aria-hidden="true" />
+            </button>
             <button
               v-if="showRefresh"
               type="button"
@@ -41,16 +42,19 @@
               :title="refreshLabel"
               @click="emit('refresh')"
             >
-              <font-awesome-icon icon="fa-solid fa-arrows-rotate" />
+              <font-awesome-icon icon="fa-solid fa-arrows-rotate" aria-hidden="true" />
             </button>
+          </div>
+          <h1 class="preview-popup-title" :title="displayName">{{ $t(`comparePage.title`) }}</h1>
+          <div class="btn-groups preview-trailing">
             <button
               type="button"
-              class="btn close"
-              :aria-label="closeLabel"
-              :title="closeLabel"
-              @click="clickClose"
+              class="btn logs"
+              :aria-label="t('logsPage.floating.open')"
+              :title="t('logsPage.floating.open')"
+              @click.stop="openLogsOverlay"
             >
-              <font-awesome-icon icon="fa-solid fa-circle-xmark" />
+              <font-awesome-icon icon="fa-solid fa-file-lines" aria-hidden="true" />
             </button>
           </div>
         </template>
@@ -70,16 +74,18 @@ import { useRoute } from "vue-router";
 
 import { useAppNotifyStore } from "@/store/appNotify";
 import { useCodeStore } from "@/store/codeStore";
+import { useLogsOverlayStore } from "@/store/logsOverlay";
 import { useSubsStore } from "@/store/subs";
 import cmView from "@/views/editCode/cmView.vue";
 
 const cmStore = useCodeStore();
+const logsOverlayStore = useLogsOverlayStore();
 const subsStore = useSubsStore();
 const route = useRoute();
 const { copy, isSupported } = useClipboard();
 const { toClipboard: copyFallback } = useV3Clipboard();
 const { showNotify } = useAppNotifyStore();
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 
 const props = defineProps<{
   previewData: any;
@@ -94,6 +100,9 @@ const processedData = ref("");
 const showRefresh = computed(() => props.showRefresh !== false);
 const copyUrlLabel = computed(() =>
   locale.value.startsWith("zh") ? "复制预览链接" : "Copy preview URL",
+);
+const copyUrlHint = computed(() =>
+  locale.value.startsWith("zh") ? "点击复制，在外部资源中使用：" : "Click to copy for external use:",
 );
 const refreshLabel = computed(() =>
   locale.value.startsWith("zh") ? "刷新预览内容" : "Refresh preview content",
@@ -155,6 +164,10 @@ const clickClose = () => {
   emit("closePreview");
 };
 
+const openLogsOverlay = () => {
+  logsOverlayStore.open();
+};
+
 const copyUrl = async () => {
   if (!url.value) return;
   if (isSupported) {
@@ -189,6 +202,18 @@ const copyUrl = async () => {
 .name-wrapper {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+
+  > div {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
 }
 
 .compare-table-body {
@@ -225,6 +250,7 @@ const copyUrl = async () => {
     display: flex;
     justify-content: center;
     align-items: center;
+    min-width: 0;
   }
 
   li:first-child,
@@ -251,6 +277,8 @@ const copyUrl = async () => {
 .original-item {
   display: flex;
   align-items: center;
+  width: 100%;
+  min-width: 0;
 
   &::before {
     content: "";
@@ -260,6 +288,7 @@ const copyUrl = async () => {
     border-radius: 50%;
     margin-right: 10px;
     background: var(--primary-color);
+    flex-shrink: 0;
   }
 }
 
@@ -269,7 +298,6 @@ const copyUrl = async () => {
 
 .processed-item::before {
   background: var(--third-color);
-  flex-shrink: 0;
 }
 
 .block-wrapper {
@@ -317,6 +345,12 @@ const copyUrl = async () => {
   background: var(--background-color);
   border-color: var(--divider-color);
   width: 100%;
+
+  &.preview-popup-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+  }
 
   .title {
     display: inline-flex;
@@ -426,6 +460,57 @@ const copyUrl = async () => {
     flex-shrink: 0;
     gap: 10px;
   }
+}
+
+.compare-page-header button:focus-visible,
+.compare-page-header a:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.compare-page-header .preview-leading {
+  gap: 0;
+  justify-content: flex-start;
+}
+
+.compare-page-header .preview-trailing {
+  grid-column: 3;
+  justify-self: end;
+  gap: 0;
+  justify-content: flex-end;
+}
+
+.compare-page-header .preview-leading button,
+.compare-page-header .preview-trailing button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--icon-nav-bar-right);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  :deep(svg) {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
+.compare-page-header .preview-popup-title {
+  grid-column: 2;
+  justify-self: center;
+  display: block;
+  flex: none;
+  margin: 0;
+  min-width: 20px;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--primary-text-color);
+  text-align: center;
+  overflow: hidden;
 }
 
 .compare-page-wrapper {

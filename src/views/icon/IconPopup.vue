@@ -494,6 +494,7 @@ defineExpose({ show, hide, close });
         justify-content: flex-end;
         padding-bottom: 10px;
         color: inherit;
+        cursor: pointer;
         span {
           font-size: 14px;
           color: var(--comment-text-color);

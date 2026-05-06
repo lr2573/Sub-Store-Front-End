@@ -263,14 +263,14 @@
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>
           <p>{{ $t(`subPage.loadFailed.desc`) }}</p>
-          <p>{{ $t(`subPage.loadFailed.followOfficialChannel`) }}</p>
+          <a href="https://t.me/zhetengsha/218" style="color: var(--primary-color)"> {{ $t(`magicPath.troubleshooting`) }}</a>
           <p>
-            {{ $t(`subPage.loadFailed.officialChannel`) }}
+            
             <a
-              href="https://t.me/cool_scripts"
+              href="/aboutUs"
               style="color: var(--primary-color)"
             >
-              Cool Scripts
+              {{ $t(`subPage.loadFailed.about`) }}
             </a>
           </p>
         </template>
@@ -283,14 +283,14 @@
         <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
         {{ $t(`subPage.loadFailed.btn`) }}
       </button>
-      <a
+      <!-- <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
         rel="noreferrer noopener"
       >
         <span>{{ $t(`subPage.loadFailed.doc`) }}</span>
         <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
-      </a>
+      </a> -->
     </div>
   </div>
 </template>
@@ -314,11 +314,13 @@ import { useTagBarHeight } from "@/hooks/useTagBarHeight";
 import { useAppNotifyStore } from "@/store/appNotify";
 import { useGlobalStore } from "@/store/global";
 import { useSystemStore } from "@/store/system";
+import { useListSearchStore } from "@/store/listSearch";
 import { useMethodStore } from '@/store/methodStore';
 import { useSettingsStore } from '@/store/settings';
 import { useSubsStore } from "@/store/subs";
 import { getShareCreatePath } from "@/utils/share";
 import { initStores } from "@/utils/initApp";
+import { listItemMatchesSearch, shouldSearchListRemark } from "@/utils/listSearch";
 import { isMobile } from "@/utils/isMobile";
 const { env } = useBackend();
 const { showNotify } = useAppNotifyStore();
@@ -339,6 +341,7 @@ const subsStore = useSubsStore();
 const globalStore = useGlobalStore();
 const systemStore = useSystemStore();
 const settingsStore = useSettingsStore();
+const listSearchStore = useListSearchStore();
 const router = useRouter();
 const { hasSubs, hasCollections, subs, collections } = storeToRefs(subsStore);
 const { appearanceSetting } = storeToRefs(settingsStore);
@@ -415,16 +418,10 @@ const handleShare = (element, type) => {
   router.push(getShareCreatePath(shareType, element.name));
 };
 const filterdSubsCount = computed(() => {
-  if(tag.value === 'all') return subs.value.length;
-  if(tag.value === 'untagged') return subs.value.filter(i => !Array.isArray(i.tag) || i.tag.length === 0).length;
-  if(tag.value === 'remote') return subs.value.filter(i => i.source === "remote").length;
-  if(tag.value === 'local') return subs.value.filter(i => i.source === "local").length;
-  return subs.value.filter(i => i.tag.includes(tag.value)).length;
+  return subs.value.filter(shouldShowElement).length;
 });
 const filterdColsCount = computed(() => {
-  if(tag.value === 'all') return collections.value.length;
-  if(tag.value === 'untagged') return collections.value.filter(i => !Array.isArray(i.tag) || i.tag.length === 0).length;
-  return collections.value.filter(i => i.tag.includes(tag.value)).length;
+  return collections.value.filter(shouldShowElement).length;
 });
 const onTouchStart = (event: TouchEvent) => {
   touchStartY.value = Math.abs(event.touches[0].clientY);
@@ -588,12 +585,18 @@ const setTag = (current) => {
   scrollToTop();
 };
 
-const shouldShowElement = (element) => {
+const shouldShowElementByTag = (element) => {
   if(tag.value === 'all') return true;
   if(tag.value === 'untagged') return !Array.isArray(element.tag) || element.tag.length === 0;
   if(tag.value === 'remote') return element.source === 'remote';
   if(tag.value === 'local') return element.source === 'local';
   return element.tag?.includes(tag.value);
+};
+const shouldShowElement = (element) => {
+  return shouldShowElementByTag(element)
+    && listItemMatchesSearch(element, listSearchStore.normalizedQuery, {
+      includeRemark: shouldSearchListRemark(appearanceSetting.value),
+    });
 };
 const filteredSubs = useFilteredDraggableList(subs, shouldShowElement);
 const filteredCollections = useFilteredDraggableList(collections, shouldShowElement);
@@ -796,7 +799,7 @@ const importTips = () => {
 
   a {
     font-size: 14px;
-    margin-top: 24px;
+    margin: 24px 0 12px 0;
     color: var(--comment-text-color);
 
     span {

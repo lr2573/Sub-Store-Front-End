@@ -392,12 +392,25 @@
               @click-right-icon="showTagPopup('linkTag')"
             />
           </nut-form-item>
-          <nut-form-item
-            :label="$t(`editorPage.subConfig.basic.subscriptions.label`)+ selectedSubs"
-            prop="subscriptions"
-            class="include-subs-wrapper"
-          >
-            <div v-if="tags && tags.length > 0" class="tag-check">
+          <nut-cell class="nut-form-item line include-subs-trigger" @click.stop="toggleManualSubscriptionsFold">
+            <view class="nut-cell__title nut-form-item__label">
+              {{ $t(`editorPage.subConfig.basic.subscriptions.label`) }}
+            </view>
+            <view class="nut-cell__value nut-form-item__body">
+              <view class="nut-form-item__body__slots">
+                <nut-input
+                  :model-value="selectedSubsDisplay"
+                  :border="false"
+                  class="nut-input-text include-subs-trigger-input"
+                  readonly
+                  input-align="right"
+                  :right-icon="manualSubscriptionsIsFold ? 'rect-right' : 'rect-down'"
+                />
+              </view>
+            </view>
+          </nut-cell>
+          <div v-show="!manualSubscriptionsIsFold" class="include-subs-wrapper">
+            <div v-show="!manualSubscriptionsIsFold && tags && tags.length > 0" class="tag-check">
               <div class="radio-wrapper">
                 <button
                   v-for="i in tags"
@@ -429,6 +442,7 @@
               </button>
             </div>
             <div
+              v-show="!manualSubscriptionsIsFold"
               :class="[
                 'subs-checkbox-wrapper',
                 {
@@ -490,7 +504,7 @@
                 </template>
               </draggable>
             </div>
-            </nut-form-item>
+          </div>
             <nut-form-item
               :label="$t(`editorPage.subConfig.basic.subUserinfo.label`)"
               prop="subUserinfo"
@@ -508,6 +522,20 @@
                 left-icon="tips"
                 @click-left-icon="subUserinfoTips"
               />
+            </nut-form-item>
+            <nut-form-item
+              prop="firstSubFlow"
+              class="ignore-failed-wrapper"
+            >
+              <template #label>
+                <span class="label-with-tip" @click="firstSubFlowTips">
+                  <span>{{ $t(`editorPage.subConfig.basic.firstSubFlow.label`) }}</span>
+                  <nut-icon name="tips"></nut-icon>
+                </span>
+              </template>
+              <div class="switch-wrapper">
+                <nut-switch v-model="form.firstSubFlow" />
+              </div>
             </nut-form-item>
             <nut-form-item
               :label="$t(`editorPage.subConfig.basic.proxy.label`)"
@@ -546,7 +574,7 @@
     </div>
 
     <!-- 常用配置 -->
-    <CommonBlock v-if="appearanceSetting.isEditorCommon" />
+    <CommonBlock v-if="showEditorCommonBlock" :default-folded="editorCommonDefaultFolded" />
 
     <!-- 节点操作 -->
     <ActionBlock
@@ -591,7 +619,6 @@
     @refresh="refreshCompare"
   />
   <icon-popup
-    v-if="iconPopupVisible"
     v-model:visible="iconPopupVisible"
     @setIcon="setIcon">
   </icon-popup>
@@ -625,6 +652,13 @@ import { useSettingsStore } from '@/store/settings';
 import { useSubsStore } from "@/store/subs";
 import { addItem, deleteItem, toggleItem } from "@/utils/actionsOperate";
 import { actionsToProcess } from "@/utils/actionsToPorcess";
+import {
+  getEditorFoldState,
+  getEditorIsFolded,
+  getEditorRouteValue,
+  setEditorFoldState,
+  setEditorRouteValue,
+} from "@/utils/editorFoldState";
 import { initStores } from "@/utils/initApp";
 import draggable from "vuedraggable";
 import CompareTable from "@/views/CompareTable.vue";
@@ -664,6 +698,8 @@ const isDis = ref(true)
 const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const MANUAL_SUBSCRIPTIONS_FOLD_STORAGE_KEY = "manual-subscriptions-fold";
+const MANUAL_SUBSCRIPTIONS_GROUP_STORAGE_KEY = "manual-subscriptions-group";
 const subsApi = useSubsApi();
 const editType = route.params.editType as string;
 const configName = route.params.id as string;
@@ -687,6 +723,44 @@ const githubUrlRewriter = computed(() => {
 const rewriteGithubUrl = (url?: string | null) => {
   return githubUrlRewriter.value(url);
 };
+const editorCommonDisplayMode = computed<EditorCommonDisplayMode>(() => {
+  return appearanceSetting.value.editorCommonDisplayMode || (appearanceSetting.value.isEditorCommon ? "expanded" : "hidden");
+});
+const showEditorCommonBlock = computed(() => editorCommonDisplayMode.value !== "hidden");
+const editorCommonDefaultFolded = computed(() => editorCommonDisplayMode.value === "collapsed");
+const manualSubscriptionsDefaultFolded = computed(() => {
+  return (appearanceSetting.value.manualSubscriptionsDisplayMode || "collapsed") === "collapsed";
+});
+const manualSubscriptionsIsFold = ref(
+  getEditorIsFolded(
+    MANUAL_SUBSCRIPTIONS_FOLD_STORAGE_KEY,
+    route.path,
+    manualSubscriptionsDefaultFolded.value,
+  ),
+);
+const toggleManualSubscriptionsFold = () => {
+  manualSubscriptionsIsFold.value = !manualSubscriptionsIsFold.value;
+  setEditorFoldState(
+    MANUAL_SUBSCRIPTIONS_FOLD_STORAGE_KEY,
+    route.path,
+    manualSubscriptionsIsFold.value,
+  );
+};
+watch(
+  [() => route.path, manualSubscriptionsDefaultFolded],
+  ([path, defaultFolded]) => {
+    if (getEditorFoldState(MANUAL_SUBSCRIPTIONS_FOLD_STORAGE_KEY, path) === undefined) {
+      manualSubscriptionsIsFold.value = defaultFolded;
+      return;
+    }
+
+    manualSubscriptionsIsFold.value = getEditorIsFolded(
+      MANUAL_SUBSCRIPTIONS_FOLD_STORAGE_KEY,
+      path,
+      defaultFolded,
+    );
+  },
+);
 const chooserAvatarSize = computed(() => {
   return appearanceSetting.value.isSimpleMode ? "28" : "32";
 });
@@ -723,13 +797,15 @@ type SubSelectRow = [string, string, string | undefined, string[] | undefined, b
     })
 
     let tags: any[] = Array.from(set)
-    if(tags.length === 0) return []
+    // if(tags.length === 0) return []
     tags = tags.map(i => ({ label: i, value: i }));
     const result = [{ label: t("specificWord.all"), value: "all" }, ...tags]
     if(hasUntagged.value) result.push({ label: t("specificWord.untagged"), value: "untagged" })
     return result
   });
   const tag = ref('all');
+  const manualSubscriptionsGroupInitialized = ref(false);
+  const manualSubscriptionsGroupTouched = ref(false);
   const tagPopupVisible = ref(false);
   const tagType = ref('tag'); // 标签tag | 关联订阅标签linkTag
 const tagPopupRef = ref(null);
@@ -761,13 +837,17 @@ const subscriptionTagsInputRef = ref<any>(null);
   };
 const selectedSubs = computed(() => {
   const subscriptions = form.subscriptions || [];
-  if(!Array.isArray(subscriptions) || subscriptions.length === 0) return `: ${t(`editorPage.subConfig.basic.subscriptions.empty`)}`
+  if(!Array.isArray(subscriptions) || subscriptions.length === 0) {
+    if (!Array.isArray(subsSelectList.value) || subsSelectList.value.length === 0) return `: ${t(`editorPage.subConfig.basic.subscriptions.empty`)}`
+    return `: ${t(`editorPage.subConfig.basic.subscriptions.none`)}`
+  }
     return `: ${subscriptions.map((name) => {
       const sub = subsStore.getOneSub(name);
       if(!sub) form.subscriptions = form.subscriptions.filter((n) => n !== name);
       return sub?.displayName || sub?.["display-name"] || sub?.name || `${name}(🚫)`;
     }).join(', ')}`
   });
+const selectedSubsDisplay = computed(() => selectedSubs.value.replace(/^:\s*/, ""));
   const subFailureModeOptions = computed(() => {
     const prefix = "editorPage.subConfig.basic.ignoreFailedRemoteSub";
     return [
@@ -878,6 +958,7 @@ watchEffect(() => {
     switch (editType) {
       case "collections":
         form.subscriptions = [];
+        form.firstSubFlow = true;
         break;
       case "subs":
         form.source = "remote";
@@ -929,6 +1010,7 @@ watchEffect(() => {
       form.subscriptions = Array.isArray(sourceData.subscriptions)
         ? [...sourceData.subscriptions]
         : [];
+      form.firstSubFlow = sourceData.firstSubFlow !== false;
       console.log('form.subscriptions ==>', form.subscriptions);
       break;
     case "subs":
@@ -1066,6 +1148,11 @@ const fetchCompareData = async () => {
     data.process = actionsToProcess(data.process, actionsList, ignoreList);
     if (data.ignoreFailedRemoteSub === "disabled") {
       data.ignoreFailedRemoteSub = false;
+    }
+    if (editType === "collections") {
+      data.firstSubFlow = data.firstSubFlow !== false;
+    } else {
+      delete data.firstSubFlow;
     }
     data.tag = [
       ...new Set(
@@ -1247,6 +1334,11 @@ const submit = () => {
     if (data.ignoreFailedRemoteSub === "disabled"){
       data.ignoreFailedRemoteSub = false;
     }
+    if (editType === "collections") {
+      data.firstSubFlow = data.firstSubFlow !== false;
+    } else {
+      delete data.firstSubFlow;
+    }
 
     console.log('submit.....\n', data);
 
@@ -1370,10 +1462,25 @@ const urlValidator = (val: string): Promise<boolean> => {
         lockScroll: false,
       });
   };
+  const firstSubFlowTips = () => {
+    Dialog({
+        title: t(`editorPage.subConfig.basic.firstSubFlow.tips.title`),
+        content: t(`editorPage.subConfig.basic.firstSubFlow.tips.content`),
+        popClass: 'auto-dialog',
+        textAlign: 'left',
+        okText: t(`editorPage.subConfig.basic.firstSubFlow.tips.okText`),
+        noCancelBtn: true,
+        closeOnPopstate: true,
+        lockScroll: false,
+        onOk: () => {
+          window.open("https://t.me/zhetengsha/3070");
+        },
+      });
+  };
   const proxyTips = () => {
     Dialog({
         title: '通过代理/节点/策略获取订阅',
-        content: '1. Surge/Egern(参数 policy/policy-descriptor)\n\n可设置节点代理 例: Test = snell, 1.2.3.4, 80, psk=password, version=4\n\n或设置策略/节点 例: 国外加速\n\n2. Loon(参数 node)\n\nLoon 官方文档: \n\n指定该请求使用哪一个节点或者策略组（可以是节点名称、策略组名称，也可以是一个 Loon 格式的节点描述，如：shadowsocksr,example.com,1070,chacha20-ietf,"password",protocol=auth_aes128_sha1,protocol-param=test,obfs=plain,obfs-param=edge.microsoft.com）\n\n3. Stash(参数 headers["X-Surge-Policy"])/Shadowrocket(参数 headers.X-Surge-Policy)/QX(参数 opts.policy)\n\n可设置策略/节点\n\n4. Node.js 版(http/https/socks5):\n\n例: socks5://a:b@127.0.0.1:7890\n\n※ 优先级由高到低: 单条订阅, 组合订阅, 默认配置',
+        content: '1. Surge/Egern(参数 policy/policy-descriptor)\n\n可设置节点代理 例: Test = snell, 1.2.3.4, 80, psk=password, version=4\n\n或设置策略/节点 例: 国外加速\n\n2. Loon(参数 node)\n\nLoon 官方文档: \n\n指定该请求使用哪一个节点或者策略组（可以是节点名称、策略组名称，也可以是一个 Loon 格式的节点描述，如：shadowsocksr,example.com,1070,chacha20-ietf,"password",protocol=auth_aes128_sha1,protocol-param=test,obfs=plain,obfs-param=edge.microsoft.com）\n\n3. Stash(参数 headers["X-Surge-Policy"])/Shadowrocket(参数 headers.X-Surge-Policy)/QX(参数 opts.policy)\n\n可设置策略/节点\n\n4. Node.js 版(http/https/socks5):\n\n例: socks5://a:b@127.0.0.1:7890\n\n※ 优先级由高到低: 单条订阅, 组合订阅, 默认配置\n\n完整说明 请查看 https://t.me/zhetengsha/1843',
         popClass: 'auto-dialog',
         textAlign: 'left',
         okText: 'OK',
@@ -1418,8 +1525,60 @@ const urlValidator = (val: string): Promise<boolean> => {
         lockScroll: false,
       });
   };
+  const normalizeTagList = (value: any): string[] => {
+    const source = Array.isArray(value) ? value : String(value || "").split(",");
+    return source
+      .map((item) => String(item).trim())
+      .filter((item) => item.length);
+  };
+  const getMatchingCollectionGroup = () => {
+    const collectionTags = normalizeTagList(form.tag);
+    if (collectionTags.length === 0) return "";
+
+    const subTagSet = new Set<string>();
+    subsSelectList.value.forEach(([, , , subTags]) => {
+      normalizeTagList(subTags).forEach((item) => subTagSet.add(item));
+    });
+
+    return collectionTags.find((item) => subTagSet.has(item)) || "";
+  };
+  const isManualSubscriptionsGroupAvailable = (group: string) => {
+    if (group === "all") return true;
+    if (!Array.isArray(tags.value) || tags.value.length === 0) return false;
+
+    return tags.value.some((item) => item.value === group);
+  };
+  const applyInitialManualSubscriptionsGroup = () => {
+    if (editType !== "collections") return;
+    if (!isInit.value) return;
+    if (manualSubscriptionsGroupInitialized.value || manualSubscriptionsGroupTouched.value) return;
+    if (tag.value !== "all") return;
+
+    const rememberedGroup = getEditorRouteValue(
+      MANUAL_SUBSCRIPTIONS_GROUP_STORAGE_KEY,
+      route.path,
+    );
+    if (rememberedGroup && isManualSubscriptionsGroupAvailable(rememberedGroup)) {
+      tag.value = rememberedGroup;
+      manualSubscriptionsGroupInitialized.value = true;
+      return;
+    }
+    if (rememberedGroup && subsSelectList.value.length === 0) return;
+
+    const matchedGroup = getMatchingCollectionGroup();
+    if (!matchedGroup) return;
+
+    tag.value = matchedGroup;
+    manualSubscriptionsGroupInitialized.value = true;
+  };
   const setTag = (current) => {
+    manualSubscriptionsGroupTouched.value = true;
     tag.value = current;
+    setEditorRouteValue(
+      MANUAL_SUBSCRIPTIONS_GROUP_STORAGE_KEY,
+      route.path,
+      current,
+    );
   };
   const shouldShowElement = (element) => {
     if(tag.value === 'all') return true
@@ -1604,6 +1763,9 @@ const urlValidator = (val: string): Promise<boolean> => {
     syncSubscriptionsFromRows(mergedRows);
     syncDisplayedSubsSelectList();
   };
+  watch([() => form.tag, subsSelectList, tags, isInit], () => {
+    applyInitialManualSubscriptionsGroup();
+  }, { immediate: true, deep: true });
   watch([tag, subsSelectList], () => {
     if (isDragging.value) return;
     syncDisplayedSubsSelectList();
@@ -1788,6 +1950,19 @@ onBeforeUnmount(() => {
     padding: 0;
     color: inherit;
   }
+  .label-with-tip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+
+    :deep(.nut-icon) {
+      color: inherit;
+    }
+  }
+  :deep(.nut-form-item__label) {
+    width: auto;
+  }
   :deep(.nut-input-text){
     .nut-input-inner {
       .nut-input-right-icon {
@@ -1902,8 +2077,35 @@ onBeforeUnmount(() => {
   }
 }
 
+.include-subs-trigger {
+  cursor: pointer;
+
+  :deep(.nut-form-item__label),
+  :deep(.nut-form-item__body),
+  :deep(.nut-cell__title),
+  :deep(.nut-cell__value),
+  :deep(.nut-input),
+  :deep(.nut-input-value),
+  :deep(.nut-input-inner),
+  :deep(.nut-input-right-icon),
+  :deep(input) {
+    cursor: pointer;
+  }
+
+  :deep(.include-subs-trigger-input .nut-input-inner .nut-input-right-icon) {
+    margin-left: 14px;
+  }
+}
+
 .include-subs-wrapper {
+  display: flex;
   flex-direction: column;
+  padding: 0 24px 12px;
+
+  .tag-check {
+    flex: 1;
+    min-width: 0;
+  }
 
   .tag-check {
     width: 100%;

@@ -1,41 +1,43 @@
 <template>
   <Teleport to="#app">
     <div class="compare-page-wrapper">
-      <header class="compare-page-header">
-        <h1>
-          <font-awesome-icon icon="fa-solid fa-eye" />
-          <span class="title">{{ $t(`comparePage.title`) }}</span>
-          <span class="displayName">
-            <font-awesome-icon icon="fa-solid fa-angles-right" />
-            <span class="displayNameText">{{ displayName }}</span>
-          </span>
-        </h1>
-        <div class="btn-groups">
+      <header class="compare-page-header preview-popup-header">
+        <div class="btn-groups preview-leading">
+          <button
+            type="button"
+            class="btn close"
+            :aria-label="closeLabel"
+            :title="closeLabel"
+            @click="clickClose"
+          >
+            <font-awesome-icon icon="fa-solid fa-xmark" aria-hidden="true" />
+          </button>
           <button
             v-if="showRefresh"
             type="button"
             class="btn refresh"
-            :aria-label="$t(`globalNotify.refresh.loading`)"
-            :title="$t(`globalNotify.refresh.loading`)"
+            :aria-label="refreshLabel"
+            :title="refreshLabel"
             @click="emit('refresh')"
           >
-            <font-awesome-icon  icon="fa-solid fa-arrows-rotate" />
+            <font-awesome-icon icon="fa-solid fa-arrows-rotate" aria-hidden="true" />
           </button>
+        </div>
+        <h1 class="preview-popup-title" :title="displayName">{{ $t(`comparePage.title`) }}</h1>
+        <div class="btn-groups preview-trailing">
           <button
             type="button"
-            class="btn close"
-            aria-label="Close"
-            title="Close"
-            @click="clickClose"
+            class="btn logs"
+            :aria-label="$t('logsPage.floating.open')"
+            :title="$t('logsPage.floating.open')"
+            @click.stop="openLogsOverlay"
           >
-            <font-awesome-icon icon="fa-solid fa-circle-xmark" />
-          </button>          
+            <font-awesome-icon icon="fa-solid fa-file-lines" aria-hidden="true" />
+          </button>
         </div>
-
       </header>
       <div class="compare-page-body">
         <div class="block-wrapper">
-          <!--块标题-->
           <div class="sticky-title-wrapperse compare-title">
             <p>
               {{ $t(`comparePage.remain.title`) }}({{ remainDesc }})
@@ -50,57 +52,80 @@
             </p>
           </div>
 
-          <!--指示器说明-->
           <div class="compare-des">
-            <button
-              type="button"
-              @click="toggleProcessedVisible"
-              class="processed-item indicator indicator-button"
-              :aria-pressed="isProcessedVisible"
-            >{{ $t(`comparePage.remain.afterIndicator`) }}</button>
-            <button
-              type="button"
-              @click="toggleOriginalVisible"
-              class="original-item indicator indicator-button"
-              :aria-pressed="isOriginalVisible"
-            >{{ $t(`comparePage.remain.beforeIndicator`) }}</button>
+            <span class="indicator-group">
+              <button
+                type="button"
+                class="original-item indicator indicator-button"
+                :aria-pressed="isOriginalVisible"
+                @click="toggleOriginalVisible"
+              >
+                {{ $t(`comparePage.remain.beforeIndicator`) }}
+              </button>
+              <button
+                type="button"
+                class="node-names-action"
+                :aria-label="`${$t('comparePage.remain.beforeIndicator')} ${$t('comparePage.nodeNames.entry')}`"
+                :title="$t('comparePage.nodeNames.entry')"
+                @click.stop="openNodeNamesDialog('before')"
+              >
+                <font-awesome-icon icon="fa-solid fa-clone" aria-hidden="true" />
+                {{ $t('comparePage.nodeNames.entry') }}
+              </button>
+            </span>
+
+            <span class="indicator-group">
+              <button
+                type="button"
+                class="processed-item indicator indicator-button"
+                :aria-pressed="isProcessedVisible"
+                @click="toggleProcessedVisible"
+              >
+                {{ $t(`comparePage.remain.afterIndicator`) }}
+              </button>
+              <button
+                type="button"
+                class="node-names-action"
+                :aria-label="`${$t('comparePage.remain.afterIndicator')} ${$t('comparePage.nodeNames.entry')}`"
+                :title="$t('comparePage.nodeNames.entry')"
+                @click.stop="openNodeNamesDialog('after')"
+              >
+                <font-awesome-icon icon="fa-solid fa-clone" aria-hidden="true" />
+                {{ $t('comparePage.nodeNames.entry') }}
+              </button>
+            </span>
           </div>
 
-          <!--表格标题-->
           <ul class="compare-table-head">
             <li v-for="title in titleList" :key="title">
               {{ $t(`comparePage.tableHead.${title}`) }}
             </li>
           </ul>
 
-          <!--表格内容-->
           <table class="compare-table-body">
             <template v-for="[processed = {}, original = {}] in data" :key="processed.id">
-              <tr
-                v-if="isProcessedVisible"
-                class="compare-table-row processed-tr"
-              >
+              <tr v-if="isProcessedVisible" class="compare-table-row processed-tr">
                 <td class="processed-item">
                   <button
                     type="button"
                     class="row-open-button"
+                    :aria-label="`${$t('comparePage.tableHead.name')}: ${processed.name || ''}`"
                     @click="openNodeInfoPanel(processed)"
                   >
-                    <div class="name-wrapper">
-                      <div>
+                    <span class="name-wrapper">
+                      <span>
                         <nut-tag class="type-tag">{{ processed.type }}</nut-tag
                         >{{ processed.name }}
-                      </div>
-                      <div>{{ processed.server || processed.addresses?.join(',') }}:{{ processed.port || processed["local-port"] }}</div>
-                    </div>
+                      </span>
+                      <span>
+                        {{ processed.server || processed.addresses?.join(',') }}:{{ processed.port || processed["local-port"] }}
+                      </span>
+                    </span>
                   </button>
                 </td>
                 <td>
                   <span :class="processed.udp ? 'item-true' : 'item-false'">
-                    <font-awesome-icon
-                      v-if="processed.udp"
-                      icon="fa-solid fa-check"
-                    />
+                    <font-awesome-icon v-if="processed.udp" icon="fa-solid fa-check" aria-hidden="true" />
                   </span>
                 </td>
                 <td>
@@ -108,51 +133,44 @@
                     <font-awesome-icon
                       v-if="(processed.tfo || processed['fast-open'])"
                       icon="fa-solid fa-check"
+                      aria-hidden="true"
                     />
                   </span>
                 </td>
                 <td>
-                  <span
-                    :class="
-                      processed['skip-cert-verify'] ? 'item-true' : 'item-false'
-                    "
-                    ><font-awesome-icon
+                  <span :class="processed['skip-cert-verify'] ? 'item-true' : 'item-false'">
+                    <font-awesome-icon
                       v-if="processed['skip-cert-verify']"
                       icon="fa-solid fa-check"
-                  /></span>
+                      aria-hidden="true"
+                    />
+                  </span>
                 </td>
                 <td>
-                  <span :class="processed.aead ? 'item-true' : 'item-false'"
-                    ><font-awesome-icon
-                      v-if="processed.aead"
-                      icon="fa-solid fa-check"
-                  /></span>
+                  <span :class="processed.aead ? 'item-true' : 'item-false'">
+                    <font-awesome-icon v-if="processed.aead" icon="fa-solid fa-check" aria-hidden="true" />
+                  </span>
                 </td>
               </tr>
-              <tr
-                v-if="isOriginalVisible"
-                class="compare-table-row original-tr"
-              >
+              <tr v-if="isOriginalVisible" class="compare-table-row original-tr">
                 <td class="original-item">
                   <button
                     type="button"
                     class="row-open-button"
+                    :aria-label="`${$t('comparePage.tableHead.name')}: ${original.name || ''}`"
                     @click="openNodeInfoPanel(original)"
                   >
-                    <div class="name-wrapper">
-                      <div>
-                        {{ original.name }}
-                      </div>
-                      <div>{{ original.server || original.addresses?.join(',') }}:{{ original.port || original["local-port"] }}</div>
-                    </div>
+                    <span class="name-wrapper">
+                      <span>{{ original.name }}</span>
+                      <span>
+                        {{ original.server || original.addresses?.join(',') }}:{{ original.port || original["local-port"] }}
+                      </span>
+                    </span>
                   </button>
                 </td>
                 <td>
                   <span :class="original.udp ? 'item-true' : 'item-false'">
-                    <font-awesome-icon
-                      v-if="original.udp"
-                      icon="fa-solid fa-check"
-                    />
+                    <font-awesome-icon v-if="original.udp" icon="fa-solid fa-check" aria-hidden="true" />
                   </span>
                 </td>
                 <td>
@@ -160,25 +178,23 @@
                     <font-awesome-icon
                       v-if="(original.tfo || original['fast-open'])"
                       icon="fa-solid fa-check"
+                      aria-hidden="true"
                     />
                   </span>
                 </td>
                 <td>
-                  <span
-                    :class="
-                      original['skip-cert-verify'] ? 'item-true' : 'item-false'
-                    "
-                    ><font-awesome-icon
+                  <span :class="original['skip-cert-verify'] ? 'item-true' : 'item-false'">
+                    <font-awesome-icon
                       v-if="original['skip-cert-verify']"
                       icon="fa-solid fa-check"
-                  /></span>
+                      aria-hidden="true"
+                    />
+                  </span>
                 </td>
                 <td>
-                  <span :class="original.aead ? 'item-true' : 'item-false'"
-                    ><font-awesome-icon
-                      v-if="original.aead"
-                      icon="fa-solid fa-check"
-                  /></span>
+                  <span :class="original.aead ? 'item-true' : 'item-false'">
+                    <font-awesome-icon v-if="original.aead" icon="fa-solid fa-check" aria-hidden="true" />
+                  </span>
                 </td>
               </tr>
             </template>
@@ -190,78 +206,66 @@
           class="divider"
           dashed
           hairline
-          :style="{
-            padding: '0 16px',
-          }"
-          >{{ $t(`comparePage.divider`) }}
+          :style="{ padding: '0 16px' }"
+        >
+          {{ $t(`comparePage.divider`) }}
         </nut-divider>
 
-        <div ref="filterRef" class="block-wrapper" v-if="filteredOriginalData.length > 0">
-          <!--块标题-->
+        <div v-if="filteredOriginalData.length > 0" ref="filterRef" class="block-wrapper">
           <div class="sticky-title-wrapperse compare-title">
             <p>{{ $t(`comparePage.filter.title`) }}({{ filterDesc }})</p>
           </div>
 
-          <!--表格标题-->
           <ul class="compare-table-head filter-table-head">
             <li v-for="title in titleList" :key="title">
               {{ $t(`comparePage.tableHead.${title}`) }}
             </li>
           </ul>
 
-          <!--表格内容-->
           <table class="compare-table-body">
             <template v-for="node in filteredOriginalData" :key="node.id">
-              <tr
-                class="compare-table-row original-tr"
-              >
+              <tr class="compare-table-row original-tr">
                 <td class="original-item">
                   <button
                     type="button"
                     class="row-open-button"
+                    :aria-label="`${$t('comparePage.tableHead.name')}: ${node.name || ''}`"
                     @click="openNodeInfoPanel(node)"
                   >
-                    <div class="name-wrapper">
-                      <div>
+                    <span class="name-wrapper">
+                      <span>
                         <nut-tag class="type-tag">{{ node.type }} </nut-tag
                         >{{ node.name }}
-                      </div>
-                      <div>{{ node.server || node.addresses?.join(',') }}:{{ node.port || node["local-port"] }}</div>
-                    </div>
+                      </span>
+                      <span>
+                        {{ node.server || node.addresses?.join(',') }}:{{ node.port || node["local-port"] }}
+                      </span>
+                    </span>
                   </button>
                 </td>
                 <td>
                   <span :class="node.udp ? 'item-true' : 'item-false'">
-                    <font-awesome-icon
-                      v-if="node.udp"
-                      icon="fa-solid fa-check"
-                    />
+                    <font-awesome-icon v-if="node.udp" icon="fa-solid fa-check" aria-hidden="true" />
                   </span>
                 </td>
                 <td>
                   <span :class="node.tfo ? 'item-true' : 'item-false'">
+                    <font-awesome-icon v-if="node.tfo" icon="fa-solid fa-check" aria-hidden="true" />
+                  </span>
+                </td>
+                <td>
+                  <span :class="node['skip-cert-verify'] ? 'item-true' : 'item-false'">
                     <font-awesome-icon
-                      v-if="node.tfo"
+                      v-if="node['skip-cert-verify']"
                       icon="fa-solid fa-check"
+                      aria-hidden="true"
                     />
                   </span>
                 </td>
                 <td>
-                  <span
-                    :class="
-                      node['skip-cert-verify'] ? 'item-true' : 'item-false'
-                    "
-                    ><font-awesome-icon
-                      v-if="node['skip-cert-verify']"
-                      icon="fa-solid fa-check"
-                  /></span>
-                </td>
-                <td>
-                  <span :class="node.aead ? 'item-true' : 'item-false'"
-                    ><font-awesome-icon
-                      v-if="node.aead"
-                      icon="fa-solid fa-check"
-                  /></span>
+                  <span :class="node.aead ? 'item-true' : 'item-false'">
+                    <font-awesome-icon v-if="node.aead" icon="fa-solid fa-check" aria-hidden="true" />
+                  </span>
                 </td>
               </tr>
             </template>
@@ -271,13 +275,19 @@
     </div>
 
     <NodeInfoPanel
-      :key="nodeInfoPanelKey"
-      :ipApi="ipApi"
-      :ip-api-status="ipApiStatus"
-      :nodeInfo="nodeInfo"
       v-if="nodeInfoIsVisible"
+      :key="nodeInfoPanelKey"
+      :ip-api="ipApi"
+      :ip-api-status="ipApiStatus"
+      :node-info="nodeInfo"
       @close="closeNodeInfoPanel"
       @retry="retryLoadIpApi"
+    />
+    <PreviewNodeNamesDialog
+      v-if="nodeNamesDialogVisible"
+      :side="nodeNamesDialogSide"
+      :node-infos="activeNodeInfos"
+      @close="closeNodeNamesDialog"
     />
   </Teleport>
 </template>
@@ -285,24 +295,29 @@
 <script lang="ts" setup>
   import { useSubsApi } from '@/api/subs';
   import NodeInfoPanel from '@/components/NodeInfoPanel.vue';
+  import PreviewNodeNamesDialog from '@/components/PreviewNodeNamesDialog.vue';
+  import { useLogsOverlayStore } from '@/store/logsOverlay';
   import { useSubsStore } from '@/store/subs';
+  import { extractPreviewNodeInfos, PreviewNodeNameSide } from '@/utils/previewNodeNames';
   import { computed, ref, toRaw } from 'vue';
+  import { useI18n } from 'vue-i18n';
 
   const { getSubInfo } = useSubsApi();
+  const logsOverlayStore = useLogsOverlayStore();
   const subsStore = useSubsStore();
+  const { locale } = useI18n();
+
   const props = defineProps<{
     compareData: any;
     name: string;
     showRefresh?: boolean;
   }>();
 
-  const showRefresh = computed(() => props.showRefresh !== false);
-
-  const titleList = ['name', 'udp', 'tfo', 'skip-cert-verify', 'aead'];
-
   const emit = defineEmits(['closeCompare', 'refresh']);
 
-  const filterRef = ref(null);
+  const showRefresh = computed(() => props.showRefresh !== false);
+  const titleList = ['name', 'udp', 'tfo', 'skip-cert-verify', 'aead'];
+  const filterRef = ref<HTMLElement | null>(null);
   const isOriginalVisible = ref(true);
   const isProcessedVisible = ref(true);
 
@@ -312,6 +327,15 @@
   const ipApiStatus = ref<NodeInfoIpApiStatus>('idle');
   const nodeInfo = ref<NodeInfo>(null);
   const currentIpApiRequestId = ref(0);
+  const nodeNamesDialogVisible = ref(false);
+  const nodeNamesDialogSide = ref<PreviewNodeNameSide>('after');
+
+  const refreshLabel = computed(() =>
+    locale.value.startsWith('zh') ? '刷新对比内容' : 'Refresh compare content',
+  );
+  const closeLabel = computed(() =>
+    locale.value.startsWith('zh') ? '关闭对比' : 'Close compare',
+  );
 
   const displayName = computed(() => {
     const sub = subsStore.getOneSub(props.name) || subsStore.getOneCollection(props.name);
@@ -341,8 +365,15 @@
   };
 
   const processedData = computed(() => props.compareData?.processed || []);
+  const originalData = computed(() => props.compareData?.original || []);
+  const processedNodeInfos = computed(() => extractPreviewNodeInfos(processedData.value));
+  const originalNodeInfos = computed(() => extractPreviewNodeInfos(originalData.value));
+  const activeNodeInfos = computed(() =>
+    nodeNamesDialogSide.value === 'after' ? processedNodeInfos.value : originalNodeInfos.value,
+  );
+
   const data = computed(() => {
-    const original = props.compareData?.original || [];
+    const original = originalData.value;
     const result = [];
     for (let i = 0; i < processedData.value.length; i++) {
       const item = [];
@@ -355,38 +386,51 @@
     return result;
   });
 
-  // 被过滤掉的节点：original 中未被 processed 匹配到的
   const filteredOriginalData = computed(() => {
-    const original = props.compareData?.original || [];
+    const original = originalData.value;
     const processedIds = new Set(processedData.value.map(item => item.id));
     return original.filter(item => !processedIds.has(item.id));
   });
 
   const remainDesc = computed(() => {
-    const remainSize = processedData.value?.length || 0
-    const filterSize = filteredOriginalData.value?.length || 0
-    const totalSize = remainSize + filterSize
+    const remainSize = processedData.value?.length || 0;
+    const filterSize = filteredOriginalData.value?.length || 0;
+    const totalSize = remainSize + filterSize;
     if (!remainSize) {
-      return 0
+      return 0;
     }
-    return filterSize > 0 ? `${remainSize}/${totalSize}` : remainSize
+    return filterSize > 0 ? `${remainSize}/${totalSize}` : remainSize;
   });
+
   const filterDesc = computed(() => {
-    const remainSize = processedData.value?.length || 0
-    const filterSize = filteredOriginalData.value?.length || 0
-    const totalSize = remainSize + filterSize
+    const remainSize = processedData.value?.length || 0;
+    const filterSize = filteredOriginalData.value?.length || 0;
+    const totalSize = remainSize + filterSize;
     if (!filterSize) {
-      return 0
+      return 0;
     }
-    return remainSize > 0 ? `${filterSize}/${totalSize}` : filterSize
+    return remainSize > 0 ? `${filterSize}/${totalSize}` : filterSize;
   });
 
   const goToFilterRef = () => {
-    filterRef.value?.scrollIntoView()
-  }
+    filterRef.value?.scrollIntoView();
+  };
 
   const clickClose = () => {
     emit('closeCompare');
+  };
+
+  const openLogsOverlay = () => {
+    logsOverlayStore.open();
+  };
+
+  const openNodeNamesDialog = (side: PreviewNodeNameSide) => {
+    nodeNamesDialogSide.value = side;
+    nodeNamesDialogVisible.value = true;
+  };
+
+  const closeNodeNamesDialog = () => {
+    nodeNamesDialogVisible.value = false;
   };
 
   const invalidateIpApiRequest = () => {
@@ -471,6 +515,18 @@
   .name-wrapper {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+
+    > span {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-all;
+    }
   }
 
   .compare-table-body {
@@ -508,6 +564,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      min-width: 0;
     }
 
     li:first-child,
@@ -534,6 +591,8 @@
   .original-item {
     display: flex;
     align-items: center;
+    width: 100%;
+    min-width: 0;
 
     &::before {
       content: '';
@@ -543,55 +602,85 @@
       border-radius: 50%;
       margin-right: 10px;
       background: var(--primary-color);
+      flex-shrink: 0;
+    }
+  }
+
+  .processed-item::before {
+    background: var(--third-color);
+  }
+
+  .indicator-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 24px;
+    min-width: 0;
+
+    .processed-item,
+    .original-item {
+      width: auto;
     }
   }
 
   .indicator {
-    margin-right: 24px;
+    flex-shrink: 0;
+  }
+
+  .indicator-button,
+  .filter-jump-button,
+  .row-open-button,
+  .node-names-action {
+    border: none;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
   }
 
   .indicator-button {
     padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    font: inherit;
   }
 
   .filter-jump-button {
     margin-left: 8px;
     padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
     text-decoration: underline;
-    cursor: pointer;
-    font: inherit;
   }
 
   .row-open-button {
     width: 100%;
     padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
     text-align: left;
-    cursor: pointer;
-    font: inherit;
+  }
+
+  .node-names-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    padding: 2px 0;
+    color: var(--comment-text-color);
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+
+    :deep(svg) {
+      width: 12px;
+      height: 12px;
+      color: var(--icon-nav-bar-right);
+      flex-shrink: 0;
+    }
   }
 
   .row-open-button:focus-visible,
   .indicator-button:focus-visible,
-  .filter-jump-button:focus-visible {
+  .filter-jump-button:focus-visible,
+  .node-names-action:focus-visible,
+  .compare-page-header button:focus-visible {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
     border-radius: 6px;
-  }
-
-  .processed-item::before {
-    background: var(--third-color);
-    flex-shrink: 0;
   }
 
   .block-wrapper {
@@ -604,16 +693,14 @@
       margin-top: 0;
       top: var(--compare-header-offset);
       background: var(--background-color);
-      .filter-jump-button {
-        cursor: pointer;
-        text-decoration: underline;
-      }
     }
 
     .compare-des {
       padding: 6px var(--safe-area-side);
       z-index: 8;
       display: flex;
+      flex-wrap: wrap;
+      gap: 8px 0;
       position: sticky;
       top: calc(var(--compare-header-offset) + 32px);
       background: var(--background-color);
@@ -645,68 +732,20 @@
     background: var(--background-color);
     border-color: var(--divider-color);
     width: 100%;
-    .title {
-      white-space: nowrap;
-      flex-shrink: 0;
+
+    &.preview-popup-header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0;
     }
-    .displayName {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      min-width: 0;
-      overflow: hidden;
-      flex: 0 1 40vw;
-      
-      @media screen and (min-width: 768px) {
-        flex-basis: 300px;
-      }
-      
-      @media screen and (min-width: 1024px) {
-        flex-basis: 400px;
-      }
 
-      > svg {
-        flex-shrink: 0;
-      }
-
-      .displayNameText {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-    h1 {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-      margin: 0;
-      font-size: 20px;
-      line-height: 1;
-      font-weight: 500;
-
-      > svg {
-        width: 20px;
-        height: 20px;
-        flex-shrink: 0;
-      }
-
-      span {
-        font-size: 14px;
-        color: var(--second-text-color);
-
-        > svg {
-          color: var(--comment-text-color);
-        }
-      }
-    }
     .btn-groups {
       display: flex;
       align-items: center;
       flex-shrink: 0;
       gap: 10px;
     }
+
     button {
       cursor: pointer;
       background: none;
@@ -715,10 +754,55 @@
       padding: 8px;
       color: var(--lowest-text-color);
       margin: 0;
+
       &.refresh {
         font-size: 18px;
       }
     }
+  }
+
+  .compare-page-header .preview-leading {
+    gap: 0;
+    justify-content: flex-start;
+  }
+
+  .compare-page-header .preview-trailing {
+    grid-column: 3;
+    justify-self: end;
+    gap: 0;
+    justify-content: flex-end;
+  }
+
+  .compare-page-header .preview-leading button,
+  .compare-page-header .preview-trailing button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: var(--icon-nav-bar-right);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    :deep(svg) {
+      width: 14px;
+      height: 14px;
+      font-size: 14px;
+    }
+  }
+
+  .compare-page-header .preview-popup-title {
+    grid-column: 2;
+    justify-self: center;
+    display: block;
+    flex: none;
+    margin: 0;
+    min-width: 20px;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 600;
+    color: var(--primary-text-color);
+    text-align: center;
+    overflow: hidden;
   }
 
   .compare-page-wrapper {
@@ -736,7 +820,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    
+
     @media screen and (min-width: 768px) {
       .compare-page-header,
       .compare-page-body {
@@ -744,7 +828,7 @@
         max-width: 800px;
       }
     }
-    
+
     @media screen and (min-width: 900px) {
       .compare-page-header,
       .compare-page-body {
@@ -752,7 +836,7 @@
         max-width: 900px;
       }
     }
-    
+
     @media screen and (min-width: 1200px) {
       .compare-page-header,
       .compare-page-body {

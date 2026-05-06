@@ -11,7 +11,6 @@
   import { storeToRefs } from 'pinia';
   import { useWideScreenNarrowMode } from '@/hooks/useWideScreenNarrowMode';
   import { useGlobalStore } from '@/store/global';
-  import router from '@/router';
 
   const globalStore = useGlobalStore();
   const { bottomSafeArea } = storeToRefs(globalStore);
@@ -23,11 +22,6 @@
     } else {
       return '16px';
     }
-  });
-
-  // 每次切换路由后，将页面位置置顶
-  router.afterEach(() => {
-    document.querySelector('.app-layout-wrapper')?.scrollTo({ top: 0 });
   });
 </script>
 

@@ -4,9 +4,21 @@
       <span>{{ desc }}</span>
       <nut-icon name="tips" aria-hidden="true"></nut-icon>
     </button>
-    <div class="includeUnsupportedProxy">
-      <input type="checkbox" id="includeUnsupportedProxy" name="includeUnsupportedProxy" value="includeUnsupportedProxy" v-model="includeUnsupportedProxy">
-      <label for="includeUnsupportedProxy">包含不支持的协议(详见文档)</label>
+    <div class="preview-options">
+      <div class="preview-option-item">
+        <input type="checkbox" id="includeUnsupportedProxy" name="includeUnsupportedProxy" value="includeUnsupportedProxy" v-model="includeUnsupportedProxy">
+        <label for="includeUnsupportedProxy">含不支持的协议</label>
+      </div>
+      <div class="preview-option-item">
+        <input
+          type="checkbox"
+          id="prettyYaml"
+          name="prettyYaml"
+          value="prettyYaml"
+          v-model="prettyYaml"
+        >
+        <label for="prettyYaml">更易读的 YAML</label>
+      </div>
     </div>
     <ul class="preview-list">
       <li v-for="platform in platformList" :key="platform.name">
@@ -71,8 +83,8 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
-  import { Toast, Dialog } from '@nutui/nutui';
+  import { onMounted, ref, watch } from 'vue';
+  import { Toast } from '@nutui/nutui';
   import json from '@/assets/icons/json.svg';
   import uri from '@/assets/icons/uri.svg';
   import surfboard from '@/assets/icons/surfboard.png';
@@ -102,6 +114,7 @@
   const { appearanceSetting } = storeToRefs(settingsStore);
 
   const includeUnsupportedProxy = ref(false);
+  const prettyYaml = ref(false);
   const { getA11yText } = useA11y();
   const { copy, isSupported } = useClipboard();
   const { toClipboard: copyFallback } = useV3Clipboard();
@@ -121,6 +134,43 @@
   }>();
 
   const { currentUrl: host } = useHostAPI();
+
+  const PREVIEW_INCLUDE_UNSUPPORTED_PROXY_KEY = "preview.includeUnsupportedProxy";
+  const PREVIEW_PRETTY_YAML_KEY = "preview.prettyYaml";
+
+  const getLocalStorageBoolean = (key: string): boolean => {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return false;
+    }
+    try {
+      return window.localStorage.getItem(key) === "true";
+    } catch {
+      return false;
+    }
+  };
+
+  const setLocalStorageBoolean = (key: string, value: boolean) => {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+    try {
+      window.localStorage.setItem(key, String(value));
+    } catch {
+      // ignore localStorage write failures in restricted environments
+    }
+  };
+
+  onMounted(() => {
+    includeUnsupportedProxy.value = getLocalStorageBoolean(PREVIEW_INCLUDE_UNSUPPORTED_PROXY_KEY);
+    prettyYaml.value = getLocalStorageBoolean(PREVIEW_PRETTY_YAML_KEY);
+  });
+
+  watch(includeUnsupportedProxy, (value) => {
+    setLocalStorageBoolean(PREVIEW_INCLUDE_UNSUPPORTED_PROXY_KEY, value);
+  });
+  watch(prettyYaml, (value) => {
+    setLocalStorageBoolean(PREVIEW_PRETTY_YAML_KEY, value);
+  });
 
   const buildUrlWithQuery = (url: string, query: Record<string, string | boolean>): string => {
     if (!url) {
@@ -146,6 +196,9 @@
     }
     if (includeUnsupportedProxy.value) {
       query.includeUnsupportedProxy = true;
+    }
+    if (prettyYaml.value) {
+      query.prettyYaml = true;
     }
     let previewUrl
     if (url) {
@@ -269,16 +322,26 @@
 </script>
 
 <style lang="scss" scoped>
-  .includeUnsupportedProxy {
+  .preview-options {
     margin: 4px 0;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    gap: 24px;
+
+    .preview-option-item {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      gap: 4px;
+    }
+
     input {
       cursor: pointer;
       padding: 0;
-      margin: 0 4px 0 0;
+      margin: 0;
     }
+
     label {
       cursor: pointer;
     }

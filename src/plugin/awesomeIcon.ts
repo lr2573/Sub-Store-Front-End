@@ -6,6 +6,7 @@ import {
   faArrowRotateRight,
   faArrowsRotate,
   faArrowUpRightFromSquare,
+  faArrowLeft,
   faBan,
   faCheck,
   faCircleQuestion,
@@ -18,6 +19,7 @@ import {
   faDesktop,
   faEye,
   faEllipsis,
+  faFileLines,
   faFloppyDisk,
   faGrip,
   faLanguage,
@@ -46,7 +48,8 @@ import {
   faMobileScreenButton,
   faBars,
   faBoxArchive,
-  faShare
+  faShare,
+  faMagnifyingGlass
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faFileImport);
@@ -72,9 +75,11 @@ library.add(faCircleXmark);
 library.add(faXmark);
 library.add(faLocationArrow);
 library.add(faCode);
+library.add(faFileLines);
 library.add(faDesktop);
 library.add(faArrowRotateRight);
 library.add(faArrowsRotate);
+library.add(faArrowLeft);
 library.add(faAnglesRight);
 library.add(faAngleRight);
 library.add(faCloudArrowDown);
@@ -95,3 +100,4 @@ library.add(faMinimize);
 library.add(faMobileScreenButton);
 library.add(faBoxArchive);
 library.add(faShare);
+library.add(faMagnifyingGlass);

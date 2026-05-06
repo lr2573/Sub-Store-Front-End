@@ -440,14 +440,14 @@
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>
           <p>{{ $t(`subPage.loadFailed.desc`) }}</p>
-          <p>{{ $t(`subPage.loadFailed.followOfficialChannel`) }}</p>
+          <a href="https://t.me/zhetengsha/218" style="color: var(--primary-color)"> {{ $t(`magicPath.troubleshooting`) }}</a>
           <p>
-            {{ $t(`subPage.loadFailed.officialChannel`) }}
+            
             <a
-              href="https://t.me/cool_scripts"
+              href="/aboutUs"
               style="color: var(--primary-color)"
             >
-              Cool Scripts
+              {{ $t(`subPage.loadFailed.about`) }}
             </a>
           </p>
         </template>
@@ -456,14 +456,14 @@
         <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
         {{ $t(`subPage.loadFailed.btn`) }}
       </button>
-      <a
+      <!-- <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
         rel="noreferrer noopener"
       >
         <span>{{ $t(`subPage.loadFailed.doc`) }}</span>
         <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
-      </a>
+      </a> -->
     </div>
     <div
       v-if="hasShares && isSelectionMode"
@@ -516,15 +516,15 @@ import { useListViewModeSelectionLock } from "@/hooks/useListViewModeSelectionLo
 import { useTagBarHeight } from "@/hooks/useTagBarHeight";
 import { useAppNotifyStore } from "@/store/appNotify";
 import { useGlobalStore } from "@/store/global";
+import { useListSearchStore } from "@/store/listSearch";
 import { useSettingsStore } from "@/store/settings";
 import { useSubsStore } from "@/store/subs";
 import { useSystemStore } from "@/store/system";
 import { getShareCreatePath } from "@/utils/share";
+import { listItemMatchesSearch, shouldSearchListRemark } from "@/utils/listSearch";
 import {
   ALL_SHARE_TAG,
-  UNTAGGED_SHARE_TAG,
   buildShareTagOptions,
-  countSharesByTagFilter,
   groupSharesByType,
   resolveShareTagFilter,
   shareMatchesTagFilter,
@@ -556,6 +556,7 @@ const subsStore = useSubsStore();
 const globalStore = useGlobalStore();
 const systemStore = useSystemStore();
 const settingsStore = useSettingsStore();
+const listSearchStore = useListSearchStore();
 const { appearanceSetting } = storeToRefs(settingsStore);
 const { effectiveListViewMode } = useListViewMode();
 const isDualColumnMode = computed(() => {
@@ -656,7 +657,10 @@ const setTag = (current: string) => {
   scrollToTop();
 };
 const shouldShowShare = (share: Share) => {
-  return shareMatchesTagFilter(share, tag.value);
+  return shareMatchesTagFilter(share, tag.value)
+    && listItemMatchesSearch(share, listSearchStore.normalizedQuery, {
+      includeRemark: shouldSearchListRemark(appearanceSetting.value),
+    });
 };
 
 const subShareData = ref<Share[]>([]);
@@ -670,9 +674,9 @@ const selectedShareKeys = ref<string[]>([]);
 const isDeletingSelectedShares = ref(false);
 useListViewModeSelectionLock(isSelectionMode);
 
-const subShareDataCount = computed(() => countSharesByTagFilter(subShareData.value, tag.value));
-const collectionShareDataCount = computed(() => countSharesByTagFilter(collectionShareData.value, tag.value));
-const fileShareDataCount = computed(() => countSharesByTagFilter(fileShareData.value, tag.value));
+const subShareDataCount = computed(() => subShareData.value.filter(shouldShowShare).length);
+const collectionShareDataCount = computed(() => collectionShareData.value.filter(shouldShowShare).length);
+const fileShareDataCount = computed(() => fileShareData.value.filter(shouldShowShare).length);
 const allShareData = computed(() => [
   ...subShareData.value,
   ...collectionShareData.value,
@@ -1076,7 +1080,7 @@ const confirmDeleteSelectedShares = () => {
 
   a {
     font-size: 14px;
-    margin-top: 24px;
+    margin: 24px 0 12px 0;
     color: var(--comment-text-color);
 
     span {
@@ -1292,13 +1296,15 @@ const confirmDeleteSelectedShares = () => {
 }
 
 .share-top-selection-toggle svg {
-  width: 17px;
-  height: 17px;
+  width: 14px !important;
+  height: 14px !important;
+  font-size: 14px !important;
 }
 
 .share-top-create-button svg {
-  width: 16px;
-  height: 16px;
+  width: 14px !important;
+  height: 14px !important;
+  font-size: 14px !important;
 }
 
 .share-top-selection-toggle:focus-visible,

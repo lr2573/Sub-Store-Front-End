@@ -516,7 +516,7 @@
     @closePreview="closePreview"
     @refresh="refreshPreview"
   />
-  <icon-popup v-if="iconPopupVisible" v-model:visible="iconPopupVisible" @setIcon="setIcon">
+  <icon-popup v-model:visible="iconPopupVisible" @setIcon="setIcon">
   </icon-popup>
   <!-- 订阅名称 -->
   <DesktopPicker

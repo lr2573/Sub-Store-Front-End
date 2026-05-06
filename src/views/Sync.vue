@@ -162,14 +162,14 @@
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>
           <p>{{ $t(`subPage.loadFailed.desc`) }}</p>
-          <p>{{ $t(`subPage.loadFailed.followOfficialChannel`) }}</p>
+          <a href="https://t.me/zhetengsha/218" style="color: var(--primary-color)"> {{ $t(`magicPath.troubleshooting`) }}</a>
           <p>
-            {{ $t(`subPage.loadFailed.officialChannel`) }}
+            {{ $t(`subPage.loadFailed.about`) }}
             <a
-              href="https://t.me/cool_scripts"
+              href="/aboutUs"
               style="color: var(--primary-color)"
             >
-              Cool Scripts
+              {{ $t(`subPage.loadFailed.about`) }}
             </a>
           </p>
         </template>
@@ -178,14 +178,14 @@
         <font-awesome-icon icon="fa-solid fa-rotate-right" />
         {{ $t(`subPage.loadFailed.btn`) }}
       </button>
-      <a
+      <!-- <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
         rel="noreferrer noopener"
       >
         <span>{{ $t(`subPage.loadFailed.doc`) }}</span>
         <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
-      </a>
+      </a> -->
     </div>
   </div>
 </template>
@@ -211,8 +211,10 @@ import { useTagBarHeight } from "@/hooks/useTagBarHeight";
 import { useA11y } from "@/hooks/useA11y";
 import { Dialog } from "@nutui/nutui";
 import { isMobile } from "@/utils/isMobile";
+import { listItemMatchesSearch, shouldSearchListRemark } from "@/utils/listSearch";
 import { useRouter } from "vue-router";
 import { useSystemStore } from "@/store/system";
+import { useListSearchStore } from "@/store/listSearch";
 
 const { env } = useBackend();
 const subsApi = useSubsApi();
@@ -222,6 +224,7 @@ const artifactsStore = useArtifactsStore();
 const settingsStore = useSettingsStore();
 const systemStore = useSystemStore();
 const methodStore = useMethodStore();
+const listSearchStore = useListSearchStore();
 const { effectiveListViewMode } = useListViewMode();
 
 const {
@@ -499,12 +502,18 @@ const setTag = (current: string) => {
   scrollToTop();
 };
 
-const shouldShowElement = (element: Artifact) => {
+const shouldShowElementByTag = (element: Artifact) => {
   if (tag.value === "all") return true;
   if (tag.value === "untagged") {
     return !Array.isArray(element.tag) || element.tag.length === 0;
   }
   return element.tag?.includes(tag.value);
+};
+const shouldShowElement = (element: Artifact) => {
+  return shouldShowElementByTag(element)
+    && listItemMatchesSearch(element, listSearchStore.normalizedQuery, {
+      includeRemark: shouldSearchListRemark(appearanceSetting.value),
+    });
 };
 const filteredArtifacts = useFilteredDraggableList(artifacts, shouldShowElement);
 </script>

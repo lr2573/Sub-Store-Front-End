@@ -28,9 +28,10 @@ export default {
   // Title Bar
   navBar: {
     langSwitcher: {
-      cellTitle: "Tap a language which you want to use",
+      cellTitle: "轻点语言以切换",
       zh: "简体中文",
       en: "English",
+      language: "语言",
     },
     listView: {
       switchToSingle: "Switch to single column",
@@ -42,6 +43,16 @@ export default {
       switchToNarrow: "Switch to narrow navigation",
       switchToWide: "Switch to wide navigation",
     },
+    simpleMode: {
+      switchToSimple: "Enable Simple Mode (more compact)",
+      switchToNormal: "Disable Simple Mode (more details)",
+    },
+    listSearch: {
+      open: "Search",
+      placeholder: "Name/tags/remarks (if shown)",
+      clear: "Clear search",
+      close: "Close search",
+    },
     pagesTitle: {
       sub: "Subscription",
       file: "File",
@@ -52,12 +63,13 @@ export default {
       fileEditor: "File Editor",
       syncEditor: "Sync Editor",
       preview: 'Preview',
-      shareManage: "Share Manage",
+      shareManage: "Share",
       shareEditor: "Share Editor",
       archive: "Archived",
+      logs: "Backend Logs",
       themeSetting: "Theme Setting",
       moreSetting: "More Setting",
-      apiSetting: "Backend Setting",
+      apiSetting: "Backend Management",
       aboutUs: "About Sub-Store",
       notFound: "404 Not Found",
       askWhat: {
@@ -173,7 +185,7 @@ export default {
       doc: "Visit Sub-Store Docs",
       followOfficialChannel:
         "You can also follow Sub-Store official channel and join the group to ask questions",
-      officialChannel: "Official channel:",
+      about: "Check the project & tutorial",
     },
     collectionItem: {
       noSub: "No subscription included",
@@ -329,6 +341,7 @@ export default {
         subscriptions: {
           label: "Select included subscriptions",
           empty: 'Please create a subscription first, then use the collection feature',
+          none: 'None',
         },
         content: {
           label: "Content",
@@ -373,6 +386,14 @@ export default {
         subUserinfo: {
           label: "Subscription-Userinfo",
           placeholder: "Value/URL(supports noCache/headersCacheTtl etc.)",
+        },
+        firstSubFlow: {
+          label: 'Pass Through Single Subscription Traffic Info',
+          tips: {
+            title: 'Pass Through Single Subscription Traffic Info',
+            content: 'By default, the first single subscription traffic info is passed through.\n\nTo merge traffic info from all single subscriptions in the collection, use the script at https://t.me/zhetengsha/3070',
+            okText: 'View',
+          },
         },
         passThroughUA: {
           label: 'Pass Through Request User-Agent',
@@ -639,12 +660,14 @@ export default {
       githubProxy: "Please input GitHub Proxy",
       githubProxyRegex: "Please input GitHub proxy match regex",
       defaultUserAgent: "Please input Default User-Agent",
+      defaultFlowUserAgent: "Please input Default Flow User-Agent",
       defaultProxy: "Please input Default Proxy/Policy",
       defaultTimeout: "Default Timeout (in ms, default: 8000)",
       cacheThreshold: "Cache Threshold (in KB, default: 1024)",
       resourceCacheTtl: 'Resource Cache TTL, default: 3600(s)',
       headersCacheTtl: 'Headers Cache TTL, default: 60(s)',
       scriptCacheTtl: 'Script Cache TTL, default: 172800(s)',
+      logsMaxCount: 'Max stored logs, default: 0=off',
       concurrency: 'Concurrency Limit(default: 3)',
       apiCheckTimeout: 'API Check Timeout, default: 3000(ms)',
       noGithubUser: "Not set GitHub username",
@@ -689,6 +712,7 @@ export default {
     cacheConfig: "Cache Configuration",
     frontEndConfig: "Front-End Configuration",
     githubConfig: 'GitHub Configuration',
+    logsTitle: 'Backend Logs',
     storage: {
       gist: {
         label: "Gist",
@@ -703,12 +727,76 @@ export default {
       },
     },
   },
+  logsPage: {
+    placeholder: {
+      keyword: "Keyword search",
+      limit: "Recent N logs, default: {count}",
+      refreshInterval: "Interval (default {seconds}s)",
+    },
+    search: {
+      regex: "Regex",
+      ignoreCase: "Ignore case",
+    },
+    autoRefresh: "Auto refresh",
+    refresh: "Refresh",
+    clear: "Clear",
+    copy: "Copy",
+    floating: {
+      open: "Open backend logs",
+      close: "Close backend logs",
+    },
+    confirmClear: "Clear persisted backend logs?",
+    empty: "No logs",
+    disabled: {
+      desc: 'Logs are off by default. Set "My Profile" - "Cache Configuration" - "Max stored logs" to enable them. This frequently reads and writes persistent cache and may affect performance.\n\nYou can also access the logs popup anytime from the top right corner of the navigation bar.',
+      alternatives: {
+        title: "How to view logs in different setups",
+        proxyApp: "Proxy app: view the script logs in the proxy app",
+        docker: "Docker: view container logs",
+        android: "Android module: check /data/adb/sub_store/run",
+        other: "Other setups: check the corresponding runtime log location",
+      },
+    },
+    backendRequired: {
+      desc: "The current backend version is {currentVersion}. The logs page requires backend {minVersion} or later. Update the backend before opening logs.",
+    },
+    meta: "Showing {total}, max stored {maxCount}",
+    selectMode: {
+      enter: "Select",
+      cancel: "Cancel",
+      selectedCount: "{count} selected",
+      selectAll: "Select All",
+      clearAll: "Clear All",
+      copy: "Copy Selected",
+      empty: "Select logs first",
+    },
+    notify: {
+      loadFailed: "Failed to load logs",
+      clearSucceed: "Logs cleared",
+      copySucceed: "Logs copied",
+      copyFailed: "Failed to copy logs\n{e}",
+      invalidRegex: "Invalid regular expression",
+      backendCheckFailed: "Unable to verify backend version",
+    },
+  },
   comparePage: {
     title: "Instant Preview",
     remain: {
       title: "remain nodes",
       beforeIndicator: "before",
       afterIndicator: "after",
+    },
+    nodeNames: {
+      entry: "All names",
+      title: "{side} all node names",
+      descriptionBefore:
+        "Copy all node names, or copy a prompt for AI to generate a general JavaScript script, then paste it into a script action for custom node renaming. For real-time AI processing, see: ",
+      aiLink: "Use AI to process nodes",
+      copyAll: "Copy all names",
+      copyPrompt: "Copy prompt",
+      copyAllSucceed: "Node names copied",
+      copyPromptSucceed: "Prompt copied",
+      copyFailed: "Failed to copy\n{e}",
     },
     divider: "Following is filtered nodes",
     filter: {
@@ -960,19 +1048,19 @@ export default {
     },
     liveDelete: {
       title: "Delete",
-      desc: 'This backend supports archiving.\nContinue with {displayName}?',
+      desc: 'New backend supports archiving.\nContinue with {displayName}?',
       batchDesc:
-        'This backend supports archiving.\nContinue with the selected {count} {type} item(s)?',
+        'New backend supports archiving.\nContinue with the selected {count} {type} item(s)?',
       succeedNotify: "Archived",
       btn: {
         archive: "Archive",
-        permanent: "Delete permanently",
+        permanent: "Delete",
       },
     },
     entry: {
       archivedAt: "Archived: {time}",
       restore: "Restore",
-      delete: "Delete permanently",
+      delete: "Delete",
     },
     selectMode: {
       enter: "Select",
@@ -1044,7 +1132,7 @@ export default {
     },
   },
   apiSettingPage: {
-    apiSettingTitle: "Backend Setting",
+    apiSettingTitle: "Backend Management",
     apiSettingDesc0: `1. When the backend server address is https://api.com, an attempt is made to request https://api.com/api/utils/env to verify backend availability. When the backend server address cannot be added, try accessing this address first.`,
     apiSettingDesc1: `2. HTTPS front-end cannot request non-local HTTP backend(Some browsers also cannot access the local HTTP backend.). Please configure a reverse proxy or host your own HTTP front-end on your LAN.`,
     apiSettingDesc2: `Add the backend server address, such as the backend service built on server/NAS/Android/cloud platform. You can refer to XiaoYi's tutorial on setting up a backend: `,
@@ -1056,6 +1144,14 @@ export default {
       desc: "This list is saved locally in the browser. If you change your browser/device, you will need to add it again. Click to switch to the corresponding backend.",
       defaultName: "Default",
       currentTag: "Current",
+      copy: "Copy link",
+      editName: "Edit name",
+      saveName: "Save name",
+      cancelEditName: "Cancel edit",
+      delete: "Delete",
+    },
+    switchApi: {
+      loading: 'Switching...',
     },
     addApi: {
       title: "Add New Backend Connection",
@@ -1065,8 +1161,15 @@ export default {
       },
       errors: {
         nameEmpty: "Name cannot be empty",
+        nameDuplicate: "API name already exists",
       },
       btn: "Add",
+      duplicate: {
+        title: 'Tips',
+        content: 'A backend configuration with the same address already exists. Do you want to switch to this backend?',
+        confirm: 'Switch directly',
+        cancel: 'Overwrite and switch',
+      },
     },
   },
   moreSettingPage: {
@@ -1108,7 +1211,18 @@ export default {
     isDefaultIcon: "Restore default icon",
     isShowIcon: 'Show icon',
     isSubItemMenuFold: "Fold sub item menu",
-    isEditorCommon: "Show editor common settings",
+    isEditorCommon: "Editor common settings",
+    editorCommon: {
+      title: "Editor common settings",
+    },
+    manualSubscriptions: {
+      title: "Manually selected subscriptions",
+    },
+    editorDisplayMode: {
+      expanded: "Expanded",
+      collapsed: "Collapsed",
+      hidden: "Hidden",
+    },
     isSimpleReicon: "Show items refresh button",
     isSimpleShowRemarks: "Simple Mode Show items remarks",
     showFloatingRefreshButton: "Show floating refresh button",
@@ -1158,7 +1272,7 @@ export default {
     placeholder: "Please enter backend path or address",
     connect: "Connect",
     skip: "Skip",
-    info: "You can configure this later in the Backend Settings in the My Profile page",
+    info: "You can configure this later in the Backend Management in the My Profile page",
     customInfo: "Self-Hosted: Backend path can be set via SUB_STORE_FRONTEND_BACKEND_PATH environment variable",
     troubleshooting: 'You may refer to this troubleshooting guide',
     preview: "Preview",
@@ -1172,6 +1286,8 @@ export default {
       empty: "Input cannot be empty",
       invalid: "Invalid backend address",
       connection: "Connection failed, please check if the input is correct",
+      urlApiConnection: "The API address specified by the URL parameter failed to connect. Please check whether the address is correct",
+      urlMagicPathConnection: "The magicpath specified by the URL parameter failed to connect. Please check whether the path is correct",
       unknown: "An unknown error occurred",
       portRequired: "Host format must include port number"
     }

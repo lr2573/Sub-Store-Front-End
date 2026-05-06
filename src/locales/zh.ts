@@ -56,9 +56,10 @@ export default {
   // 顶部标题栏
   navBar: {
     langSwitcher: {
-      cellTitle: '轻点语言以切换',
+      cellTitle: 'Tap a language to switch',
       zh: '简体中文',
       en: 'English',
+      language: "Language",
     },
     listView: {
       switchToSingle: '切换为单列',
@@ -69,6 +70,16 @@ export default {
     navigationMode: {
       switchToNarrow: '切换为窄屏导航',
       switchToWide: '切换为宽屏导航',
+    },
+    simpleMode: {
+      switchToSimple: '开启简洁模式（更紧凑）',
+      switchToNormal: '关闭简洁模式（信息更完整）',
+    },
+    listSearch: {
+      open: '搜索',
+      placeholder: '名称/标签/备注(若开启显示)',
+      clear: '清空搜索',
+      close: '关闭搜索',
     },
     pagesTitle: {
       sub: '订阅管理',
@@ -83,9 +94,10 @@ export default {
       shareManage: '分享管理',
       shareEditor: '分享编辑',
       archive: '已归档',
+      logs: '后端日志',
       themeSetting: '主题设置',
       moreSetting: '更多设置',
-      apiSetting: '后端设置',
+      apiSetting: '后端管理',
       aboutUs: '关于 Sub-Store',
       notFound: '地址未找到',
       askWhat: {
@@ -197,7 +209,7 @@ export default {
       btn: '重试',
       doc: '查看 Sub-Store 教程',
       followOfficialChannel: '或关注 Sub-Store 官方频道并进群提问',
-      officialChannel: '官方频道：',
+      about: '查看项目 & 教程',
     },
     collectionItem: {
       noSub: '没有包含子订阅',
@@ -349,6 +361,7 @@ export default {
         subscriptions: {
           label: '手动选择的订阅',
           empty: '请先创建单条订阅, 再使用组合订阅功能',
+          none: '未选择',
         },
         content: {
           label: '内容',
@@ -391,6 +404,14 @@ export default {
         subUserinfo: {
           label: '订阅流量信息',
           placeholder: '值/链接(支持 noCache/headersCacheTtl 等参数)',
+        },
+        firstSubFlow: {
+          label: '透传单条订阅流量信息',
+          tips: {
+            title: '透传单条订阅流量信息',
+            content: '默认透传第一个单条订阅流量信息。\n\n若需要合并组合订阅中所有单条订阅的流量，可使用脚本 https://t.me/zhetengsha/3070',
+            okText: '查看',
+          },
         },
         passThroughUA: {
           label: '透传请求的 User-Agent',
@@ -634,12 +655,14 @@ export default {
       githubProxy: '请输入 GitHub 加速代理',
       githubProxyRegex: '请输入 GitHub 加速代理匹配正则',
       defaultUserAgent: '请输入默认 User-Agent',
+      defaultFlowUserAgent: '请输入默认查询订阅流量信息 的 User-Agent',
       defaultProxy: '请输入默认代理/策略',
       defaultTimeout: '默认超时(单位: 毫秒, 默认: 8000)',
       cacheThreshold: '缓存阈值(单位: KB, 默认: 1024)',
       resourceCacheTtl: '资源缓存(单位: 秒, 默认: 3600)',
       headersCacheTtl: '响应头缓存(单位: 秒, 默认: 60)',
       scriptCacheTtl: '脚本缓存(单位: 秒, 默认: 172800)',
+      logsMaxCount: '最大保存日志条数(默认: 0=关闭)',
       concurrency: '并发数(默认: 3)',
       apiCheckTimeout: 'API 检测超时(单位: 毫秒, 默认: 3000)',
       noGithubUser: '未配置 GitHub 用户名',
@@ -684,6 +707,7 @@ export default {
     cacheConfig: "缓存配置",
     frontEndConfig: "前端配置",
     githubConfig: 'GitHub 配置',
+    logsTitle: '后端日志',
     storage: {
       gist: {
         label: 'Gist 同步',
@@ -698,12 +722,75 @@ export default {
       }
     }
   },
+  logsPage: {
+    placeholder: {
+      keyword: '关键词搜索',
+      limit: '最近 N 条(默认: {count})',
+      refreshInterval: '刷新间隔(默认 {seconds}(s))',
+    },
+    search: {
+      regex: '正则',
+      ignoreCase: '忽略大小写',
+    },
+    autoRefresh: '定时刷新',
+    refresh: '刷新',
+    clear: '清空',
+    copy: '复制',
+    floating: {
+      open: '打开后端日志',
+      close: '关闭后端日志',
+    },
+    confirmClear: '确定要清空后端持久化日志吗？',
+    empty: '暂无日志',
+    disabled: {
+      desc: '日志功能默认关闭\n\n可在“我的” - “缓存配置” - “最大保存日志条数”中设置\n此方式会频繁读写持久化缓存，可能影响性能\n\n可在导航栏右上角 随时进入日志弹窗',
+      alternatives: {
+        title: '不同方案 如何查看日志',
+        proxyApp: '代理 App: 查看脚本日志',
+        docker: 'Docker 版: 容器日志',
+        android: 'Android 模块版: 在 /data/adb/sub_store/run',
+        other: '其他的方案在对应的地方看',
+      },
+    },
+    backendRequired: {
+      desc: '当前后端版本为 {currentVersion}，日志页面需要后端 {minVersion} 或更高版本。请更新后端后再打开日志。',
+    },
+    meta: '当前显示 {total} 条，最多保存 {maxCount} 条',
+    selectMode: {
+      enter: '多选',
+      cancel: '取消多选',
+      selectedCount: '已选 {count} 条',
+      selectAll: '全选',
+      clearAll: '取消全选',
+      copy: '复制所选',
+      empty: '请先选择日志',
+    },
+    notify: {
+      loadFailed: '日志加载失败',
+      clearSucceed: '日志已清空',
+      copySucceed: '日志已复制',
+      copyFailed: '复制日志失败\n{e}',
+      invalidRegex: '正则表达式无效',
+      backendCheckFailed: '无法验证后端版本',
+    },
+  },
   comparePage: {
     title: '即时预览',
     remain: {
       title: '保留的节点',
       beforeIndicator: '操作前',
       afterIndicator: '操作后',
+    },
+    nodeNames: {
+      entry: '全部节点名',
+      title: '{side}全部节点名',
+      descriptionBefore: '可复制全部节点名，也可复制提示词让 AI 生成一段比较通用的 JavaScript 脚本，然后粘贴到脚本操作中实现更符合你需求的重命名。若想实时 AI 处理可以参考：',
+      aiLink: '使用 AI 处理节点',
+      copyAll: '复制全部节点名',
+      copyPrompt: '复制提示词',
+      copyAllSucceed: '节点名已复制',
+      copyPromptSucceed: '提示词已复制',
+      copyFailed: '复制失败\n{e}',
     },
     divider: '以下为被过滤的节点',
     filter: {
@@ -1032,7 +1119,7 @@ export default {
     },
   },
   apiSettingPage: {
-    apiSettingTitle: '后端设置',
+    apiSettingTitle: '后端管理',
     apiSettingDesc0: `1. 后端地址为 https://api.com 时, 将尝试请求 https://api.com/api/utils/env 验证后端可用性. 当无法添加后端地址时, 可先尝试访问此地址`,
     apiSettingDesc1: `2. HTTPS 前端无法请求非本地的 HTTP 后端(部分浏览器上也无法访问本地 HTTP 后端). 请配置反代或在局域网自建 HTTP 前端. `,
     apiSettingDesc2: `3. 添加后端服务器地址，例如 服务器/NAS/Android/云平台 上搭建的后端服务。可以查看小一佬的后端搭建教程：`,
@@ -1044,6 +1131,14 @@ export default {
       desc: '此列表为浏览器本地保存，更换浏览器/设备需重新添加，点击即可切换至对应后端',
       defaultName: '默认后端',
       currentTag: '当前',
+      copy: '复制链接',
+      editName: '编辑名称',
+      saveName: '保存名称',
+      cancelEditName: '取消编辑',
+      delete: '删除',
+    },
+    switchApi: {
+      loading: '切换中...',
     },
     addApi: {
       title: '添加新的后端连接配置',
@@ -1053,8 +1148,15 @@ export default {
       },
       errors: {
         nameEmpty: '名称不能为空',
+        nameDuplicate: 'API 名称重复',
       },
       btn: '添加',
+      duplicate: {
+        title: '温馨提示',
+        content: '当前已存在相同地址的后端配置，是否切换至该后端？',
+        confirm: '直接切换',
+        cancel: '覆盖切换',
+      },
     },
   },
   moreSettingPage: {
@@ -1096,7 +1198,18 @@ export default {
     isDefaultIcon: '恢复默认图标',
     isShowIcon: '展示图标',
     isSubItemMenuFold: '收纳订阅页菜单功能',
-    isEditorCommon: '展示编辑页常用配置',
+    isEditorCommon: '编辑页常用配置',
+    editorCommon: {
+      title: '编辑页常用配置',
+    },
+    manualSubscriptions: {
+      title: '手动选择的订阅',
+    },
+    editorDisplayMode: {
+      expanded: '展开',
+      collapsed: '收起',
+      hidden: '不显示',
+    },
     isSimpleReicon: '简洁模式展示刷新按钮',
     isSimpleShowRemarks: '简洁模式列表展示备注',
     showFloatingRefreshButton: '显示悬浮刷新按钮',
@@ -1147,7 +1260,7 @@ export default {
     placeholder: '请输入后端路径或地址',
     connect: '连接',
     skip: '跳过',
-    info: '您可以稍后在"我的"页面中的"后端设置"中配置',
+    info: '您可以稍后在"我的"页面中的"后端管理"中配置',
     customInfo: '自建后端: 可通过环境变量 SUB_STORE_FRONTEND_BACKEND_PATH 设置后端路径',
     troubleshooting: '你可以查看此排查指南',
     preview: '预览',
@@ -1161,6 +1274,8 @@ export default {
       empty: '输入不能为空',
       invalid: '无效的后端地址',
       connection: '连接失败，请检查输入是否正确',
+      urlApiConnection: '通过 URL 参数指定的 API 地址连接失败，请检查地址是否正确',
+      urlMagicPathConnection: '通过 URL 参数指定的 magicpath 连接失败，请检查路径是否正确',
       unknown: '发生未知错误',
       portRequired: '主机格式需要包含端口号'
     }

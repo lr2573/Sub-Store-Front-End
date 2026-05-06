@@ -596,11 +596,12 @@ import { useTagBarHeight } from '@/hooks/useTagBarHeight';
 import { useAppNotifyStore } from '@/store/appNotify';
 import { useGlobalStore } from '@/store/global';
 import { useArchiveStore } from '@/store/archive';
+import { useListSearchStore } from '@/store/listSearch';
+import { useSettingsStore } from '@/store/settings';
 import { useSystemStore } from '@/store/system';
 import {
   ALL_SHARE_TAG as ALL_ARCHIVE_TAG,
   buildShareTagOptions as buildArchiveTagOptions,
-  countSharesByTagFilter as countArchiveEntriesByTagFilter,
   resolveShareTagFilter as resolveArchiveTagFilter,
   shareMatchesTagFilter as archiveEntryMatchesTagFilter,
 } from '@/utils/shareTags';
@@ -609,6 +610,7 @@ import {
   groupArchiveEntriesByType,
   openClosableDialog,
 } from '@/utils/archive';
+import { listItemMatchesSearch, shouldSearchListRemark } from '@/utils/listSearch';
 
 type ArchiveGroupKey = ArchiveItemType;
 const ARCHIVE_TAG_STORAGE_KEY = 'archive-tag';
@@ -626,11 +628,14 @@ const { showNotify } = useAppNotifyStore();
 const archiveStore = useArchiveStore();
 const globalStore = useGlobalStore();
 const systemStore = useSystemStore();
+const settingsStore = useSettingsStore();
+const listSearchStore = useListSearchStore();
 const { effectiveListViewMode } = useListViewMode();
 
 const { entries, hasEntries } = storeToRefs(archiveStore);
 const { bottomSafeArea } = storeToRefs(globalStore);
 const { navBartop, navBarHeight } = storeToRefs(systemStore);
+const { appearanceSetting } = storeToRefs(settingsStore);
 const isDualColumnMode = computed(() => {
   return effectiveListViewMode.value === 'dual-column';
 });
@@ -698,7 +703,10 @@ const setTag = (current: string) => {
   scrollToTop();
 };
 const shouldShowEntry = (entry: ArchiveEntry) => {
-  return archiveEntryMatchesTagFilter(entry, tag.value);
+  return archiveEntryMatchesTagFilter(entry, tag.value)
+    && listItemMatchesSearch(entry, listSearchStore.normalizedQuery, {
+      includeRemark: shouldSearchListRemark(appearanceSetting.value),
+    });
 };
 
 const subEntries = ref<ArchiveEntry[]>([]);
@@ -713,11 +721,11 @@ const filteredFileEntries = useFilteredDraggableList(fileEntries, shouldShowEntr
 const filteredArtifactEntries = useFilteredDraggableList(artifactEntries, shouldShowEntry);
 const filteredShareEntries = useFilteredDraggableList(shareEntries, shouldShowEntry);
 
-const subEntryCount = computed(() => countArchiveEntriesByTagFilter(subEntries.value, tag.value));
-const colEntryCount = computed(() => countArchiveEntriesByTagFilter(colEntries.value, tag.value));
-const fileEntryCount = computed(() => countArchiveEntriesByTagFilter(fileEntries.value, tag.value));
-const artifactEntryCount = computed(() => countArchiveEntriesByTagFilter(artifactEntries.value, tag.value));
-const shareEntryCount = computed(() => countArchiveEntriesByTagFilter(shareEntries.value, tag.value));
+const subEntryCount = computed(() => subEntries.value.filter(shouldShowEntry).length);
+const colEntryCount = computed(() => colEntries.value.filter(shouldShowEntry).length);
+const fileEntryCount = computed(() => fileEntries.value.filter(shouldShowEntry).length);
+const artifactEntryCount = computed(() => artifactEntries.value.filter(shouldShowEntry).length);
+const shareEntryCount = computed(() => shareEntries.value.filter(shouldShowEntry).length);
 
 const allEntries = computed(() => [
   ...subEntries.value,
@@ -1112,7 +1120,7 @@ onMounted(() => {
 
   a {
     font-size: 14px;
-    margin-top: 24px;
+    margin: 24px 0 12px 0;
     color: var(--comment-text-color);
   }
 }
@@ -1282,8 +1290,9 @@ onMounted(() => {
 }
 
 .share-top-selection-toggle svg {
-  width: 17px;
-  height: 17px;
+  width: 14px !important;
+  height: 14px !important;
+  font-size: 14px !important;
 }
 
 .share-top-selection-toggle:focus-visible {

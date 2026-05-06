@@ -197,14 +197,14 @@
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>
           <p>{{ $t(`subPage.loadFailed.desc`) }}</p>
-          <p>{{ $t(`subPage.loadFailed.followOfficialChannel`) }}</p>
+          <a href="https://t.me/zhetengsha/218" style="color: var(--primary-color)"> {{ $t(`magicPath.troubleshooting`) }}</a>
           <p>
-            {{ $t(`subPage.loadFailed.officialChannel`) }}
+            
             <a
-              href="https://t.me/cool_scripts"
+              href="/aboutUs"
               style="color: var(--primary-color)"
             >
-              Cool Scripts
+              {{ $t(`subPage.loadFailed.about`) }}
             </a>
           </p>
         </template>
@@ -217,14 +217,14 @@
         <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
         {{ $t(`subPage.loadFailed.btn`) }}
       </button>
-      <a
+      <!-- <a
         href="https://www.notion.so/Sub-Store-6259586994d34c11a4ced5c406264b46"
         target="_blank"
         rel="noreferrer noopener"
       >
         <span>{{ $t(`subPage.loadFailed.doc`) }}</span>
         <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
-      </a>
+      </a> -->
     </div>
   </div>
 </template>
@@ -243,6 +243,7 @@ import AccessibleEmpty from "@/components/AccessibleEmpty.vue";
 import FileListItem from "@/components/FileListItem.vue";
 import { useA11y } from "@/hooks/useA11y";
 import { useGlobalStore } from "@/store/global";
+import { useListSearchStore } from "@/store/listSearch";
 import { useSubsStore } from "@/store/subs";
 import { useSettingsStore } from '@/store/settings';
 import { useSystemStore } from "@/store/system";
@@ -255,6 +256,7 @@ import { useListViewMode } from "@/hooks/useListViewMode";
 import { useTagBarHeight } from "@/hooks/useTagBarHeight";
 import { isMobile } from "@/utils/isMobile";
 import { getShareCreatePath } from "@/utils/share";
+import { listItemMatchesSearch, shouldSearchListRemark } from "@/utils/listSearch";
 
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -294,6 +296,7 @@ const subsStore = useSubsStore();
 const globalStore = useGlobalStore();
 const systemStore = useSystemStore();
 const settingsStore = useSettingsStore();
+const listSearchStore = useListSearchStore();
 const { appearanceSetting } = storeToRefs(settingsStore);
 const { effectiveListViewMode } = useListViewMode();
 const { navBarHeight } = storeToRefs(systemStore);
@@ -505,10 +508,16 @@ const setTag = (current) => {
   // 增加滚动到顶部
   scrollToTop();
 };
-const shouldShowElement = (element) => {
+const shouldShowElementByTag = (element) => {
   if(tag.value === 'all') return true;
   if(tag.value === 'untagged') return !Array.isArray(element.tag) || element.tag.length === 0;
   return element.tag?.includes(tag.value);
+};
+const shouldShowElement = (element) => {
+  return shouldShowElementByTag(element)
+    && listItemMatchesSearch(element, listSearchStore.normalizedQuery, {
+      includeRemark: shouldSearchListRemark(appearanceSetting.value),
+    });
 };
 const filteredFiles = useFilteredDraggableList(files, shouldShowElement);
 </script>
@@ -667,7 +676,7 @@ const filteredFiles = useFilteredDraggableList(files, shouldShowElement);
 
   a {
     font-size: 14px;
-    margin-top: 24px;
+    margin: 24px 0 12px 0;
     color: var(--comment-text-color);
 
     span {

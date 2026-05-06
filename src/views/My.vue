@@ -11,6 +11,9 @@
           :aria-pressed="i.value === storageType"
           @click="setTag(i.value)"
         >{{$t(`myPage.storage.${i.value}.label`) }}</button>
+        <div class="storage-language-switch">
+          <LanguageSwitcherButton />
+        </div>
         <p class="storage-info">{{ $t(`myPage.storage.${storageType}.info`) }}</p>
       </div>
 
@@ -352,6 +355,28 @@
               <nut-icon name="tips"></nut-icon>
             </button>
           </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="flowUaInputRef"
+              class="input"
+              v-model="flowUaInput"
+              :disabled="!isRequestConfigEditing"
+              :placeholder="$t(`myPage.placeholder.defaultFlowUserAgent`)"
+              type="text"
+              input-align="left"
+              :left-icon="iconUA"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isRequestConfigEditing"
+              :aria-label="flowUaHelpLabel"
+              :title="flowUaHelpLabel"
+              @click="flowUaTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
         </div>
       </div>
       <div class="config-card">
@@ -485,6 +510,28 @@
               :aria-label="scriptCacheTtlHelpLabel"
               :title="scriptCacheTtlHelpLabel"
               @click="scriptCacheTtlTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="logsMaxCountInputRef"
+              class="input"
+              v-model="logsMaxCountInput"
+              :disabled="!isCacheConfigEditing"
+              :placeholder="$t(`myPage.placeholder.logsMaxCount`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconLogsMaxCount"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isCacheConfigEditing"
+              :aria-label="logsMaxCountHelpLabel"
+              :title="logsMaxCountHelpLabel"
+              @click="logsMaxCountTips"
             >
               <nut-icon name="tips"></nut-icon>
             </button>
@@ -627,6 +674,14 @@
         <button
           type="button"
           class="settings-nav-button"
+          @click="onClickLogs"
+        >
+          <span>{{ $t(`myPage.logsTitle`) }}</span>
+          <nut-icon name="right"></nut-icon>
+        </button>
+        <button
+          type="button"
+          class="settings-nav-button"
           @click="onClickMore"
         >
           <span>{{ $t(`moreSettingPage.moreSettingTitle`) }}</span>
@@ -673,6 +728,7 @@ import icongithubProxy from "@/assets/icons/githubProxy.svg";
 import iconUA from "@/assets/icons/user-agent.svg";
 import iconMax from "@/assets/icons/max.svg";
 import iconHeadersCacheTtl from "@/assets/icons/headersCacheTtl.svg";
+import iconLogsMaxCount from "@/assets/icons/logsMaxCount.svg";
 import iconResourceCacheTtl from "@/assets/icons/resourceCacheTtl.svg";
 import iconScriptCacheTtl from "@/assets/icons/scriptCacheTtl.svg";
 import iconTimeout from "@/assets/icons/timeout.svg";
@@ -690,6 +746,7 @@ import { useRouter } from "vue-router";
 import { useBackend } from "@/hooks/useBackend";
 import { useHostAPI } from '@/hooks/useHostAPI';
 import { syncInnerInputA11y } from '@/hooks/useA11y';
+import LanguageSwitcherButton from "@/components/LanguageSwitcherButton.vue";
 import { Dialog, Toast } from '@nutui/nutui';
 
 const { t, locale } = useI18n();
@@ -699,7 +756,7 @@ const router = useRouter();
 const { showNotify } = useAppNotifyStore();
 const { currentUrl: host } = useHostAPI();
 const settingsStore = useSettingsStore();
-const { githubUser, gistToken, syncTime, avatarUrl, defaultUserAgent, defaultProxy, defaultTimeout, cacheThreshold, resourceCacheTtl, headersCacheTtl, scriptCacheTtl, syncPlatform, githubProxy, githubProxyRegex, gistUpload } =
+const { githubUser, gistToken, syncTime, avatarUrl, defaultUserAgent, defaultFlowUserAgent, defaultProxy, defaultTimeout, cacheThreshold, resourceCacheTtl, headersCacheTtl, scriptCacheTtl, logsMaxCount, syncPlatform, githubProxy, githubProxyRegex, gistUpload } =
   storeToRefs(settingsStore);
 
 const HTTP_URL_RE = /^https?:\/\//i;
@@ -784,6 +841,9 @@ const archiveVisible = computed(() => {
 const onClickAPISetting = () => {
   router.push(`/settings/api`);
 };
+const onClickLogs = () => {
+  router.push(`/logs`);
+};
 
 const onClickShareManage = () => {
   router.push(`/shares`);
@@ -806,12 +866,14 @@ const tokenInput = ref("");
 const githubProxyInput = ref("");
 const githubProxyRegexInput = ref("");
 const uaInput = ref("");
+const flowUaInput = ref("");
 const proxyInput = ref("");
 const timeoutInput = ref("");
 const cacheThresholdInput = ref("");
 const resourceCacheTtlInput = ref("");
 const headersCacheTtlInput = ref("");
 const scriptCacheTtlInput = ref("");
+const logsMaxCountInput = ref("");
 const concurrencyInput = ref("");
 const apiCheckTimeoutInput = ref("");
 const isGitHubConfigEditing = ref(false);
@@ -828,11 +890,13 @@ const githubProxyInputRef = ref(null);
 const githubProxyRegexInputRef = ref(null);
 const defaultProxyInputRef = ref(null);
 const defaultUserAgentInputRef = ref(null);
+const flowUaInputRef = ref(null);
 const defaultTimeoutInputRef = ref(null);
 const cacheThresholdInputRef = ref(null);
 const resourceCacheTtlInputRef = ref(null);
 const headersCacheTtlInputRef = ref(null);
 const scriptCacheTtlInputRef = ref(null);
+const logsMaxCountInputRef = ref(null);
 const concurrencyInputRef = ref(null);
 const apiCheckTimeoutInputRef = ref(null);
 
@@ -845,11 +909,13 @@ const githubProxyHelpLabel = createHelpLabel(`myPage.placeholder.githubProxy`);
 const githubProxyRegexHelpLabel = createHelpLabel(`myPage.placeholder.githubProxyRegex`);
 const defaultProxyHelpLabel = createHelpLabel(`myPage.placeholder.defaultProxy`);
 const defaultUserAgentHelpLabel = createHelpLabel(`myPage.placeholder.defaultUserAgent`);
+const flowUaHelpLabel = createHelpLabel(`myPage.placeholder.defaultFlowUserAgent`);
 const defaultTimeoutHelpLabel = createHelpLabel(`myPage.placeholder.defaultTimeout`);
 const cacheThresholdHelpLabel = createHelpLabel(`myPage.placeholder.cacheThreshold`);
 const resourceCacheTtlHelpLabel = createHelpLabel(`myPage.placeholder.resourceCacheTtl`);
 const headersCacheTtlHelpLabel = createHelpLabel(`myPage.placeholder.headersCacheTtl`);
 const scriptCacheTtlHelpLabel = createHelpLabel(`myPage.placeholder.scriptCacheTtl`);
+const logsMaxCountHelpLabel = createHelpLabel(`myPage.placeholder.logsMaxCount`);
 const concurrencyHelpLabel = createHelpLabel(`myPage.placeholder.concurrency`);
 const apiCheckTimeoutHelpLabel = createHelpLabel(`myPage.placeholder.apiCheckTimeout`);
 
@@ -861,11 +927,13 @@ const updateInputA11y = async () => {
   syncInnerInputA11y(githubProxyRegexInputRef.value, { label: t(`myPage.placeholder.githubProxyRegex`) });
   syncInnerInputA11y(defaultProxyInputRef.value, { label: t(`myPage.placeholder.defaultProxy`) });
   syncInnerInputA11y(defaultUserAgentInputRef.value, { label: t(`myPage.placeholder.defaultUserAgent`) });
+  syncInnerInputA11y(flowUaInputRef.value, { label: t(`myPage.placeholder.defaultFlowUserAgent`) });
   syncInnerInputA11y(defaultTimeoutInputRef.value, { label: t(`myPage.placeholder.defaultTimeout`) });
   syncInnerInputA11y(cacheThresholdInputRef.value, { label: t(`myPage.placeholder.cacheThreshold`) });
   syncInnerInputA11y(resourceCacheTtlInputRef.value, { label: t(`myPage.placeholder.resourceCacheTtl`) });
   syncInnerInputA11y(headersCacheTtlInputRef.value, { label: t(`myPage.placeholder.headersCacheTtl`) });
   syncInnerInputA11y(scriptCacheTtlInputRef.value, { label: t(`myPage.placeholder.scriptCacheTtl`) });
+  syncInnerInputA11y(logsMaxCountInputRef.value, { label: t(`myPage.placeholder.logsMaxCount`) });
   syncInnerInputA11y(concurrencyInputRef.value, { label: t(`myPage.placeholder.concurrency`) });
   syncInnerInputA11y(apiCheckTimeoutInputRef.value, { label: t(`myPage.placeholder.apiCheckTimeout`) });
 };
@@ -881,12 +949,14 @@ const toggleEditMode = async (type) => {
         githubProxy: githubProxyInput.value,
         githubProxyRegex: githubProxyRegexInput.value,
         defaultUserAgent: uaInput.value,
+        defaultFlowUserAgent: flowUaInput.value,
         defaultProxy: proxyInput.value,
         defaultTimeout: timeoutInput.value,
         cacheThreshold: cacheThresholdInput.value,
         resourceCacheTtl: resourceCacheTtlInput.value,
         headersCacheTtl: headersCacheTtlInput.value,
         scriptCacheTtl: scriptCacheTtlInput.value,
+        logsMaxCount: logsMaxCountInput.value,
       });
 
       if (saveSucceeded && type === 'github') {
@@ -905,12 +975,14 @@ const toggleEditMode = async (type) => {
       githubProxyInput.value = githubProxy.value;
       githubProxyRegexInput.value = githubProxyRegex.value;
       uaInput.value = defaultUserAgent.value;
+      flowUaInput.value = defaultFlowUserAgent.value || "";
       proxyInput.value = defaultProxy.value;
       timeoutInput.value = defaultTimeout.value;
       cacheThresholdInput.value = cacheThreshold.value;
       resourceCacheTtlInput.value = resourceCacheTtl.value;
       headersCacheTtlInput.value = headersCacheTtl.value;
       scriptCacheTtlInput.value = scriptCacheTtl.value;
+      logsMaxCountInput.value = logsMaxCount.value;
     }
     if (type === 'frontEnd' && isFrontEndConfigEditing.value) {
       const apiCheckTimeout = Number(apiCheckTimeoutInput.value);
@@ -1022,12 +1094,14 @@ const setDisplayInfo = () => {
   githubProxyRegexInput.value = githubProxyRegex.value || "";
   tokenInput.value = gistToken.value || "";
   uaInput.value = defaultUserAgent.value || "";
+  flowUaInput.value = defaultFlowUserAgent.value || "";
   proxyInput.value = defaultProxy.value || "";
   timeoutInput.value = defaultTimeout.value || "";
   cacheThresholdInput.value = cacheThreshold.value || "";
   resourceCacheTtlInput.value = resourceCacheTtl.value || "";
   headersCacheTtlInput.value = headersCacheTtl.value || "";
   scriptCacheTtlInput.value = scriptCacheTtl.value || "";
+  logsMaxCountInput.value = logsMaxCount.value ?? "";
 };
 
 // 同步 上传
@@ -1236,7 +1310,7 @@ const githubProxyRegexTips = () => {
 const proxyTips = () => {
   Dialog({
       title: '通过代理/节点/策略进行下载',
-      content: '1. Surge/Egern(参数 policy/policy-descriptor)\n\n可设置节点代理 例: Test = snell, 1.2.3.4, 80, psk=password, version=4\n\n或设置策略/节点 例: 国外加速\n\n2. Loon(参数 node)\n\nLoon 官方文档: \n\n指定该请求使用哪一个节点或者策略组（可以是节点名称、策略组名称，也可以是一个 Loon 格式的节点描述，如：shadowsocksr,example.com,1070,chacha20-ietf,"password",protocol=auth_aes128_sha1,protocol-param=test,obfs=plain,obfs-param=edge.microsoft.com）\n\n3. Stash(参数 headers["X-Surge-Policy"])/Shadowrocket(参数 headers.X-Surge-Policy)/QX(参数 opts.policy)\n\n可设置策略/节点\n\n4. Node.js 版(http/https/socks5):\n\n例: socks5://a:b@127.0.0.1:7890\n\n※ 优先级由高到低: 单条订阅, 组合订阅, 默认配置',
+      content: '1. Surge/Egern(参数 policy/policy-descriptor)\n\n可设置节点代理 例: Test = snell, 1.2.3.4, 80, psk=password, version=4\n\n或设置策略/节点 例: 国外加速\n\n2. Loon(参数 node)\n\nLoon 官方文档: \n\n指定该请求使用哪一个节点或者策略组（可以是节点名称、策略组名称，也可以是一个 Loon 格式的节点描述，如：shadowsocksr,example.com,1070,chacha20-ietf,"password",protocol=auth_aes128_sha1,protocol-param=test,obfs=plain,obfs-param=edge.microsoft.com）\n\n3. Stash(参数 headers["X-Surge-Policy"])/Shadowrocket(参数 headers.X-Surge-Policy)/QX(参数 opts.policy)\n\n可设置策略/节点\n\n4. Node.js 版(http/https/socks5):\n\n例: socks5://a:b@127.0.0.1:7890\n\n※ 优先级由高到低: 单条订阅, 组合订阅, 默认配置\n\n完整说明 请查看 https://t.me/zhetengsha/1843',
       popClass: 'auto-dialog',
       textAlign: 'left',
       okText: 'OK',
@@ -1248,7 +1322,18 @@ const proxyTips = () => {
 const uaTips = () => {
   Dialog({
       title: '默认为 clash.meta',
-      content: '可尝试设置为 clash-verge/v2.4.6, v2rayNG 等客户端的 User-Agent 让机场后端下发更多协议(可根据实际情况改成最新版本号)',
+      content: '可尝试设置为 clash-verge/v2.4.6, v2rayNG 等客户端的 User-Agent 让机场后端下发更多协议(可根据实际情况改成最新版本号)。也可在单条订阅里设置单独的 User-Agent',
+      popClass: 'auto-dialog',
+      okText: 'OK',
+      noCancelBtn: true,
+      closeOnPopstate: true,
+      lockScroll: false,
+    });
+};
+const flowUaTips = () => {
+  Dialog({
+      title: '查询订阅流量信息 的 User-Agent',
+      content: '若机场后端不给默认 UA 下发订阅流量信息, 可改为 "Quantumult%20X/1.0.30 (iPhone14,2; iOS 15.6)"。也可在单条订阅里的远程链接参数里设置单独的 flowUserAgent',
       popClass: 'auto-dialog',
       okText: 'OK',
       noCancelBtn: true,
@@ -1304,6 +1389,17 @@ const scriptCacheTtlTips = () => {
   Dialog({
       title: '脚本缓存时间 (秒)',
       content: '主要涉及在脚本中使用的 scriptResourceCache 缓存',
+      popClass: 'auto-dialog',
+      okText: 'OK',
+      noCancelBtn: true,
+      closeOnPopstate: true,
+      lockScroll: false,
+    });
+};
+const logsMaxCountTips = () => {
+  Dialog({
+      title: '最大保存日志条数',
+      content: '默认 0，即关闭日志缓存读写。设为大于 0 后，后端会把日志写入持久化缓存；数值越大占用的缓存空间越多，也可能影响性能。',
       popClass: 'auto-dialog',
       okText: 'OK',
       noCancelBtn: true,
@@ -1391,10 +1487,9 @@ const setTag = (current) => {
         border-bottom: 1px solid var(--primary-color);
         color: var(--primary-color);
       }
-      .storage-info {
+      .storage-language-switch {
         margin-left: auto;
-        font-size: 12px;
-        color: var(--lowest-text-color);
+        flex-shrink: 0;
       }
 
     }
