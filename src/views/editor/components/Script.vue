@@ -469,7 +469,7 @@ $server.name = 'prefix-' + $server.name
 $server.ecn = true
 $server['test-url'] = 'http://1.0.0.1/generate_204'
 // 2. operator function
-function operator(proxies, targetPlatform, context) {
+async function operator(proxies, targetPlatform, context) {
   // if ($options) {
   //   const { headers, url, path } = $options?._req || {}
   //   const ua = headers?.['user-agent'] || headers?.['User-Agent']
@@ -494,7 +494,7 @@ const port = Number($server.port)
 return [80].includes(port)
 
 // 2. filter function
-function filter(proxies, targetPlatform) {
+async function filter(proxies, targetPlatform) {
   return proxies.map( proxy => {
     // Return true if the current proxy is selected
 

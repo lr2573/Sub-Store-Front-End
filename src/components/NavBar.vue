@@ -291,14 +291,9 @@ onMounted(() => {
   systemStore.initSystemState();
 });
 
-const { navBarHeight, navBartop, pwaTopPadding: Pwa_top } = storeToRefs(systemStore);
+// 使用systemStore中的计算属性
+const { navBarHeight, navBartop, navActionOffset, pwaTopPadding: Pwa_top } = storeToRefs(systemStore);
 const searchInputRef = ref<HTMLInputElement | null>(null);
-
-const navActionOffset = computed(() => {
-  const navBarHeightNum = Number.parseFloat(navBarHeight.value || "56");
-  const navBarTopNum = Number.parseFloat(navBartop.value || "0");
-  return `${(navBarHeightNum + navBarTopNum) / 2}px`;
-});
 
 const isNeedBack = computed(() => {
   return route.meta.needNavBack ?? false;
@@ -700,21 +695,21 @@ const refresh = async () => {
       .icon-group {
         .navBar-left-icon {
           position: absolute;
-          top: 0;
-          bottom: 0;
+          top: v-bind(navActionOffset);
           width: 32px;
-          padding-top: v-bind(navBartop);
-          padding-right: 0;
-          padding-bottom: 0;
-          padding-left: 0;
+          height: 32px;
+          box-sizing: border-box;
+          padding: 0;
           border: 0;
           margin: 0;
           background: transparent;
+          transform: translateY(-50%);
           display: flex;
           align-items: center;
           justify-content: center;
           color: var(--icon-nav-bar-right);
           cursor: pointer;
+          pointer-events: auto;
           z-index: 3;
 
           &:focus {
@@ -846,20 +841,19 @@ const refresh = async () => {
 
 .nav-leading-button {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: v-bind(navActionOffset);
   left: 10px;
   width: 32px;
+  height: 32px;
+  box-sizing: border-box;
   padding: 0;
-  padding-top: v-bind(navBartop);
-  padding-right: 0;
-  padding-bottom: 0;
-  padding-left: 0;
   border: 0;
   margin: 0;
   background: transparent;
   color: var(--icon-nav-bar-right);
   cursor: pointer;
+  pointer-events: auto;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
