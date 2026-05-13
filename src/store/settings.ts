@@ -12,6 +12,18 @@ const { t } = i18n.global;
 const LIST_PAGE_VIEW_MODE_STORAGE_KEY = "appearanceSetting.listPageViewMode";
 const NARROW_MODE_LIST_PAGE_VIEW_MODE_STORAGE_KEY = "appearanceSetting.listPageViewModeInWideScreenNarrowMode";
 const WIDE_SCREEN_NARROW_MODE_STORAGE_KEY = "appearanceSetting.useNarrowModeOnWideScreen";
+const LEGACY_APPEARANCE_STORAGE_KEYS = [
+  "isSimpleMode",
+  "isLr",
+  "iconColor",
+  "isDefaultIcon",
+  "iseditorCommon",
+  "isSimpleReicon",
+  "showFloatingRefreshButton",
+  "istabBar",
+  "istabBar2",
+  "subProgressStyle",
+];
 
 const normalizeSettingInputValue = (value: unknown) => {
   return value === null || value === undefined ? "" : String(value);
@@ -69,6 +81,14 @@ const getBooleanAppearanceSetting = (
   value: unknown,
   fallback: boolean
 ): boolean => (typeof value === "boolean" ? value : fallback);
+
+const hasLocalAppearanceSetting = () => {
+  return LEGACY_APPEARANCE_STORAGE_KEYS.some((key) => localStorage.getItem(key) !== null);
+};
+
+const hasRemoteAppearanceSetting = (appearanceSetting?: SettingsPostData["appearanceSetting"]) => {
+  return Boolean(appearanceSetting && Object.keys(appearanceSetting).length > 0);
+};
 
 const isEditorCommonDisplayMode = (value: unknown): value is EditorCommonDisplayMode => {
   return value === "expanded" || value === "collapsed" || value === "hidden";
@@ -187,6 +207,9 @@ export const useSettingsStore = defineStore("settingsStore", {
       syncPlatform: "",
       gistToken: "",
       githubProxy: "",
+      githubApiUrl: "",
+      githubApiTimeout: "",
+      artifactSyncBatchSize: "",
       githubProxyRegex: "",
       githubUser: "",
       defaultUserAgent: "",
@@ -210,6 +233,8 @@ export const useSettingsStore = defineStore("settingsStore", {
       avatarUrl: "",
       artifactStore: "",
       artifactStoreStatus: "",
+      hasFetchedSettings: false,
+      hasRemoteAppearanceSetting: false,
       // ishostApi: localStorage.getItem('hostApi'),
     };
   },
@@ -242,6 +267,9 @@ export const useSettingsStore = defineStore("settingsStore", {
         this.syncPlatform = res.data.data.syncPlatform || "";
         this.gistToken = res.data.data.gistToken || "";
         this.githubProxy = res.data.data.githubProxy || "";
+        this.githubApiUrl = normalizeSettingInputValue(res.data.data.githubApiUrl);
+        this.githubApiTimeout = normalizeSettingInputValue(res.data.data.githubApiTimeout);
+        this.artifactSyncBatchSize = normalizeSettingInputValue(res.data.data.artifactSyncBatchSize);
         this.githubProxyRegex = res.data.data.githubProxyRegex || "";
         this.githubUser = res.data.data.githubUser || "";
         this.defaultProxy = res.data.data.defaultProxy || "";
@@ -263,9 +291,12 @@ export const useSettingsStore = defineStore("settingsStore", {
         this.theme.dark = res.data.data.theme?.dark ?? "dark";
         this.theme.light = res.data.data.theme?.light ?? "light";
 
+        this.hasFetchedSettings = true;
+        this.hasRemoteAppearanceSetting = hasRemoteAppearanceSetting(res.data.data.appearanceSetting);
         this.applyAppearanceSetting(res.data.data.appearanceSetting);
         this.gistUpload = res.data.data?.gistUpload ?? "base64";
       } else {
+        this.hasFetchedSettings = false;
         showNotify({
           title: `获取配置失败`,
           type: "danger",
@@ -279,6 +310,9 @@ export const useSettingsStore = defineStore("settingsStore", {
         this.syncPlatform = res.data.data.syncPlatform || "";
         this.gistToken = res.data.data.gistToken || "";
         this.githubProxy = res.data.data.githubProxy || "";
+        this.githubApiUrl = normalizeSettingInputValue(res.data.data.githubApiUrl);
+        this.githubApiTimeout = normalizeSettingInputValue(res.data.data.githubApiTimeout);
+        this.artifactSyncBatchSize = normalizeSettingInputValue(res.data.data.artifactSyncBatchSize);
         this.githubProxyRegex = res.data.data.githubProxyRegex || "";
         this.githubUser = res.data.data.githubUser || "";
         this.defaultProxy = res.data.data.defaultProxy || "";
@@ -318,7 +352,6 @@ export const useSettingsStore = defineStore("settingsStore", {
         istabBar,
         istabBar2,
         subProgressStyle,
-        gistUpload,
       } = globalStore;
       const hasLocalEditorCommonSetting = localStorage.getItem('iseditorCommon') !== null;
       const editorCommonDisplayMode = hasLocalEditorCommonSetting
@@ -337,23 +370,30 @@ export const useSettingsStore = defineStore("settingsStore", {
         istabBar: istabBar ?? false,
         istabBar2: istabBar2 ?? false,
         subProgressStyle: subProgressStyle ?? "hidden",
-        gistUpload: gistUpload ?? "base64",
       };
-      const list = Object.keys(data) as (keyof SettingsPostData)[];
-      // 判断是否有本地持久化的外观设置
-      const hasLocalAppearanceSetting = list.some((key) => {
-        return localStorage.getItem(key) !== null
-      }) || hasLocalEditorCommonSetting;
-      // 如果有本地持久化的外观设置，则将其同步到后端
-      if (hasLocalAppearanceSetting) {
-        await this.changeAppearanceSetting({ appearanceSetting: data });
-        this.removeLocalAppearanceSetting(); 
+      if (!hasLocalAppearanceSetting()) {
+        return;
       }
+
+      if (!this.hasFetchedSettings) {
+        return;
+      }
+
+      if (this.hasRemoteAppearanceSetting) {
+        this.removeLocalAppearanceSetting();
+        return;
+      }
+
+      // 如果有本地持久化的外观设置且后端还没有外观设置，则将其同步到后端
+      await this.changeAppearanceSetting({ appearanceSetting: data });
+      this.hasRemoteAppearanceSetting = true;
+      this.removeLocalAppearanceSetting();
     },
     // 清除本地持久化的外观设置
     removeLocalAppearanceSetting() {
       const globalStore = useGlobalStore();
-      globalStore.setSimpleMode(false);
+      localStorage.removeItem('isSimpleMode');
+      globalStore.isSimpleMode = this.appearanceSetting.isSimpleMode ?? true;
       globalStore.setLeftRight(false);
       globalStore.setIconColor(false);
       globalStore.setIsDefaultIcon(false);
@@ -386,6 +426,7 @@ export const useSettingsStore = defineStore("settingsStore", {
       try {
         const res = await settingsApi.setSettings(data);
         if (res?.data?.status === "success" && res?.data?.data) {
+          this.hasRemoteAppearanceSetting = hasRemoteAppearanceSetting(res.data.data.appearanceSetting);
           this.applyAppearanceSetting(res.data.data.appearanceSetting);
           return true;
         }

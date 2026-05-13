@@ -67,7 +67,7 @@
           </button>
           <button
             type="button"
-            class="share-sub-link archives-danger-action"
+            class="public-link-action archives-danger-action"
             :disabled="props.disabled"
             :aria-label="getItemActionLabel(getA11yText('delete'))"
             :title="getItemActionLabel(getA11yText('delete'))"
@@ -478,7 +478,7 @@ const nonSimpleSecondLine = computed(() => {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  .share-sub-link,
+  .public-link-action,
   .copy-sub-link,
   .refresh-sub-flow {
     background-color: transparent;

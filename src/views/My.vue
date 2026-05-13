@@ -58,7 +58,7 @@
           </div>
           <div class="name">
             <p class="title">
-              {{ githubUser || $t(`myPage.placeholder.name`) }}
+              {{ gistProfileTitle }}
             </p>
             <p class="des">
               <span class="des-line1">{{ desText[0] }}</span>
@@ -196,6 +196,72 @@
             input-align="left"
             :left-icon="iconKey"
           />
+          <div class="input-with-help">
+            <nut-input
+              ref="githubApiUrlInputRef"
+              class="input"
+              v-model="githubApiUrlInput"
+              :disabled="!isGitHubConfigEditing"
+              :placeholder="$t(`myPage.placeholder.githubApiUrl`)"
+              type="text"
+              input-align="left"
+              :left-icon="icongithubProxy"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isGitHubConfigEditing"
+              :aria-label="githubApiUrlHelpLabel"
+              :title="githubApiUrlHelpLabel"
+              @click="githubApiUrlTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="githubApiTimeoutInputRef"
+              class="input"
+              v-model="githubApiTimeoutInput"
+              :disabled="!isGitHubConfigEditing"
+              :placeholder="$t(`myPage.placeholder.githubApiTimeout`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconTimeout"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isGitHubConfigEditing"
+              :aria-label="githubApiTimeoutHelpLabel"
+              :title="githubApiTimeoutHelpLabel"
+              @click="githubApiTimeoutTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
+          <div class="input-with-help">
+            <nut-input
+              ref="artifactSyncBatchSizeInputRef"
+              class="input"
+              v-model="artifactSyncBatchSizeInput"
+              :disabled="!isGitHubConfigEditing"
+              :placeholder="$t(`myPage.placeholder.artifactSyncBatchSize`)"
+              type="number"
+              input-align="left"
+              :left-icon="iconConcurrency"
+            />
+            <button
+              type="button"
+              class="input-help-button"
+              :disabled="!isGitHubConfigEditing"
+              :aria-label="artifactSyncBatchSizeHelpLabel"
+              :title="artifactSyncBatchSizeHelpLabel"
+              @click="artifactSyncBatchSizeTips"
+            >
+              <nut-icon name="tips"></nut-icon>
+            </button>
+          </div>
           <div class="input-with-help">
             <nut-input
               ref="githubProxyInputRef"
@@ -756,27 +822,12 @@ const router = useRouter();
 const { showNotify } = useAppNotifyStore();
 const { currentUrl: host } = useHostAPI();
 const settingsStore = useSettingsStore();
-const { githubUser, gistToken, syncTime, avatarUrl, defaultUserAgent, defaultFlowUserAgent, defaultProxy, defaultTimeout, cacheThreshold, resourceCacheTtl, headersCacheTtl, scriptCacheTtl, logsMaxCount, syncPlatform, githubProxy, githubProxyRegex, gistUpload } =
+const { githubUser, gistToken, syncTime, defaultUserAgent, defaultFlowUserAgent, defaultProxy, defaultTimeout, cacheThreshold, resourceCacheTtl, headersCacheTtl, scriptCacheTtl, logsMaxCount, syncPlatform, githubProxy, githubApiUrl, githubApiTimeout, artifactSyncBatchSize, githubProxyRegex, gistUpload } =
   storeToRefs(settingsStore);
 
-const HTTP_URL_RE = /^https?:\/\//i;
+const DEFAULT_GITHUB_API_URL = "https://api.github.com";
 const avatarLoadFailed = ref(false);
 const avatarRenderNonce = ref(0);
-
-const applyGithubAvatarProxy = (candidateUrl?: string | null) => {
-  const normalizedUrl = candidateUrl?.trim();
-  const proxyBaseUrl = githubProxy.value?.trim().replace(/\/+$/, "");
-
-  if (!normalizedUrl || !proxyBaseUrl || !HTTP_URL_RE.test(normalizedUrl)) {
-    return normalizedUrl || "";
-  }
-
-  if (normalizedUrl.startsWith(`${proxyBaseUrl}/`)) {
-    return normalizedUrl;
-  }
-
-  return `${proxyBaseUrl}/${normalizedUrl}`;
-};
 
 const fallbackGithubAvatarUrl = computed(() => {
   const normalizedGithubUser = githubUser.value?.trim();
@@ -793,7 +844,17 @@ const remoteAvatarUrl = computed(() => {
     return "";
   }
 
-  return applyGithubAvatarProxy(avatarUrl.value || fallbackGithubAvatarUrl.value);
+  return fallbackGithubAvatarUrl.value;
+});
+
+const gistProfileTitle = computed(() => {
+  const normalizedGithubUser = githubUser.value?.trim();
+
+  if (normalizedGithubUser) {
+    return normalizedGithubUser;
+  }
+
+  return gistToken.value ? t(`myPage.storage.gist.label`) : t(`myPage.placeholder.name`);
 });
 
 const avatarDisplayKey = computed(() => {
@@ -817,7 +878,7 @@ const handleAvatarError = () => {
   avatarRenderNonce.value += 1;
 };
 
-watch([githubUser, githubProxy, githubProxyRegex, avatarUrl], () => {
+watch([githubUser], () => {
   resetAvatarState(true);
 });
 
@@ -864,6 +925,9 @@ const syncPlatformInput = ref("");
 const userInput = ref("");
 const tokenInput = ref("");
 const githubProxyInput = ref("");
+const githubApiUrlInput = ref("");
+const githubApiTimeoutInput = ref("");
+const artifactSyncBatchSizeInput = ref("");
 const githubProxyRegexInput = ref("");
 const uaInput = ref("");
 const flowUaInput = ref("");
@@ -886,6 +950,9 @@ const storageType = ref('gist');
 const fileInput = ref(null);
 const githubUserInputRef = ref(null);
 const gistTokenInputRef = ref(null);
+const githubApiUrlInputRef = ref(null);
+const githubApiTimeoutInputRef = ref(null);
+const artifactSyncBatchSizeInputRef = ref(null);
 const githubProxyInputRef = ref(null);
 const githubProxyRegexInputRef = ref(null);
 const defaultProxyInputRef = ref(null);
@@ -906,6 +973,9 @@ const createHelpLabel = (key: string) => computed(() => {
 });
 
 const githubProxyHelpLabel = createHelpLabel(`myPage.placeholder.githubProxy`);
+const githubApiUrlHelpLabel = createHelpLabel(`myPage.placeholder.githubApiUrl`);
+const githubApiTimeoutHelpLabel = createHelpLabel(`myPage.placeholder.githubApiTimeout`);
+const artifactSyncBatchSizeHelpLabel = createHelpLabel(`myPage.placeholder.artifactSyncBatchSize`);
 const githubProxyRegexHelpLabel = createHelpLabel(`myPage.placeholder.githubProxyRegex`);
 const defaultProxyHelpLabel = createHelpLabel(`myPage.placeholder.defaultProxy`);
 const defaultUserAgentHelpLabel = createHelpLabel(`myPage.placeholder.defaultUserAgent`);
@@ -923,6 +993,9 @@ const updateInputA11y = async () => {
   await nextTick();
   syncInnerInputA11y(githubUserInputRef.value, { label: t(`myPage.placeholder.githubUser`) });
   syncInnerInputA11y(gistTokenInputRef.value, { label: t(`myPage.placeholder.gistToken`) });
+  syncInnerInputA11y(githubApiUrlInputRef.value, { label: t(`myPage.placeholder.githubApiUrl`) });
+  syncInnerInputA11y(githubApiTimeoutInputRef.value, { label: t(`myPage.placeholder.githubApiTimeout`) });
+  syncInnerInputA11y(artifactSyncBatchSizeInputRef.value, { label: t(`myPage.placeholder.artifactSyncBatchSize`) });
   syncInnerInputA11y(githubProxyInputRef.value, { label: t(`myPage.placeholder.githubProxy`) });
   syncInnerInputA11y(githubProxyRegexInputRef.value, { label: t(`myPage.placeholder.githubProxyRegex`) });
   syncInnerInputA11y(defaultProxyInputRef.value, { label: t(`myPage.placeholder.defaultProxy`) });
@@ -947,6 +1020,9 @@ const toggleEditMode = async (type) => {
         githubUser: userInput.value,
         gistToken: tokenInput.value,
         githubProxy: githubProxyInput.value,
+        githubApiUrl: githubApiUrlInput.value,
+        githubApiTimeout: githubApiTimeoutInput.value,
+        artifactSyncBatchSize: artifactSyncBatchSizeInput.value,
         githubProxyRegex: githubProxyRegexInput.value,
         defaultUserAgent: uaInput.value,
         defaultFlowUserAgent: flowUaInput.value,
@@ -973,6 +1049,9 @@ const toggleEditMode = async (type) => {
       userInput.value = githubUser.value;
       tokenInput.value = gistToken.value;
       githubProxyInput.value = githubProxy.value;
+      githubApiUrlInput.value = githubApiUrl.value || "";
+      githubApiTimeoutInput.value = githubApiTimeout.value || "";
+      artifactSyncBatchSizeInput.value = artifactSyncBatchSize.value || "";
       githubProxyRegexInput.value = githubProxyRegex.value;
       uaInput.value = defaultUserAgent.value;
       flowUaInput.value = defaultFlowUserAgent.value || "";
@@ -1091,6 +1170,9 @@ const setDisplayInfo = () => {
   syncPlatformInput.value = syncPlatform.value || "";
   userInput.value = githubUser.value || "";
   githubProxyInput.value = githubProxy.value || "";
+  githubApiUrlInput.value = githubApiUrl.value || "";
+  githubApiTimeoutInput.value = githubApiTimeout.value || "";
+  artifactSyncBatchSizeInput.value = artifactSyncBatchSize.value || "";
   githubProxyRegexInput.value = githubProxyRegex.value || "";
   tokenInput.value = gistToken.value || "";
   uaInput.value = defaultUserAgent.value || "";
@@ -1112,13 +1194,12 @@ const syncIsDisabled = computed(() => {
   return (
     uploadIsLoading.value ||
     downloadIsLoading.value ||
-    !gistToken.value ||
-    !githubUser.value
+    !gistToken.value
   );
 });
 
 const desText = computed(() => {
-  if (!gistToken.value || !githubUser.value) {
+  if (!gistToken.value) {
     return [t(`myPage.placeholder.des`), ""];
   } else {
     if (!syncTime.value) return [t(`myPage.placeholder.haveNotDownload`), ""];
@@ -1281,7 +1362,47 @@ const downloadBtn = () => {
 const githubProxyTips = () => {
   Dialog({
       title: '请填写完整 GitHub 加速代理地址',
-      content: '后端需 >= 2.21.75 才可完整使用下方正则匹配能力\n\n1. 该代理仍用于上传/下载 Gist 和获取 GitHub 头像\n\n2. 请填写完整地址, 如 https://a.com\n\n3. 需支持代理 https://api.github.com/users/* 和 https://api.github.com/gists\n\n4. 若同时配置下方的 GitHub 加速代理匹配正则, 匹配的所有远程资源 URL 会改写为\nhttps://a.com/原始URL\n\n测试方式:\n浏览器打开\nhttps://a.com/https://api.github.com/gists?per_page=1&page=1\n和\nhttps://a.com/https://api.github.com/users/xream\n有正常的响应\n\n5. 使用此方式时, 自行注意安全隐私问题',
+      content: '后端需 >= 2.21.75 才可完整使用下方正则匹配能力\n\n1. 该代理用于上传/下载 GitHub Gist\n\n2. 请填写完整地址, 如 https://a.com\n\n3. 需支持代理 https://api.github.com/gists\n\n4. 若同时配置下方的 GitHub 加速代理匹配正则, 匹配的所有远程资源 URL 会改写为\nhttps://a.com/原始URL\n\n测试方式:\n浏览器打开\nhttps://a.com/https://api.github.com/gists?per_page=1&page=1\n有正常的响应\n\n5. 使用自定义 GitHub API 地址后, GitHub 加速代理不会作用于 Gist API 请求\n\n6. 使用此方式时, 自行注意安全隐私问题',
+      popClass: 'auto-dialog',
+      textAlign: 'left',
+      okText: 'OK',
+      noCancelBtn: true,
+      closeOnPopstate: true,
+      lockScroll: false,
+    });
+};
+const githubApiUrlTips = () => {
+  Dialog({
+      title: 'GitHub API 地址',
+      content: `后端需 >= 2.22.21\n\n1. 默认为 ${DEFAULT_GITHUB_API_URL}\n\n2. 需使用 GitHub Gist 兼容接口\n\n3. 此时 GitHub 令牌里填入的是对应服务的 API Key 之类的\n\n4. 使用自定义 GitHub API 地址后, GitHub 加速代理不会作用于此处\n\n5. 项目推荐:\nEdgeGist: https://github.com/xream/EdgeGist\nLiteGist: https://github.com/lockcp/LiteGist`,
+      popClass: 'auto-dialog',
+      textAlign: 'left',
+      okText: 'OK',
+      cancelText: '查看 LiteGist',
+      noCancelBtn: true,
+      // onCancel: () => {
+      //   window.open('https://github.com/lockcp/LiteGist');
+      // },
+      closeOnPopstate: true,
+      lockScroll: false,
+    });
+};
+const githubApiTimeoutTips = () => {
+  Dialog({
+      title: 'GitHub API 请求超时',
+      content: 'GitHub API 请求可能比较慢, 可单独设置更长的超时时间。\n\n1. 单位为毫秒, 默认 10000\n\n2. 仅影响 GitHub/Gist API 请求\n\n3. 与请求配置里的默认超时相互独立',
+      popClass: 'auto-dialog',
+      textAlign: 'left',
+      okText: 'OK',
+      noCancelBtn: true,
+      closeOnPopstate: true,
+      lockScroll: false,
+    });
+};
+const artifactSyncBatchSizeTips = () => {
+  Dialog({
+      title: '同步上传分批大小',
+      content: '同步全部配置时, 每批上传几个配置文件。\n\n1. 默认 10\n\n2. 较小的值可降低 Gist 兼容 API 的单次请求压力, 但会增加请求次数',
       popClass: 'auto-dialog',
       textAlign: 'left',
       okText: 'OK',
@@ -1294,7 +1415,7 @@ const githubProxyRegexExample = '^https?:\\/\\/.+\\.(githubusercontent|github)\\
 const githubProxyRegexTips = () => {
   Dialog({
       title: '按正则匹配下载链接',
-      content: `后端需 >= 2.21.75\n\n1. 需先配置上方 GitHub 加速代理, 本项才会生效\n\n2. 影响所有远程资源 URL, 不影响上面的 Gist 和头像代理逻辑\n\n3. 默认忽略大小写, 例如\n${githubProxyRegexExample}\n\n4. 会把匹配的下载地址改写为\nhttps://a.com/原始URL\n\n5. 使用此方式时, 自行注意安全隐私问题`,
+      content: `后端需 >= 2.21.75\n\n1. 需先配置上方 GitHub 加速代理, 本项才会生效\n\n2. 影响所有远程资源 URL, 不影响 Gist API 和头像逻辑\n\n3. 默认忽略大小写, 例如\n${githubProxyRegexExample}\n\n4. 会把匹配的下载地址改写为\nhttps://a.com/原始URL\n\n5. 使用此方式时, 自行注意安全隐私问题`,
       popClass: 'auto-dialog',
       textAlign: 'left',
       okText: 'OK',

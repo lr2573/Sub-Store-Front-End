@@ -143,7 +143,7 @@
               :title="`${$t(`specificWord.singleSub`)}(${filterdSubsCount})`"
               @click="toggleFold('sub')"
             >
-              <span>{{ `${$t(`specificWord.singleSub`)  }(${filterdSubsCount})` }}</span>
+              <span class="list-title-text">{{ `${$t(`specificWord.singleSub`)  }(${filterdSubsCount})` }}</span>
               <nut-icon v-if="!isFold('sub')" name="rect-down" size="12px"></nut-icon>
               <nut-icon v-else name="rect-right" size="12px"></nut-icon>
             </button>
@@ -194,7 +194,7 @@
               :title="`${$t(`specificWord.collectionSub`)}(${filterdColsCount})`"
               @click="toggleFold('col')"
             >
-              <span>{{ `${$t(`specificWord.collectionSub`)  }(${filterdColsCount})`}}</span>
+              <span class="list-title-text">{{ `${$t(`specificWord.collectionSub`)  }(${filterdColsCount})`}}</span>
               <nut-icon v-if="!isFold('col')" name="rect-down" size="12px"></nut-icon>
               <nut-icon v-else name="rect-right" size="12px"></nut-icon>
             </button>
@@ -240,7 +240,7 @@
     <!-- 没有数据 -->
     <div
       v-if="!isLoading && fetchResult && !hasSubs && !hasCollections"
-      class="no-data-wrapper"
+      class="empty-state-wrapper"
     >
       <AccessibleEmpty image="empty">
         <template #description>
@@ -258,7 +258,7 @@
     </div>
 
     <!-- 数据加载失败 -->
-    <div v-if="!isLoading && !fetchResult" class="no-data-wrapper">
+    <div v-if="!isLoading && !fetchResult" class="empty-state-wrapper">
       <AccessibleEmpty image="error" style="padding: 32px 30px">
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>
@@ -778,7 +778,7 @@ const importTips = () => {
   }
 }
 
-.no-data-wrapper {
+.empty-state-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
@@ -844,7 +844,7 @@ const importTips = () => {
   background: transparent;
   text-align: left;
   //padding-left: var(--safe-area-side);
-  span {
+  .list-title-text {
     margin-right: 6px;
   }
   :deep(.nut-icon) {

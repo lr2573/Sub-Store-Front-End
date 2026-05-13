@@ -297,7 +297,12 @@ export default {
         },
         subInfoUrl: {
           label: "Sub Info URL",
-          placeholder: "The URL for fetching subscription usage info",
+          placeholder: "URL for fetching subscription usage info(supports headers etc.)",
+          tips: {
+            title: "Sub Info URL",
+            content:
+              'Fill in the URL used to fetch subscription usage info. The response body, or response headers subscription-userinfo/profile-web-page-url/plan-name, will be used as the file usage info.\n\nSupported parameters:\nheaders: custom request headers(single-line JSON string)\ninsecure: do not verify the server certificate\nnoCache: do not use cache\nheadersCacheTtl: headers cache ttl(seconds)\n\nExample: http://a.com/userinfo#headers=%7B%22Authorization%22%3A%22Bearer%20token%22%7D',
+          },
         },
         subInfoUserAgent: {
           label: "Sub Info User-Agent",
@@ -333,7 +338,7 @@ export default {
             label: "Usage",
             title: "Subscription URL(s)",
             content:
-              "Supports mixing three types of formats with line breaks:\n1. Full remote URL\n2. Internal file reference like /api/file/name 3.\nAbsolute path for local file\n\nSupported parameters:\n\nheaders: Custom request headers(single-line JSON string)\ninsecure: https requests will not verify the server certificate\ncacheKey: Setting the name of the optimistic cache. Its value can be managed in the persistent store(suitable for subscriptions that often fail to fetch).\n\nvalidCheck: error will be reported when expired or there is no remaining traffic\n\nflowUserAgent: the User-Agent for fetching subscription usage info\n\nflowUrl: the URL for fetching subscription usage info(using the content of the response body or response headers)\n\nshowRemaining: show remaining traffic instead of usage\n\nnoFlow: do not query for flow\n\nhideExpire: hide expiration time\n\nnoCache: do not use cache\n\ncacheTtl: cache ttl (seconds)\n\nheadersCacheTtl: headers cache ttl (seconds)\n\nresetDay: the day when monthly data usage resets\n\nstartDate: subscription start date\n\ncycleDays: reset cycle (in days).\n\nFor example: http://a.com?token=1#cycleDays=31&startDate=2024-06-04 \nor http://a.com?token=1#resetDay=15",
+              "Supports mixing three types of formats with line breaks:\n1. Full remote URL\n2. Internal file reference like /api/file/name 3.\nAbsolute path for local file\n\nSupported parameters:\n\nheaders: Custom request headers(single-line JSON string)\ninsecure: https requests will not verify the server certificate\ncacheKey: Setting the name of the optimistic cache. Its value can be managed in the persistent store(suitable for subscriptions that often fail to fetch).\n\nvalidCheck: error will be reported when expired or there is no remaining traffic\n\nflowUserAgent: the User-Agent for fetching subscription usage info\n\nflowHeaders: custom request headers for fetching subscription usage info(single-line JSON string)\n\nflowUrl: the URL for fetching subscription usage info(using the content of the response body or response headers)\n\nshowRemaining: show remaining traffic instead of usage\n\nnoFlow: do not query for flow\n\nhideExpire: hide expiration time\n\nnoCache: do not use cache\n\ncacheTtl: cache ttl (seconds)\n\nheadersCacheTtl: headers cache ttl (seconds)\n\nresetDay: the day when monthly data usage resets\n\nstartDate: subscription start date\n\ncycleDays: reset cycle (in days).\n\nFor example: http://a.com?token=1#cycleDays=31&startDate=2024-06-04 \nor http://a.com?token=1#resetDay=15",
           },
           isEmpty: "URL cannot be empty",
           isIllegal: "Invalid URL",
@@ -385,7 +390,7 @@ export default {
         },
         subUserinfo: {
           label: "Subscription-Userinfo",
-          placeholder: "Value/URL(supports noCache/headersCacheTtl etc.)",
+          placeholder: "Value/URL(URL supports headers/noCache/headersCacheTtl etc.)",
         },
         firstSubFlow: {
           label: 'Pass Through Single Subscription Traffic Info',
@@ -652,12 +657,15 @@ export default {
   myPage: {
     placeholder: {
       name: "Gist Sync not set",
-      des: "Sync available after Gist configuration",
+      des: "Configure GitHub Token to enable sync",
       uploadTime: "Last upload time",
       haveNotDownload: "Not download yet",
       githubUser: "Please input GitHub username",
-      gistToken: "Please input Gist Token",
+      gistToken: "Please input GitHub Token",
       githubProxy: "Please input GitHub Proxy",
+      githubApiUrl: "GitHub API URL (default: https://api.github.com)",
+      githubApiTimeout: "GitHub API Request Timeout (in ms, default: 10000)",
+      artifactSyncBatchSize: "Sync upload batch size (default: 10)",
       githubProxyRegex: "Please input GitHub proxy match regex",
       defaultUserAgent: "Please input Default User-Agent",
       defaultFlowUserAgent: "Please input Default Flow User-Agent",
@@ -671,7 +679,7 @@ export default {
       concurrency: 'Concurrency Limit(default: 3)',
       apiCheckTimeout: 'API Check Timeout, default: 3000(ms)',
       noGithubUser: "Not set GitHub username",
-      noGistToken: "Not set Gist Token",
+      noGistToken: "Not set GitHub Token",
       noGithubProxy: "Not set GitHub Proxy",
       noGithubProxyRegex: "Not set GitHub proxy match regex",
       noDefaultUserAgent: "Not set default user-agent",
@@ -849,6 +857,8 @@ export default {
       desc: "Are you sure to delete sync configuration {displayName}? \nDeleted cannot be restored!\n\n⚠️ If the current item has been synced before, an attempt will be made to delete gist files with the original filename and the encoded filename.",
       archiveExtra: "⚠️ If this sync configuration has been synced before, the original filename and encoded filename will still be removed from gist when possible.",
       succeedNotify: "Successfully deleted!",
+      remotePlaceholderNotice: "The remote configuration file was deleted, and a placeholder file was kept to prevent the Gist from becoming empty.",
+      remoteDeleteFailedNotice: "The sync configuration was deleted, but deleting the remote configuration file failed. Check logs for details.",
       btn: {
         confirm: "Delete",
         cancel: "Cancel",
@@ -886,6 +896,9 @@ export default {
             "Includes unsupported protocols",
           content: "https://github.com/sub-store-org/Sub-Store/wiki/%E9%93%BE%E6%8E%A5%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E",
         },
+      },
+      prettyYaml: {
+        label: "More readable YAML",
       },
       platform: {
         label: "Target Platform",
@@ -1048,9 +1061,9 @@ export default {
     },
     liveDelete: {
       title: "Delete",
-      desc: 'New backend supports archiving.\nContinue with {displayName}?',
+      desc: "Continue with {displayName}?",
       batchDesc:
-        'New backend supports archiving.\nContinue with the selected {count} {type} item(s)?',
+        "Continue with the selected {count} {type} item(s)?",
       succeedNotify: "Archived",
       btn: {
         archive: "Archive",

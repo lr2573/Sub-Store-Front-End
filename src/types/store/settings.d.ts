@@ -10,6 +10,8 @@ interface SettingsBase {
   avatarUrl: string;
   artifactStore: string;
   artifactStoreStatus?: string;
+  hasFetchedSettings: boolean;
+  hasRemoteAppearanceSetting: boolean;
   // ishostApi: string;
 }
 
@@ -17,6 +19,9 @@ interface SettingsPostData {
   syncPlatform?: string;
   gistToken?: string;
   githubProxy?: string;
+  githubApiUrl?: string;
+  githubApiTimeout?: string;
+  artifactSyncBatchSize?: string;
   githubProxyRegex?: string;
   githubUser?: string;
   defaultProxy?: string;

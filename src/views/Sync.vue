@@ -143,7 +143,7 @@
     <!--没有数据-->
     <div
       v-if="!isLoading && fetchResult && artifacts.length === 0"
-      class="no-data-wrapper"
+      class="empty-state-wrapper"
     >
       <AccessibleEmpty image="empty">
         <template #description>
@@ -157,7 +157,7 @@
     </div>
 
     <!--数据加载失败-->
-    <div v-if="!isLoading && !fetchResult" class="no-data-wrapper">
+    <div v-if="!isLoading && !fetchResult" class="empty-state-wrapper">
       <AccessibleEmpty image="error" style="padding: 32px 30px">
         <template #description>
           <h3>{{ $t(`subPage.loadFailed.title`) }}</h3>

@@ -145,7 +145,7 @@
               <button
                 v-if="shareBtnVisible"
                 type="button"
-                class="share-sub-link"
+                class="public-link-action"
                 :aria-label="getItemActionLabel(getA11yText('share'))"
                 :title="getItemActionLabel(getA11yText('share'))"
                 @click.stop="onClickShareLink"
@@ -1234,7 +1234,7 @@ const refreshSubFlowsIfNeeded = async () => {
           display: flex;
         }
         .compare-sub-link,
-      .share-sub-link,
+        .public-link-action,
       .copy-sub-link,
       .refresh-sub-flow {
         background-color: transparent;

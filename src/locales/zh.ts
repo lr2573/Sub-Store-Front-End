@@ -321,7 +321,11 @@ export default {
         },
         subInfoUrl: {
           label: '查询流量信息订阅链接',
-          placeholder: '用于传递流量信息',
+          placeholder: '用于查询流量信息的订阅链接(支持 headers 等参数)',
+          tips: {
+            title: '查询流量信息订阅链接',
+            content: '填写用于查询流量信息的链接, 会使用响应体内容或响应头 subscription-userinfo/profile-web-page-url/plan-name 作为文件的流量信息.\n\n支持参数:\nheaders: 自定义请求头(单行 JSON 字符串)\ninsecure: 不验证服务器证书\nnoCache: 不使用缓存\nheadersCacheTtl: 响应头缓存时长(秒)\n\n例: http://a.com/userinfo#headers=%7B%22Authorization%22%3A%22Bearer%20token%22%7D',
+          },
         },
         subInfoUserAgent: {
           label: '查询流量信息 User-Agent',
@@ -353,7 +357,7 @@ export default {
             fullScreenEditCancel: '取消全屏',
             label: '使用说明',
             title: '订阅链接',
-            content: '支持使用换行混写三种格式:\n1. 完整远程链接\n2. 类似 /api/file/name 的内部文件调用路径\n3. 本地文件的绝对路径\n\n支持以下参数\n\nheaders: 自定义请求头(单行 JSON 字符串)\ninsecure: 不验证服务器证书\ncacheKey: 设置乐观缓存的名称 开启后也可自行在持久化缓存中管理(适合经常拉取失败的订阅)\nvalidCheck: 过期或无剩余流量时报错\nflowUserAgent: 查询流量时使用的 User-Agent\nflowUrl: 自定义查询流量的 URL(优先响应体, 也支持响应头)\nnoFlow: 不查询流量\nhideExpire: 隐藏到期\nshowRemaining: 显示剩余流量而不是已用流量\nnoCache: 不使用缓存\ncacheTtl: 缓存时长(秒)\nheadersCacheTtl: 响应头缓存时长(秒)\nnoCache: 不使用缓存\nresetDay: 每月流量重置日\nstartDate: 订阅开始日期\ncycleDays: 订阅重置周期(单位: 天)\n\n例: http://a.com?token=1#cycleDays=31&startDate=2024-06-04\n或 http://a.com?token=1#resetDay=15',
+            content: '支持使用换行混写三种格式:\n1. 完整远程链接\n2. 类似 /api/file/name 的内部文件调用路径\n3. 本地文件的绝对路径\n\n支持以下参数\n\nheaders: 自定义请求头(单行 JSON 字符串)\ninsecure: 不验证服务器证书\ncacheKey: 设置乐观缓存的名称 开启后也可自行在持久化缓存中管理(适合经常拉取失败的订阅)\nvalidCheck: 过期或无剩余流量时报错\nflowUserAgent: 查询流量时使用的 User-Agent\nflowHeaders: 查询流量时使用的自定义请求头(单行 JSON 字符串)\nflowUrl: 自定义查询流量的 URL(优先响应体, 也支持响应头)\nnoFlow: 不查询流量\nhideExpire: 隐藏到期\nshowRemaining: 显示剩余流量而不是已用流量\nnoCache: 不使用缓存\ncacheTtl: 缓存时长(秒)\nheadersCacheTtl: 响应头缓存时长(秒)\nnoCache: 不使用缓存\nresetDay: 每月流量重置日\nstartDate: 订阅开始日期\ncycleDays: 订阅重置周期(单位: 天)\n\n例: http://a.com?token=1#cycleDays=31&startDate=2024-06-04\n或 http://a.com?token=1#resetDay=15',
           },
           isEmpty: '订阅链接不能为空',
           isIllegal: '订阅链接格式非法',
@@ -403,7 +407,7 @@ export default {
         },
         subUserinfo: {
           label: '订阅流量信息',
-          placeholder: '值/链接(支持 noCache/headersCacheTtl 等参数)',
+          placeholder: '值/链接(链接支持 headers/noCache/headersCacheTtl 等参数)',
         },
         firstSubFlow: {
           label: '透传单条订阅流量信息',
@@ -647,12 +651,15 @@ export default {
   myPage: {
     placeholder: {
       name: '未设置 GitHub 同步',
-      des: '同步功能配置 GitHub 用户名以及 Token 后可用',
+      des: '配置 GitHub Token 启用同步',
       uploadTime: '上次上传',
       haveNotDownload: '暂无下载记录',
       githubUser: '请输入 GitHub 用户名',
       gistToken: '请输入 GitHub 令牌',
       githubProxy: '请输入 GitHub 加速代理',
+      githubApiUrl: 'GitHub API 地址(默认: https://api.github.com)',
+      githubApiTimeout: 'GitHub API 请求超时(单位: 毫秒, 默认: 10000)',
+      artifactSyncBatchSize: '同步上传分批大小(默认: 10)',
       githubProxyRegex: '请输入 GitHub 加速代理匹配正则',
       defaultUserAgent: '请输入默认 User-Agent',
       defaultFlowUserAgent: '请输入默认查询订阅流量信息 的 User-Agent',
@@ -843,6 +850,8 @@ export default {
       desc: '是否确认删除同步配置 {displayName}？删除后不可恢复！\n\n⚠️ 若当前同步配置进行过同步, 将尝试原文件名和编码后的文件名对应的文件',
       archiveExtra: '⚠️ 若当前同步配置进行过同步, 仍会继续尝试删除原文件名和编码后的文件名对应的文件',
       succeedNotify: '删除同步配置成功！',
+      remotePlaceholderNotice: '远端配置文件已删除，并保留占位文件防止 Gist 被删空',
+      remoteDeleteFailedNotice: '同步配置已删除，但远端配置文件删除失败，详情请查看日志',
       btn: {
         confirm: '确认删除',
         cancel: '取消',
@@ -882,6 +891,9 @@ export default {
           title: '包含不支持的协议(详见文档)',
           content: 'https://github.com/sub-store-org/Sub-Store/wiki/%E9%93%BE%E6%8E%A5%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E'
         }
+      },
+      prettyYaml: {
+        label: '更易读的 YAML',
       },
       pop: {
         errorTitle: '提交出错',
@@ -1036,9 +1048,9 @@ export default {
     },
     liveDelete: {
       title: '删除',
-      desc: '新版后端支持归档\n是否继续处理 {displayName}？',
+      desc: '是否继续处理 {displayName}？',
       batchDesc:
-        '新版后端支持归档\n是否继续处理选中的 {count} 项{type}？',
+        '是否继续处理选中的 {count} 项{type}？',
       succeedNotify: '已归档',
       btn: {
         archive: '归档',

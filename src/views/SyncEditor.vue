@@ -193,6 +193,12 @@
             </div>
           </nut-form-item>
 
+          <nut-form-item :label="$t(`syncPage.addArtForm.prettyYaml.label`)">
+            <div class="switch-wrapper">
+              <nut-switch v-model="form.prettyYaml" />
+            </div>
+          </nut-form-item>
+
           <nut-form-item :label="$t(`syncPage.addArtForm.platform.label`)">
             <div
               class="artifact-radio-group native-radio-group"
@@ -369,6 +375,7 @@ const form = reactive<any>({
   platform: "Stash",
   sync: false,
   includeUnsupportedProxy: false,
+  prettyYaml: false,
 });
 const platformOptions: Array<{
   value: string;
@@ -519,6 +526,7 @@ watchEffect(() => {
   form.platform = sourceData.platform || "Stash";
   form.sync = sourceData.sync ?? false;
   form.includeUnsupportedProxy = sourceData.includeUnsupportedProxy ?? false;
+  form.prettyYaml = sourceData.prettyYaml ?? false;
   form.updated = sourceData.updated;
   form.url = sourceData.url;
   sourceModel.value = [form.type, form.source];

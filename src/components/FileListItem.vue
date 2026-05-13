@@ -82,7 +82,7 @@
             <button
               v-if="shareBtnVisible"
               type="button"
-              class="share-sub-link"
+              class="public-link-action"
               :aria-label="getItemActionLabel(getA11yText('share'))"
               :title="getItemActionLabel(getA11yText('share'))"
               @click.stop="onClickShareLink"
@@ -744,7 +744,7 @@
           margin: 0 2px;
         }
         .compare-sub-link,
-        .share-sub-link,
+        .public-link-action,
         .copy-sub-link,
         .refresh-sub-flow {
           background-color: transparent;
@@ -842,7 +842,7 @@
         }
 
         .compare-sub-link,
-        .share-sub-link,
+        .public-link-action,
         .copy-sub-link,
         .refresh-sub-flow {
           padding: 0 8px;

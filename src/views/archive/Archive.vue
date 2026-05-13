@@ -1,10 +1,10 @@
 <template>
   <div style="overflow: hidden; -webkit-user-select: none; user-select: none">
     <Teleport to="body">
-      <div v-if="hasEntries" class="share-nav-action-layer">
+      <div v-if="hasEntries" class="archive-nav-action-layer">
         <button
           type="button"
-          class="share-top-selection-toggle"
+          class="archive-top-selection-toggle"
           :style="{ top: selectionToggleOffset }"
           :aria-label="isSelectionMode ? $t('archivePage.selectMode.cancel') : $t('archivePage.selectMode.enter')"
           :title="isSelectionMode ? $t('archivePage.selectMode.cancel') : $t('archivePage.selectMode.enter')"
@@ -37,13 +37,13 @@
       </div>
       <div
         v-if="hasEntries"
-        class="share-page-content"
+        class="archive-page-content"
         :style="{
           paddingTop: `${radioWrapperHeight}px`,
           ...(isSelectionMode ? { paddingBottom: `${bottomSafeArea + 108}px` } : {}),
         }"
       >
-        <div v-if="subEntryCount > 0" class="share-data">
+        <div v-if="subEntryCount > 0" class="archive-section">
           <div class="sticky-title-wrappers">
             <div class="list-title-row">
               <h2 class="section-heading">
@@ -68,7 +68,7 @@
               <button
                 v-if="isSelectionMode"
                 type="button"
-                class="share-type-selection-toggle"
+                class="archive-type-selection-toggle"
                 :class="{ active: isTypeAllSelected('sub') }"
                 :aria-label="getTypeSelectionA11yLabel('sub')"
                 :title="getTypeSelectionA11yLabel('sub')"
@@ -104,11 +104,11 @@
               <div :key="element.id" class="draggable-item">
                 <div
                   v-if="isSelectionMode"
-                  class="share-select-item"
+                  class="archive-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
                   @click.stop="toggleEntrySelection(element)"
                 >
-                  <span class="share-select-checkbox" aria-hidden="true">
+                  <span class="archive-select-checkbox">
                     <input
                       type="checkbox"
                       class="share-select-input"
@@ -122,7 +122,7 @@
                       :class="{ checked: isEntrySelected(element) }"
                     ></span>
                   </span>
-                  <div class="share-select-item-content">
+                  <div class="archive-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
                 </div>
@@ -139,7 +139,7 @@
           </draggable>
         </div>
 
-        <div v-if="colEntryCount > 0" class="share-data">
+        <div v-if="colEntryCount > 0" class="archive-section">
           <div class="sticky-title-wrappers">
             <div class="list-title-row">
               <h2 class="section-heading">
@@ -164,7 +164,7 @@
               <button
                 v-if="isSelectionMode"
                 type="button"
-                class="share-type-selection-toggle"
+                class="archive-type-selection-toggle"
                 :class="{ active: isTypeAllSelected('col') }"
                 :aria-label="getTypeSelectionA11yLabel('col')"
                 :title="getTypeSelectionA11yLabel('col')"
@@ -200,11 +200,11 @@
               <div :key="element.id" class="draggable-item">
                 <div
                   v-if="isSelectionMode"
-                  class="share-select-item"
+                  class="archive-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
                   @click.stop="toggleEntrySelection(element)"
                 >
-                  <span class="share-select-checkbox" aria-hidden="true">
+                  <span class="archive-select-checkbox">
                     <input
                       type="checkbox"
                       class="share-select-input"
@@ -218,7 +218,7 @@
                       :class="{ checked: isEntrySelected(element) }"
                     ></span>
                   </span>
-                  <div class="share-select-item-content">
+                  <div class="archive-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
                 </div>
@@ -235,7 +235,7 @@
           </draggable>
         </div>
 
-        <div v-if="fileEntryCount > 0" class="share-data">
+        <div v-if="fileEntryCount > 0" class="archive-section">
           <div class="sticky-title-wrappers">
             <div class="list-title-row">
               <h2 class="section-heading">
@@ -260,7 +260,7 @@
               <button
                 v-if="isSelectionMode"
                 type="button"
-                class="share-type-selection-toggle"
+                class="archive-type-selection-toggle"
                 :class="{ active: isTypeAllSelected('file') }"
                 :aria-label="getTypeSelectionA11yLabel('file')"
                 :title="getTypeSelectionA11yLabel('file')"
@@ -296,11 +296,11 @@
               <div :key="element.id" class="draggable-item">
                 <div
                   v-if="isSelectionMode"
-                  class="share-select-item"
+                  class="archive-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
                   @click.stop="toggleEntrySelection(element)"
                 >
-                  <span class="share-select-checkbox" aria-hidden="true">
+                  <span class="archive-select-checkbox">
                     <input
                       type="checkbox"
                       class="share-select-input"
@@ -314,7 +314,7 @@
                       :class="{ checked: isEntrySelected(element) }"
                     ></span>
                   </span>
-                  <div class="share-select-item-content">
+                  <div class="archive-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
                 </div>
@@ -331,7 +331,7 @@
           </draggable>
         </div>
 
-        <div v-if="artifactEntryCount > 0" class="share-data">
+        <div v-if="artifactEntryCount > 0" class="archive-section">
           <div class="sticky-title-wrappers">
             <div class="list-title-row">
               <h2 class="section-heading">
@@ -356,7 +356,7 @@
               <button
                 v-if="isSelectionMode"
                 type="button"
-                class="share-type-selection-toggle"
+                class="archive-type-selection-toggle"
                 :class="{ active: isTypeAllSelected('artifact') }"
                 :aria-label="getTypeSelectionA11yLabel('artifact')"
                 :title="getTypeSelectionA11yLabel('artifact')"
@@ -392,11 +392,11 @@
               <div :key="element.id" class="draggable-item">
                 <div
                   v-if="isSelectionMode"
-                  class="share-select-item"
+                  class="archive-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
                   @click.stop="toggleEntrySelection(element)"
                 >
-                  <span class="share-select-checkbox" aria-hidden="true">
+                  <span class="archive-select-checkbox">
                     <input
                       type="checkbox"
                       class="share-select-input"
@@ -410,7 +410,7 @@
                       :class="{ checked: isEntrySelected(element) }"
                     ></span>
                   </span>
-                  <div class="share-select-item-content">
+                  <div class="archive-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
                 </div>
@@ -427,7 +427,7 @@
           </draggable>
         </div>
 
-        <div v-if="shareEntryCount > 0" class="share-data">
+        <div v-if="shareEntryCount > 0" class="archive-section">
           <div class="sticky-title-wrappers">
             <div class="list-title-row">
               <h2 class="section-heading">
@@ -452,7 +452,7 @@
               <button
                 v-if="isSelectionMode"
                 type="button"
-                class="share-type-selection-toggle"
+                class="archive-type-selection-toggle"
                 :class="{ active: isTypeAllSelected('share') }"
                 :aria-label="getTypeSelectionA11yLabel('share')"
                 :title="getTypeSelectionA11yLabel('share')"
@@ -488,11 +488,11 @@
               <div :key="element.id" class="draggable-item">
                 <div
                   v-if="isSelectionMode"
-                  class="share-select-item"
+                  class="archive-select-item"
                   :class="{ selected: isEntrySelected(element), 'is-dual-column': isDualColumnMode }"
                   @click.stop="toggleEntrySelection(element)"
                 >
-                  <span class="share-select-checkbox" aria-hidden="true">
+                  <span class="archive-select-checkbox">
                     <input
                       type="checkbox"
                       class="share-select-input"
@@ -506,7 +506,7 @@
                       :class="{ checked: isEntrySelected(element) }"
                     ></span>
                   </span>
-                  <div class="share-select-item-content">
+                  <div class="archive-select-item-content">
                     <ArchiveListItem :data="element" :disabled="true" :is-dual-column="isDualColumnMode" />
                   </div>
                 </div>
@@ -525,7 +525,7 @@
       </div>
     </div>
 
-    <div v-if="!pageLoading && pageFetchResult && !hasEntries" class="no-data-wrapper">
+    <div v-if="!pageLoading && pageFetchResult && !hasEntries" class="empty-state-wrapper">
       <AccessibleEmpty image="empty">
         <template #description>
           <h3>{{ $t('archivePage.empty.title') }}</h3>
@@ -537,7 +537,7 @@
       </router-link>
     </div>
 
-    <div v-if="!pageLoading && !pageFetchResult" class="no-data-wrapper">
+    <div v-if="!pageLoading && !pageFetchResult" class="empty-state-wrapper">
       <AccessibleEmpty image="error" style="padding: 32px 30px">
         <template #description>
           <h3>{{ $t('subPage.loadFailed.title') }}</h3>
@@ -552,10 +552,10 @@
 
     <div
       v-if="hasEntries && isSelectionMode"
-      class="share-selection-actions"
+      class="archive-selection-actions"
       :style="{ bottom: `${bottomSafeArea + 12}px` }"
     >
-      <div class="share-selection-summary">
+      <div class="archive-selection-summary">
         {{ $t('archivePage.selectMode.selectedCount', { count: selectedEntryCount }) }}
       </div>
       <button type="button" class="selection-action-button secondary" @click="toggleSelectAllEntries">
@@ -1099,7 +1099,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-.no-data-wrapper {
+.empty-state-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1162,7 +1162,7 @@ onMounted(() => {
   align-items: center;
 }
 
-.share-type-selection-toggle {
+.archive-type-selection-toggle {
   flex-shrink: 0;
   border: 1px solid var(--primary-color);
   border-radius: 999px;
@@ -1257,22 +1257,22 @@ onMounted(() => {
   }
 }
 
-.share-page-content {
+.archive-page-content {
   width: 100%;
 }
 
-.share-data + .share-data {
+.archive-section + .archive-section {
   margin-top: 8px;
 }
 
-.share-nav-action-layer {
+.archive-nav-action-layer {
   @include centered-fixed-container;
   top: 0;
   z-index: 21;
   pointer-events: none;
 }
 
-.share-top-selection-toggle {
+.archive-top-selection-toggle {
   position: absolute;
   left: 46px;
   transform: translateY(-50%);
@@ -1289,13 +1289,13 @@ onMounted(() => {
   justify-content: center;
 }
 
-.share-top-selection-toggle svg {
+.archive-top-selection-toggle svg {
   width: 14px !important;
   height: 14px !important;
   font-size: 14px !important;
 }
 
-.share-top-selection-toggle:focus-visible {
+.archive-top-selection-toggle:focus-visible {
   outline: 3px solid var(--primary-color);
   outline-offset: 3px;
 }
@@ -1313,7 +1313,7 @@ onMounted(() => {
   margin: 0;
 }
 
-.share-select-item {
+.archive-select-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1326,7 +1326,7 @@ onMounted(() => {
   }
 }
 
-.share-select-checkbox {
+.archive-select-checkbox {
   position: relative;
   flex-shrink: 0;
   width: 20px;
@@ -1362,7 +1362,7 @@ onMounted(() => {
   }
 }
 
-.share-select-item-content {
+.archive-select-item-content {
   min-width: 0;
   flex: 1;
   display: flex;
@@ -1373,7 +1373,7 @@ onMounted(() => {
   }
 }
 
-.share-selection-actions {
+.archive-selection-actions {
   @include centered-fixed-container;
   width: calc(100% - 1.5rem);
   max-width: calc(100% - 1.5rem);
@@ -1405,7 +1405,7 @@ onMounted(() => {
   }
 }
 
-.share-selection-summary {
+.archive-selection-summary {
   flex: 1;
   min-width: 0;
   color: var(--primary-text-color);
